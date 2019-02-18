@@ -9,7 +9,7 @@ import frc.robot.utilities.MathUtils;
 
 class SwerveMotor {
     private static final int CAN_TIMEOUT = 20;
-    private static final double SMALL_NUMBER = 0.0075; //Was 0.05
+    private static final double SMALL_NUMBER = 0.05; //Was 0.05
 
     private double[] moduleDrift;
 

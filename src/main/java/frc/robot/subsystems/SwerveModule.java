@@ -96,7 +96,6 @@ public class SwerveModule {
         wheelSensor = new DigitalInput(sensorPort);
     }
 
-
     void drive() {
         distance = swerveMotor.getDistance() * DISTANCE_PER_PULSE;
 
@@ -224,18 +223,16 @@ public class SwerveModule {
             }
         }
 
-        delta = distance - previousDistance;
-
 //        if (id == 3) {
 //            System.out.println(angle + " | | " + Time.get());
 //            System.out.println(dRPM_command + " | | " + alpha_er + " | | " + raw_turn_time + " | | " + turn_command_counts + " | | " + omega_command);
 //        }
 
-        if (wheelReversed) {
+        // if (wheelReversed) {
             delta = previousDistance - distance;
-        } else {
-            delta = distance - previousDistance;
-        }
+        // } else {
+        //     delta = distance - previousDistance;
+        // }
 
         /*
          * If the wheel has to move over 90 degrees
@@ -246,14 +243,8 @@ public class SwerveModule {
                 angleCommand = MathUtils.reverseWheelDirection(angleCommand);
                 speedCommand *= -1;
 
-                if (!wheelReversed) {
-                    reversePoint = getAngle();
-                }
                 wheelReversed = true;
             } else {
-                if (!wheelReversed) {
-                    reversePoint = getAngle();
-                }
                 wheelReversed = false;
             }
 
@@ -303,7 +294,8 @@ back_right_drift=0.0059,0.0027
          * then set wheel speed command to 0 while wheel is turning.
          */
 
-//        if (Math.abs(anglePID.getError()) > TICKS_PER_REVOLUTION/16) {
+        //FIXME this might cause Arcs to jitter once they get closer to their center point
+//        if (Math.abs(anglePID.getError()) > TICKS_PER_REVOLUTION / /*16*/8) {
 //            speedCommand = 0.0;
 //        }
 
@@ -340,19 +332,15 @@ back_right_drift=0.0059,0.0027
 //            if (Math.abs(rotationCommand) < 0.008) {
 //                rotationCommand = 0.0;
 //            }
-//        if (id== 2) {
-        //FIXME ID 2 is kinda angry
-       
+
+//        if (id ==4/*1 || id== 2 || id ==3*/) {
             swerveMotor.set(speedCommand, rotationCommand);
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
 //        }
 
-//        } else {
-//            swerveMotor.set(0.0, 0.0);
-//        }
 /*
-front_right_`=-0.001,-0.001
+front_right_drift=-0.001,-0.001
 front_left_drift=0.001,0.0
 back_left_drift=-0.002,-0.002
 back_right_drift=0.0028,0.0028
@@ -429,19 +417,11 @@ back_right_drift=0.0028,0.0028
     }
 
     public double getRightSum() {
-        if (wheelReversed) {
-            return -rightSum;
-        } else {
-            return rightSum;
-        }
+        return rightSum;
     }
 
     public double getForwardSum() {
-        if (wheelReversed) {
-            return -forwardSum;
-        } else {
-            return forwardSum;
-        }
+        return forwardSum;
     }
 
 	public void resetDelta() {

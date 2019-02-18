@@ -108,6 +108,12 @@ public class Robot extends TimedRobot {
 	private Acceleration decelSTR;
 	private int cmdCounter = 0;
 
+	private double[] ArcXs = new double[3];
+	private double[] ArcYs = new double[3];
+	double[] curveVelocity = {0.0, 0.0};
+
+
+
 	private void keepAngle() {
 		//Fixme, THIS causes the point rotation
 		// LABEL keepAngle
@@ -127,13 +133,13 @@ public class Robot extends TimedRobot {
 			SwerveCompensate.setPID(0.015, 0.0, 0.0);
 			keepAngle = imu.getAngle();
 		} else {
-			SwerveCompensate.setPID(0.004/*0.008*/, 0.0, 0.0);
+			SwerveCompensate.setPID(0.0/*0.008*/, 0.0, 0.0);
 
 			SwerveCompensate.setInput(imu.getAngle());
 			SwerveCompensate.setSetpoint(keepAngle);
 
 			if (!SwerveCompensate.onTarget()) {
-				SwerveCompensate.setPID(0.002/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+				SwerveCompensate.setPID(0.0/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
 			}
 
 			robotRotation = SwerveCompensate.performPID();
@@ -184,6 +190,72 @@ public class Robot extends TimedRobot {
 		RCW = (robotRotation);
 	}
 
+	//Might be helpful for verification
+	//Once robotDistance+= calculateLength distance, finish step
+	public double calculateLength(double[] ArcXs, double[] ArcYs) {
+        double vx = 2 * (ArcXs[1] - ArcXs[0]);
+        double vy = 2 * (ArcYs[1] - ArcYs[0]);
+        double wx = ArcXs[2] - 2 * ArcXs[1] + ArcXs[0];
+        double wy = ArcYs[2] - 2 * ArcYs[1] + ArcYs[0];
+
+        double uu = 4 * (Math.pow(wx, 2) + Math.pow(wy, 2));
+        if (uu < 0.00001) {
+//            System.out.println(Math.sqrt(Math.pow(ArcXs[2] - ArcXs[0], 2) + Math.pow(ArcYs[2] - ArcYs[0], 2)));
+        }
+
+        double vv = 4 * (vx * wx + vy * wy);
+        double ww = Math.pow(vx, 2) + Math.pow(vy, 2);
+
+        double t1 = (float) (2 * Math.sqrt(uu * (uu + vv + ww)));
+        double t2 = 2 * uu + vv;
+        double t3 = vv * vv - 4 * uu * ww;
+        double t4 = (float) (2 * Math.sqrt(uu * ww));
+
+        return (((t1 * t2 - t3 * Math.log(t2 + t1) - (vv * t4 - t3 * Math.log(vv + t4))) / (8 * Math.pow(uu, 1.5))));
+    }
+
+	//This function will return the scaled FWD and STR commands based off the arc points
+    public double[] calculatePath(double[] ArcXs, double[] ArcYs, double distance) {
+		double[] velocity = new double[2];
+		double[] move = new double[4];
+		distance /= calculateLength(ArcXs, ArcYs);
+		double nextDistance = distance + 0.00001; //scale to speed later
+		
+		//t = distance
+        // distance += 0.00005;
+        //if distance == 1, we're done
+
+		//move[0] = robot's xcoord, move[1] = ycoord
+		//move[2] = robot's xcoord in next tiny second, move[3] = that but for ycoord
+        move[0] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(distance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * distance + ArcXs[0];
+        move[1] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(distance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * distance + ArcYs[0];
+		
+		move[2] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * nextDistance + ArcXs[0];
+        move[3] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * nextDistance + ArcYs[0];
+
+        // distanceDelta += Math.sqrt(Math.pow(prevPoint[0] - move[0], 2) + Math.pow(prevPoint[1] - move[1], 2));
+		//When distanceDelta = calculateDistance, we should be done
+        // prevPoint[0] = move[0];
+		// prevPoint[1] = move[1];
+
+		velocity[0] = move[3]-move[1]; //FWD
+		velocity[1] = move[2]-move[0]; //STR
+
+
+		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
+			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
+			velocity[0] = Math.signum(velocity[0]);
+		} else {
+			velocity[0] = Math.signum(velocity[1])*velocity[0]/velocity[1];
+			velocity[1] = Math.signum(velocity[1]);
+		}
+
+//		System.out.println(velocity[0] + " || " + velocity[1]);
+
+
+		return velocity;
+	}
+	
 	/**
 	 * This function is run when the robot is first started up and should be used for any initialization code.
 	 */
@@ -275,7 +347,7 @@ public class Robot extends TimedRobot {
 			commands = new double[lines.size()][];
 			int l = 0;
 			for (String line : lines) {
-				String[] parts = line.split(";");
+				String[] parts = line.split(",");
 				double[] linel = new double[parts.length];
 				int i = 0;
 				for (String part : parts) {
@@ -322,19 +394,28 @@ public class Robot extends TimedRobot {
 
 			case 1:
 
-//				SmartDashboard.putNumber("Array Index", arrayIndex);
+				SmartDashboard.putNumber("Array Index", arrayIndex);
 //				SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
 				/*
 				 * 0 = translate speed, 1 = rotate speed, 2 = direction to translate, 3 = direction to face,
 				 * 4 = distance(in), 5 = How to accelerate(0 = no modification, 1 = transition, 2 = accelerate, 3 = decelerate)
-				 * 6 = smoothArcStartAngle, 7 = smoothArcEndAngle
-				 * 8 = time out(seconds), 9 = imu offset
+				 * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2]
+				 * 9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
+				 * 12 = time out(seconds), 13 = imu offset, was 8 and 9
 				 *
 				 */
 
 				tSpeed = commands[arrayIndex][0];
 				rSpeed = commands[arrayIndex][1];
+
+				ArcXs[0] = commands[arrayIndex][6];
+				ArcXs[1] = commands[arrayIndex][7];
+				ArcXs[2] = commands[arrayIndex][8];
+
+				ArcYs[0] = commands[arrayIndex][9];
+				ArcYs[1] = commands[arrayIndex][10];
+				ArcYs[2] = commands[arrayIndex][11];
 
 				if (commands[arrayIndex][2] != -1) {
 					FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
@@ -344,12 +425,13 @@ public class Robot extends TimedRobot {
 					STR = 0;
 				}
 
-				if (commands[arrayIndex][6] <= 360.0 && commands[arrayIndex][6] >= 0.0) {
-					smoothArc = Math.toRadians(MathUtils.convertRange(0.0, commands[arrayIndex][4], commands[arrayIndex][6], commands[arrayIndex][7], Math.abs(SmartDashboard.getNumber("Distance", 0) - previousDistance)));
-					FWD = Math.cos(smoothArc);
-					STR = Math.sin(smoothArc);
+				if (ArcXs[0] != 999) {
+					curveVelocity = calculatePath(ArcXs, ArcYs, SmartDashboard.getNumber("Distance", 0) - previousDistance);
+					STR = -curveVelocity[0];
+					FWD = curveVelocity[1];
+					commands[arrayIndex][4] = calculateLength(ArcXs, ArcYs);
 				}
-
+				
 				keepAngle = commands[arrayIndex][3];
 
 				if (Math.abs(MathUtils.getAngleError(imu.getAngle(), commands[arrayIndex][3])) < 5.0) {
@@ -365,6 +447,7 @@ public class Robot extends TimedRobot {
 					turnDone = false;
 				}
 
+				//Fixme. Transitions between curves and lines are abrupt. Robot doesn't read next speed and coast
 				if (commands[arrayIndex][5] == 1) {
 					smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex+1][0], SmartDashboard.getNumber("Distance", 0)));
 					smoothAccelerate = smoothAccelerateNum;
@@ -393,10 +476,10 @@ public class Robot extends TimedRobot {
 
 				SmartDashboard.putNumber("Previous Distance", previousDistance);
 
-				if ((Math.abs(SmartDashboard.getNumber("Distance", 0) - previousDistance) >= commands[arrayIndex][4]) || commands[arrayIndex][4] == 0) {
+				if ((Math.abs(SmartDashboard.getNumber("Distance", 0) - previousDistance) >= commands[arrayIndex][4])) {
 					driveDone = true;
-					STR = 0;
-					FWD = 0;
+//					STR = 0;
+//					FWD = 0;
 				}
 
 				SmartDashboard.putNumber("Auto Distance Gone", Math.abs(currentDistance - previousDistance));
@@ -404,13 +487,13 @@ public class Robot extends TimedRobot {
 
 				SwerveCompensate.setTolerance(1);
 
-				if (Time.get() > timeBase + commands[arrayIndex][8] && commands[arrayIndex][8] > 0) {
+				if (Time.get() > timeBase + commands[arrayIndex][12] && commands[arrayIndex][12] > 0) {
 					override = true;
-				} else if (commands[arrayIndex][8] == 0) {
+				} else if (commands[arrayIndex][12] == 0) {
 					timeDone = true;
 				}
 
-				imuOffset = commands[arrayIndex][9];
+				imuOffset = commands[arrayIndex][13];
 
 				if (turnDone) {
 					keepAngle();
@@ -421,8 +504,7 @@ public class Robot extends TimedRobot {
 				SmartDashboard.putNumber("RCW", RCW);
 
 				if (robotBackwards) {
-					//Todo, fix this
-					driveTrain.drive(new Vector(-STR, FWD), -RCW);
+					driveTrain.drive(new Vector(-STR, FWD), RCW);
 				} else {
 					driveTrain.drive(new Vector(STR, FWD), RCW);
 				}
@@ -481,6 +563,10 @@ public class Robot extends TimedRobot {
 		xbox1.setDeadband(0.09);
 		xbox2.setDeadband(0.09);
 
+		Elevator.setPower(xbox2.LStickY());
+//		Hatch.set(xbox2.A(), xbox2.B());
+//		Cargo.set(xbox2.X(), xbox2.Y());
+
 //		SmartDashboard.putNumber("DistanceFR", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getDistance());
 //		SmartDashboard.putNumber("DistanceFL", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getDistance());
 //		SmartDashboard.putNumber("DistanceBL", SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getDistance());
@@ -502,10 +588,14 @@ public class Robot extends TimedRobot {
 		}
 
 		// forward command (-1.0 to 1.0)
-		FWD = -xbox1.LStickY()/* / 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		if (Math.abs(xbox1.LStickY()) >= 0.5) {
+			FWD = -xbox1.LStickY()/* / 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		}
 //		System.out.println(FWD + "||" + STR + "||" + RCW);
 		// strafe command (-1.0 to 1.0)
-		STR = xbox1.LStickX() /*/ 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		if (Math.abs(xbox1.LStickX()) >= 0.05) {
+			STR = xbox1.LStickX() /*/ 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		}
 
 		// Increase the time it takes for the robot to accelerate
 
@@ -579,18 +669,6 @@ public class Robot extends TimedRobot {
 
 //		SmartDashboard.putBoolean("Field Oriented", fieldOriented);
 
-		if (xbox1.LStickButton()) {
-			FWD = 0.0;
-			STR = 0.0;
-			RCW = 0.0;
-		}
-
-		if (xbox1.RStickButton()) {
-			FWD = 0.0;
-			STR = 0.0;
-			RCW = 0.0;
-		}
-
 //		SmartDashboard.putNumber("FWD", FWD);
 //		SmartDashboard.putNumber("STR", STR);
 //		SmartDashboard.putNumber("RCW", RCW);
@@ -609,8 +687,7 @@ public class Robot extends TimedRobot {
 
 		SmartDashboard.putBoolean("Backwards", robotBackwards);
 		if (robotBackwards) {
-			//Todo, values might be wonky
-			driveTrain.drive(new Vector(-STR, FWD), RCW); // x = str, y = fwd, rotation = rcw
+			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
 		} else {
 			driveTrain.drive(new Vector(STR, FWD), RCW); // x = str, y = fwd, rotation = rcw
 		}
@@ -626,10 +703,6 @@ public class Robot extends TimedRobot {
 
 		if (xbox1.Start()) {
 			driveTrain.resetWheels();
-			// currentDistance = 0.0;
-//FIXME Can change based off RCW
-			//Not always 1 inch per value
-			//Look into IMU for distance
 		}
 	}
 
