@@ -4,14 +4,24 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Hatch {
-    private static DoubleSolenoid beak = new DoubleSolenoid(0,1);
-    private static DoubleSolenoid push = new DoubleSolenoid(2,3);
+    private static DoubleSolenoid beak = new DoubleSolenoid(2, 7);
+    private static DoubleSolenoid push = new DoubleSolenoid(3,6);
 
     private static double prevTime = 0.0;
+    private static int step = 0;
 
     public static void set(boolean grab, boolean place) {
-        int step = 0;
-
+//        if (grab) {
+//            beak.set(Value.kForward);
+//        } else {
+//            beak.set(Value.kReverse);
+//        }
+//        if (place) {
+//            push.set(Value.kForward);
+//        } else {
+//            push.set(Value.kReverse);
+//        }
+//Add@logic@so@that@the@TOF can line it up properly
         switch (step) {
             case 0:
                 beak.set(Value.kForward);
@@ -65,6 +75,6 @@ public class Hatch {
                     step = 0;
                 }
                 break;
-        }  
+        }
     }
 }

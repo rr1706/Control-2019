@@ -9,7 +9,7 @@ import frc.robot.utilities.MathUtils;
 
 class SwerveMotor {
     private static final int CAN_TIMEOUT = 20;
-    private static final double SMALL_NUMBER = 0.05; //Was 0.05
+    private static final double SMALL_NUMBER = 0.02; //Was 0.05
 
     private double[] moduleDrift;
 
@@ -163,19 +163,18 @@ class SwerveMotor {
 //            lastValidVelocity2 = counterEncoder.getVelocity();
 //        }
 
-        //Todo, weird thing with wheel ID 3
-        if (id == 1) {
-            SmartDashboard.putNumber("Front Right Ticks", lastValidDistanceClockwise);
-            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
-        } else if (id == 2) {
-            SmartDashboard.putNumber("Front Left Ticks", lastValidDistanceClockwise);
-            SmartDashboard.putNumber("Front Left Velocity", clockwiseEncoder.getVelocity());
-        } else if (id == 3) {
-            SmartDashboard.putNumber("Back Right Ticks", lastValidDistanceClockwise);
-            SmartDashboard.putNumber("Back Right Velocity", clockwiseEncoder.getVelocity());
-        } else {
-            SmartDashboard.putNumber("Back Left Ticks", lastValidDistanceClockwise);
-            SmartDashboard.putNumber("Back Left Velocity", clockwiseEncoder.getVelocity());
+//        if (id == 1) {
+//            SmartDashboard.putNumber("Front Right Ticks", lastValidDistanceClockwise);
+//            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
+//        } else if (id == 2) {
+//            SmartDashboard.putNumber("Front Left Ticks", lastValidDistanceClockwise);
+//            SmartDashboard.putNumber("Front Left Velocity", clockwiseEncoder.getVelocity());
+//        } else if (id == 3) {
+//            SmartDashboard.putNumber("Back Right Ticks", lastValidDistanceClockwise);
+//            SmartDashboard.putNumber("Back Right Velocity", clockwiseEncoder.getVelocity());
+//        } else {
+//            SmartDashboard.putNumber("Back Left Ticks", lastValidDistanceClockwise);
+//            SmartDashboard.putNumber("Back Left Velocity", clockwiseEncoder.getVelocity());
 //            System.out.println((lastValidDistanceCounter+lastValidDistanceClockwise)*36.0  + "| |" + lastValidDistanceClockwise + "||" + lastValidDistanceCounter + "||" + clockwiseMotor.getAppliedOutput() + "||" + counterMotor.getAppliedOutput());
 //            System.out.println((lastValidDistanceCounter+lastValidDistanceClockwise)*36.0 + "| |" + (clockwiseEncoder.getVelocity()+counterEncoder.getVelocity()) + "| |" + clockwiseEncoder.getVelocity() + "| | " + counterEncoder.getVelocity());
 //            System.out.println(clockwiseCommand*MAX_RPM + " | | " + clockwiseEncoder.getVelocity());
@@ -186,7 +185,7 @@ class SwerveMotor {
 //            RRLogger.addData("Counter Encoder Position", lastValidDistanceCounter);
 //            RRLogger.addData("Clockwise Encoder Velocity", clockwiseEncoder.getVelocity());
 //            RRLogger.addData("Counter Encoder Velocity", counterEncoder.getVelocity());
-        }
+//        }
 
 //        if ((rotationCommand == 0.0) && (clockwiseEncoder.getVelocity() + counterEncoder.getVelocity() > 15.0)) {
 //            System.out.println("id:" + id + " | " + clockwiseEncoder.getVelocity() + "| | " + counterEncoder.getVelocity() + " | | " + (clockwiseEncoder.getVelocity()+counterEncoder.getVelocity()));

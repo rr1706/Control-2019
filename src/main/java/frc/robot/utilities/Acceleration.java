@@ -14,7 +14,6 @@ public class Acceleration {
 
     public Acceleration() {
         super();
-
     }
 
     public void set(double start, double stop, double time) {

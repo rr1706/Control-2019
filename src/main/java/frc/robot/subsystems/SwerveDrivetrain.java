@@ -85,7 +85,7 @@ public class SwerveDrivetrain {
 			double Wyi = translation.getY() - rotation * MathUtils.inchToMeter(wheel.getPosition().getX()) / radius;
 			double speed = Math.sqrt(Math.pow(Wxi, 2) + Math.pow(Wyi, 2));
 			double angle = Math.atan2(Wxi, Wyi);
-			System.out.println(speed);
+//			System.out.println(speed);
 			wheel.setSpeedCommand(speed);
 			wheel.setAngleCommand(Math.toDegrees(MathUtils.resolveAngle(angle)));
 

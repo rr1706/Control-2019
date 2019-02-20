@@ -3,6 +3,7 @@ package frc.robot;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -38,7 +39,7 @@ public class Robot extends TimedRobot {
 	private SwerveDrivetrain driveTrain;
 	private IMU imu;
 
-	private boolean robotBackwards;
+//	private boolean robotBackwards;
 
 	private double robotOffset;
 
@@ -75,6 +76,11 @@ public class Robot extends TimedRobot {
 
 	private double[] prevFWD = {0.0, 0.0, 0.0, 0.0, 0.0};
 	private double[] prevSTR = {0.0, 0.0, 0.0, 0.0, 0.0};
+	private double[] prevRCW = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+	private  double[] hatchSetpoints = {7.07, 33.26, 60/*62.8*/};
+	private  double[] ballSetpoints = {12.4, 39.5, 60/*63.6*/};
+
 
 	private double wheelRamp = 0;
 	private double rampRate = 0;
@@ -104,6 +110,8 @@ public class Robot extends TimedRobot {
 	private int rumbleTime = 0;
 
 	private Acceleration accel;
+	private Acceleration rcwAccel;
+
 	private Acceleration decelFWD;
 	private Acceleration decelSTR;
 	private int cmdCounter = 0;
@@ -111,6 +119,7 @@ public class Robot extends TimedRobot {
 	private double[] ArcXs = new double[3];
 	private double[] ArcYs = new double[3];
 	double[] curveVelocity = {0.0, 0.0};
+	private  double position = 0.0;
 
 
 
@@ -130,16 +139,16 @@ public class Robot extends TimedRobot {
 						(xbox1.DPad() == -1) && // If dpad is not pressed
 						(!autonomous)) { // If teleop
 
-			SwerveCompensate.setPID(0.015, 0.0, 0.0);
+			SwerveCompensate.setPID(0.015/*0.015*/, 0.0, 0.0);
 			keepAngle = imu.getAngle();
 		} else {
-			SwerveCompensate.setPID(0.0/*0.008*/, 0.0, 0.0);
+			SwerveCompensate.setPID(0.008/*0.008*/, 0.0, 0.0);
 
 			SwerveCompensate.setInput(imu.getAngle());
 			SwerveCompensate.setSetpoint(keepAngle);
 
 			if (!SwerveCompensate.onTarget()) {
-				SwerveCompensate.setPID(0.0/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+				SwerveCompensate.setPID(0.005/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
 			}
 
 			robotRotation = SwerveCompensate.performPID();
@@ -169,8 +178,8 @@ public class Robot extends TimedRobot {
 //		SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setDrift(application.getProperty("back_left_drift", "0.0,0.0").split(","));
 //		SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setDrift(application.getProperty("back_right_drift", "0.0,0.0").split(","));
 
-		robotBackwards = Boolean.parseBoolean(application.getProperty("robot_backwards", "false"));
-	}
+//		robotBackwards = Boolean.parseBoolean(application.getProperty("robot_backwards", "false"));
+}
 
 	private void autonomousAngle(double angle) {
 		// LABEL autonomous angle
@@ -319,6 +328,7 @@ public class Robot extends TimedRobot {
 		accel = new Acceleration();
 		decelFWD = new Acceleration();
 		decelSTR = new Acceleration();
+		rcwAccel = new Acceleration();
 	}
 
 	public void autonomousInit() {
@@ -330,8 +340,7 @@ public class Robot extends TimedRobot {
 
 		String choice;
 
-		choice = "/home/lvuser/deploy/Test.csv";
-
+		choice = "/home/lvuser/deploy/RightStartToRightRocket.csv";
 
 		SmartDashboard.putString("Autonomous File", choice);
 
@@ -383,7 +392,7 @@ public class Robot extends TimedRobot {
 			// Pause the robot for x seconds at the start of auto
 			case 0:
 
-				driveTrain.drive(new Vector(0, 0), 0);
+				driveTrain.drive(new Vector(FWD, STR), 0);
 				if (Time.get() > timeBase + SmartDashboard.getNumber("Autonomous Delay", 0)) {
 					autoMove = 1;
 				}
@@ -400,9 +409,11 @@ public class Robot extends TimedRobot {
 				/*
 				 * 0 = translate speed, 1 = rotate speed, 2 = direction to translate, 3 = direction to face,
 				 * 4 = distance(in), 5 = How to accelerate(0 = no modification, 1 = transition, 2 = accelerate, 3 = decelerate)
-				 * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2]
-				 * 9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
-				 * 12 = time out(seconds), 13 = imu offset, was 8 and 9
+				 * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2],  9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
+				 * 12 = time out(seconds), 13 = imu offset
+				 * 14 = hatch placement (0 = none, 1 = hatch low, 2 = hatch mid, 3 = hatch high),
+				  * 15 = ball placement (0 = none, 1 = ball low, 2 = ball mid, 3 = ball high),
+				 * 16 = intake/outake (0 = none, 1 = get hatch, 2 = put hatch, 3 = get ball, 4 = put ball)
 				 *
 				 */
 
@@ -416,6 +427,29 @@ public class Robot extends TimedRobot {
 				ArcYs[0] = commands[arrayIndex][9];
 				ArcYs[1] = commands[arrayIndex][10];
 				ArcYs[2] = commands[arrayIndex][11];
+
+				if (commands[arrayIndex][14] != 0.0) {
+					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
+					Elevator.setPosition(hatchSetpoints[setpoint]);
+				}
+
+				if (commands[arrayIndex][15] != 0.0) {
+					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
+					Elevator.setPosition(hatchSetpoints[setpoint]);
+				}
+
+				if (commands[arrayIndex][16] == 0.0) {
+					Cargo.set(false, false);
+//					Hatch.set(false, false); //Obsolete for the hatch?
+				} else if (commands[arrayIndex][16] == 1.0) {
+					Hatch.set(true, false); //Maybe have limit switch to know when to stop instead of doing it at next command
+				} else if (commands[arrayIndex][16] == 2.0) {
+					Hatch.set(false, true);
+				} else if (commands[arrayIndex][16] == 3.0) {
+					Cargo.set(true, false);
+				} else if (commands[arrayIndex][16] == 4.0) {
+					Cargo.set(false, true);
+				}
 
 				if (commands[arrayIndex][2] != -1) {
 					FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
@@ -447,7 +481,6 @@ public class Robot extends TimedRobot {
 					turnDone = false;
 				}
 
-				//Fixme. Transitions between curves and lines are abrupt. Robot doesn't read next speed and coast
 				if (commands[arrayIndex][5] == 1) {
 					smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex+1][0], SmartDashboard.getNumber("Distance", 0)));
 					smoothAccelerate = smoothAccelerateNum;
@@ -503,11 +536,12 @@ public class Robot extends TimedRobot {
 				SmartDashboard.putNumber("STR", STR);
 				SmartDashboard.putNumber("RCW", RCW);
 
-				if (robotBackwards) {
-					driveTrain.drive(new Vector(-STR, FWD), RCW);
-				} else {
-					driveTrain.drive(new Vector(STR, FWD), RCW);
-				}
+//				if (robotBackwards) {
+//					driveTrain.drive(new Vector(-STR, FWD), RCW);
+//				} else {
+					driveTrain.drive(new Vector(STR, FWD), -RCW);
+					//FIXME, if point rotation happens, switch FL with BR and L with R
+//				}
 
 				if (override) {
 					driveDone = true;
@@ -559,13 +593,49 @@ public class Robot extends TimedRobot {
 		autonomous = false;
 
 		SmartDashboard.putNumber("IMU Angle", imu.getAngle());
+		SmartDashboard.putNumber("Elevator Setpoint", position);
+		SmartDashboard.putNumber("L Trig", xbox2.LTrig());
+		SmartDashboard.putNumber("R Trig", xbox2.RTrig());
 
-		xbox1.setDeadband(0.09);
-		xbox2.setDeadband(0.09);
 
-		Elevator.setPower(xbox2.LStickY());
-//		Hatch.set(xbox2.A(), xbox2.B());
-//		Cargo.set(xbox2.X(), xbox2.Y());
+		xbox1.setDeadband(0.2);
+		xbox2.setDeadband(0.2);
+
+		if (xbox2.RTrig() != 0.0) { //Hatch
+			if (xbox2.DPad() == 180) { //Low
+				position = hatchSetpoints[0]; //For later, make it a toggle
+			}
+			else if (xbox2.DPad() == 0) { //High
+				position = hatchSetpoints[2]; //63
+			}
+			else if (xbox2.DPad() == 90){ //Middle
+				position = hatchSetpoints[1];
+			}
+			Elevator.setPosition(position);
+		}
+		else if (xbox2.LTrig() != 0.0) { //Ball
+			if (xbox2.DPad() == 180) { //Low
+				position = ballSetpoints[0]; //For later, make it a toggle
+			}
+			else if (xbox2.DPad() == 0) { //High
+				position = ballSetpoints[2]; //63
+			}
+			else if (xbox2.DPad() == 270) { //Middle
+				position = ballSetpoints[1];
+			}
+			Elevator.setPosition(position);
+		}
+		else {
+			Elevator.setPower(xbox2.LStickY());
+		}
+
+		SmartDashboard.putNumber("DPad", xbox2.DPad());
+
+		Hatch.set(xbox2.A(), xbox2.B());
+
+		Cargo.set(xbox2.X(), xbox2.Y());
+
+		compressor.start();
 
 //		SmartDashboard.putNumber("DistanceFR", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getDistance());
 //		SmartDashboard.putNumber("DistanceFL", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getDistance());
@@ -599,22 +669,36 @@ public class Robot extends TimedRobot {
 
 		// Increase the time it takes for the robot to accelerate
 
+		//Get pressure sensor to disable once above 100 psi
+		//Base it off actuations
 		if (FWD != 0.0 || STR != 0.0) {
+//			compressor.start();
 			FWD *= accel.calculate();
 			STR *= accel.calculate();
-
 			if (Math.abs(FWD) > 0.3 || Math.abs(STR) > 0.3) {
-				decelFWD.set(prevFWD[cmdCounter], 0.0, 0.8);
-				decelSTR.set(prevSTR[cmdCounter], 0.0, 0.8);
+				decelFWD.set(0.8*prevFWD[cmdCounter], 0.0, 0.7);
+				decelSTR.set(0.8*prevSTR[cmdCounter], 0.0, 0.7);
 			}
 		} else {
-			accel.set(0.0, 1.0, 2.2);
+//			compressor.stop();
+			accel.set(0.0, 1.0, 2);
 			FWD = decelFWD.calculate();
 			STR = decelSTR.calculate();
 		}
+
+		if (RCW != 0.0) {
+			RCW *= rcwAccel.calculate();
+		} else {
+			rcwAccel.set(0.0, 0.17, 2);
+		}
+		prevRCW[cmdCounter] = RCW;
+
 		prevFWD[cmdCounter] = FWD;
 		prevSTR[cmdCounter] = STR;
-		cmdCounter++;
+
+		SmartDashboard.putNumber("PrevFWD", prevFWD[cmdCounter]);
+		SmartDashboard.putNumber("Counter", cmdCounter);
+
 		if (cmdCounter > 4) {
 			cmdCounter = 0;
 		}
@@ -661,10 +745,10 @@ public class Robot extends TimedRobot {
 			FWD = commands.getY();
 			STR = commands.getX();
 		} else {
-			if (!robotBackwards) {
+//			if (!robotBackwards) {
 				FWD *= -1;
 				STR *= -1;
-			}
+//			}
 		}
 
 //		SmartDashboard.putBoolean("Field Oriented", fieldOriented);
@@ -680,17 +764,17 @@ public class Robot extends TimedRobot {
 		if (FWD + STR == 0.0) {
 			RCW = xbox1.RStickX();
 		} else {
-			RCW = xbox1.RStickX() * 0.5;
+			RCW = xbox1.RStickX()/6;
 		}
 
 		keepAngle();
 
-		SmartDashboard.putBoolean("Backwards", robotBackwards);
-		if (robotBackwards) {
+//		SmartDashboard.putBoolean("Backwards", robotBackwards);
+//		if (robotBackwards) {
+//			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
+//		} else {
 			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
-		} else {
-			driveTrain.drive(new Vector(STR, FWD), RCW); // x = str, y = fwd, rotation = rcw
-		}
+//		}
 
 //		RRLogger.writeFromQueue();
 

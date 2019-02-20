@@ -90,9 +90,9 @@ public class SwerveModule {
         anglePID.setOutputRange(-1.0, 1.0);
         anglePID.enable();
 
-        SmartDashboard.putNumber("kP", kP);
-        SmartDashboard.putNumber("kI", kI);
-        SmartDashboard.putNumber("kD", kD);
+//        SmartDashboard.putNumber("kP", kP);
+//        SmartDashboard.putNumber("kI", kI);
+//        SmartDashboard.putNumber("kD", kD);
         wheelSensor = new DigitalInput(sensorPort);
     }
 
@@ -116,7 +116,6 @@ public class SwerveModule {
 
         rawError = MathUtils.calculateContinuousError(angleCommand, angle, 360.0, 0.0);
         SmartDashboard.putNumber("Combined Rates of Change", angleCommand*angle);
-
 
         if (id == 1) {
             SmartDashboard.putNumber("FR Angle Command", angleCommand);
@@ -334,7 +333,7 @@ back_right_drift=0.0059,0.0027
 //            }
 
 //        if (id ==4/*1 || id== 2 || id ==3*/) {
-            swerveMotor.set(speedCommand, rotationCommand);
+        swerveMotor.set(speedCommand, rotationCommand);
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
 //        }
