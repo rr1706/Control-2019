@@ -196,7 +196,6 @@ class SwerveMotor {
             clockwisePID.setReference(clockwiseCommand, ControlType.kVelocity);
 //            clockwisePID.setReference(clockwiseCommand, ControlType.kVoltage);
 //            clockwiseMotor.set(clockwiseCommand);
-
         } else {
             clockwiseMotor.stopMotor();
         }

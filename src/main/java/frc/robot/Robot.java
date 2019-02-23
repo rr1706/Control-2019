@@ -114,6 +114,7 @@ public class Robot extends TimedRobot {
 
 	private Acceleration decelFWD;
 	private Acceleration decelSTR;
+	private Acceleration decelRCW;
 	private int cmdCounter = 0;
 
 	private double[] ArcXs = new double[3];
@@ -124,7 +125,7 @@ public class Robot extends TimedRobot {
 
 
 	private void keepAngle() {
-		//Fixme, THIS causes the point rotation
+		//This causes the point rotation when wheels are flipped over y=x
 		// LABEL keepAngle
 		SwerveCompensate.enable();
 
@@ -148,14 +149,14 @@ public class Robot extends TimedRobot {
 			SwerveCompensate.setSetpoint(keepAngle);
 
 			if (!SwerveCompensate.onTarget()) {
-				SwerveCompensate.setPID(0.005/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+				SwerveCompensate.setPID(0.007/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
 			}
 
 			robotRotation = SwerveCompensate.performPID();
 
 			RCW = robotRotation;
 
-			SmartDashboard.putNumber("Robot Rotation", robotRotation);
+			SmartDashboard.putNumber("Robot Rotation 1", robotRotation);
 		}
 	}
 
@@ -225,13 +226,22 @@ public class Robot extends TimedRobot {
 
 	//This function will return the scaled FWD and STR commands based off the arc points
     public double[] calculatePath(double[] ArcXs, double[] ArcYs, double distance) {
+		//We need to scale returned FWD and STR cmds based off
 		double[] velocity = new double[2];
 		double[] move = new double[4];
 		distance /= calculateLength(ArcXs, ArcYs);
 		double nextDistance = distance + 0.00001; //scale to speed later
-		
-		//t = distance
-        // distance += 0.00005;
+		double xCoordVector1 = 2*ArcXs[0] - 4*ArcXs[1] + 2*ArcXs[2];
+		double xCoordVector2 = -2*ArcXs[0] + 2*ArcXs[1];
+
+		double yCoordVector1 = 2*ArcXs[0] - 4*ArcXs[1] + 2*ArcXs[2];
+		double yCoordVector2 = -2*ArcXs[0] + 2*ArcXs[1];
+
+		//tX = move[0] ???
+		//tY = move[1] ???
+//		double newTX = tX + nextDistance/((distance*(tX*xCoordVector1 +xCoordVector2)));
+//		double newTY = tX + nextDistance/((distance*(tY*xCoordVector1 +xCoordVector2)));
+		// distance += 0.00005;
         //if distance == 1, we're done
 
 		//move[0] = robot's xcoord, move[1] = ycoord
@@ -250,7 +260,7 @@ public class Robot extends TimedRobot {
 		velocity[0] = move[3]-move[1]; //FWD
 		velocity[1] = move[2]-move[0]; //STR
 
-
+		//t = t + nextDistance/(totalArcLength*v1*v2)
 		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
 			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
 			velocity[0] = Math.signum(velocity[0]);
@@ -328,6 +338,8 @@ public class Robot extends TimedRobot {
 		accel = new Acceleration();
 		decelFWD = new Acceleration();
 		decelSTR = new Acceleration();
+
+		decelRCW = new Acceleration();
 		rcwAccel = new Acceleration();
 	}
 
@@ -416,6 +428,8 @@ public class Robot extends TimedRobot {
 				 * 16 = intake/outake (0 = none, 1 = get hatch, 2 = put hatch, 3 = get ball, 4 = put ball)
 				 *
 				 */
+
+				//Only use translation for RCW and Arc Speed
 
 				tSpeed = commands[arrayIndex][0];
 				rSpeed = commands[arrayIndex][1];
@@ -676,8 +690,8 @@ public class Robot extends TimedRobot {
 			FWD *= accel.calculate();
 			STR *= accel.calculate();
 			if (Math.abs(FWD) > 0.3 || Math.abs(STR) > 0.3) {
-				decelFWD.set(0.8*prevFWD[cmdCounter], 0.0, 0.7);
-				decelSTR.set(0.8*prevSTR[cmdCounter], 0.0, 0.7);
+				decelFWD.set(prevFWD[cmdCounter], 0.0, 0.8);
+				decelSTR.set( prevSTR[cmdCounter], 0.0, 0.8);
 			}
 		} else {
 //			compressor.stop();
@@ -686,13 +700,10 @@ public class Robot extends TimedRobot {
 			STR = decelSTR.calculate();
 		}
 
-		if (RCW != 0.0) {
-			RCW *= rcwAccel.calculate();
-		} else {
-			rcwAccel.set(0.0, 0.17, 2);
-		}
-		prevRCW[cmdCounter] = RCW;
+			System.out.println(RCW + "||" + robotRotation + "||" + rcwAccel.calculate());
 
+
+		prevRCW[cmdCounter] = RCW;
 		prevFWD[cmdCounter] = FWD;
 		prevSTR[cmdCounter] = STR;
 
@@ -739,7 +750,9 @@ public class Robot extends TimedRobot {
 		}
 		previousOrientedButton = currentOrientedButton;
 
-		if (fieldOriented) {
+		SmartDashboard.putBoolean("Field Oriented", fieldOriented);
+
+		if (fieldOriented) {//Fix field oriented
 			Vector commands;
 			commands = MathUtils.convertOrientation(headingRad, FWD, STR);
 			FWD = commands.getY();
@@ -761,19 +774,40 @@ public class Robot extends TimedRobot {
 		// Limited to half speed because of wheel direction calculation issues when rotating quickly
 		// Let robot rotate at full speed if it is not translating
 
-		if (FWD + STR == 0.0) {
+		if (FWD + STR == 0.0) { //Change this, when robot nears 0 it rotates too slow
+			//FIXME, BIG ISSUE! Robot turns in the direction RCW is when Ian rotates while driving
 			RCW = xbox1.RStickX();
+			if (RCW != 0.0) {
+				RCW *=rcwAccel.calculate();
+				SmartDashboard.putNumber("Robot Rotation 2", rcwAccel.calculate());
+				if (Math.abs(RCW) > 1) {
+					decelRCW.set(prevRCW[cmdCounter], 0.0, 2);
+				}
+			} else {
+				rcwAccel.set(0.0, 1, 1);
+				RCW = decelRCW.calculate();
+			}
 		} else {
-			RCW = xbox1.RStickX()/6;
+			RCW = xbox1.RStickX()/2;
 		}
-
-		keepAngle();
 
 //		SmartDashboard.putBoolean("Backwards", robotBackwards);
 //		if (robotBackwards) {
 //			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
 //		} else {
-			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
+//		if (xbox1.LTrig() != 0.0) {
+//			FWD = 0.2;
+//		} else {
+//			FWD = 0.0;
+//			STR = 0.0;
+//		}
+//		if (xbox1.RTrig() != 0.0) {
+//			RCW = 0.1;
+//		} else {
+//			RCW = 0.0;
+//		}
+		keepAngle();
+		driveTrain.drive(new Vector(-STR, FWD), RCW); // x = str, y = fwd, rotation = rcw
 //		}
 
 //		RRLogger.writeFromQueue();

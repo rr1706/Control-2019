@@ -71,7 +71,7 @@ public class SwerveDrivetrain {
 		// SmartDashboard.putNumber("STR", translation.getX());
 		// SmartDashboard.putNumber("FWD", translation.getY());
 		// SmartDashboard.putNumber("RCW", rotation);
-		System.out.println(translation.getY() + "||" + translation.getX() + "||" + rotation);
+//		System.out.println(translation.getY() + "||" + translation.getX() + "||" + rotation);
 
 
 
@@ -118,23 +118,23 @@ public class SwerveDrivetrain {
 		double[] xyDistFL = swerveModules.get(SwerveDrivetrain.WheelType.FRONT_LEFT).getXYDist();
 		double[] xyDistBR = swerveModules.get(SwerveDrivetrain.WheelType.BACK_RIGHT).getXYDist();
 
-		SmartDashboard.putNumber("FR DistX", xyDistFR[0]);
-		SmartDashboard.putNumber("FL DistX", xyDistFL[0]);
-		SmartDashboard.putNumber("BR DistX", xyDistBR[0]);
-		SmartDashboard.putNumber("BL DistX", xyDistBL[0]);
+//		SmartDashboard.putNumber("FR DistX", xyDistFR[0]);
+//		SmartDashboard.putNumber("FL DistX", xyDistFL[0]);
+//		SmartDashboard.putNumber("BR DistX", xyDistBR[0]);
+//		SmartDashboard.putNumber("BL DistX", xyDistBL[0]);
 
-		SmartDashboard.putNumber("FR DistY", xyDistFR[1]);
-		SmartDashboard.putNumber("FL DistY", xyDistFL[1]);
-		SmartDashboard.putNumber("BR DistY", xyDistBR[1]);
-		SmartDashboard.putNumber("BL DistY", xyDistBL[1]);
+//		SmartDashboard.putNumber("FR DistY", xyDistFR[1]);
+//		SmartDashboard.putNumber("FL DistY", xyDistFL[1]);
+//		SmartDashboard.putNumber("BR DistY", xyDistBR[1]);
+//		SmartDashboard.putNumber("BL DistY", xyDistBL[1]);
 
 		swerveModules.get(SwerveDrivetrain.WheelType.FRONT_RIGHT).resetDelta();
 		swerveModules.get(SwerveDrivetrain.WheelType.FRONT_LEFT).resetDelta();
 		swerveModules.get(SwerveDrivetrain.WheelType.BACK_LEFT).resetDelta();
 		swerveModules.get(SwerveDrivetrain.WheelType.BACK_RIGHT).resetDelta();
 
-		SmartDashboard.putNumber("XoverT", (xyDistFR[0] + xyDistFL[0] + xyDistBL[0] + xyDistBR[0]));
-		SmartDashboard.putNumber("YoverT", (xyDistFR[1] + xyDistFL[1] + xyDistBL[1] + xyDistBR[1]));
+//		SmartDashboard.putNumber("XoverT", (xyDistFR[0] + xyDistFL[0] + xyDistBL[0] + xyDistBR[0]));
+//		SmartDashboard.putNumber("YoverT", (xyDistFR[1] + xyDistFL[1] + xyDistBL[1] + xyDistBR[1]));
 
 		double xAvg = (xyDistFR[0] + xyDistFL[0] + xyDistBL[0] + xyDistBR[0])/4.0;
 		double yAvg = (xyDistFR[1] + xyDistFL[1] + xyDistBL[1] + xyDistBR[1])/4.0;

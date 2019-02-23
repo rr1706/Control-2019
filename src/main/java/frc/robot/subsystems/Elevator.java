@@ -11,7 +11,7 @@ public class Elevator {
     private  static double lastPosition = 0.0;
 
     public static void setPower(double set) { //Ian said to reverse
-        motor.set(-set*0.65);
+        motor.set(-set*0.4);
 //        System.out.println(encoder.getPosition());
         SmartDashboard.putNumber("Elevator Position", encoder.getPosition());
     }
@@ -19,11 +19,11 @@ public class Elevator {
     //Use button to set position to current
     public static void setPosition(double pos) {
         if (lastPosition > pos) {
-            pid.setP(0.06);
+            pid.setP(0.04);
         } else if (pos == 60)  {
-            pid.setP(0.08);
+            pid.setP(0.07);
         } else {
-            pid.setP(0.13);
+            pid.setP(0.10);
         }
         pid.setI(0.0);
         pid.setD(0.0);
