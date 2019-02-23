@@ -122,6 +122,9 @@ public class Robot extends TimedRobot {
 	double[] curveVelocity = {0.0, 0.0};
 	private  double position = 0.0;
 
+	private int arcResolution = 200;
+	private int[] arcLengths = new int[arcResolution+1];
+
 
 
 	private void keepAngle() {
@@ -222,8 +225,41 @@ public class Robot extends TimedRobot {
         double t4 = (float) (2 * Math.sqrt(uu * ww));
 
         return (((t1 * t2 - t3 * Math.log(t2 + t1) - (vv * t4 - t3 * Math.log(vv + t4))) / (8 * Math.pow(uu, 1.5))));
+        /*
+Calculate N points on the curve using t and store the arc-length(aka the length of the curve) at that position into an array
+To map T onto t, first multiply T by the total length of the curve to get u and then search the array of
+lengths for the index of the largest value that's smaller than u
+If we had an exact hit, return the array value at that index divided by N, if not interpolate a bit between the point we
+found and the next one, divide the thing once again by N and return.
+         */
     }
 
+    public void makeCurve(double curveLength, double aX, double bX, double cX, double aY, double bY, double cY) {
+		arcLengths[0] = 0;
+		int N = 0; //clen
+		double zeroX = getPoint(0,  aX,  bX,  cX,  aY,  bY,  cY)[0];
+		double zeroY = getPoint(0,  aX,  bX,  cX,  aY,  bY,  cY)[1];
+
+		for (int i = 0;  i <= arcResolution; i++) {
+			double x = getPoint((i*0.05),  aX,  bX,  cX,  aY,  bY,  cY)[0];
+			double y = getPoint((i*0.05),  aX,  bX,  cX,  aY,  bY,  cY)[1];
+			double dX = zeroX-x;
+			double dY = zeroY-y;
+			N += Math.sqrt(dX*dX + dY*dY);
+			arcLengths[i] = N;
+			zeroX = x;
+			zeroY = y;
+		}
+		double length = N;
+	}
+
+	//This function will return the x and ys of the curve at a given time when given the points
+	public double[] getPoint(double t, double aX, double bX, double cX, double aY, double bY, double cY) {
+		double[] point = new double[2];
+		point[0] = (1-t)*(1-t)*aX + 2*t*(1-t)*bX + t*t*cX;
+		point[1] = (1-t)*(1-t)*aY + 2*t*(1-t)*bY + t*t*cY;
+		return point;
+	}
 	//This function will return the scaled FWD and STR commands based off the arc points
     public double[] calculatePath(double[] ArcXs, double[] ArcYs, double distance) {
 		//We need to scale returned FWD and STR cmds based off
@@ -231,16 +267,7 @@ public class Robot extends TimedRobot {
 		double[] move = new double[4];
 		distance /= calculateLength(ArcXs, ArcYs);
 		double nextDistance = distance + 0.00001; //scale to speed later
-		double xCoordVector1 = 2*ArcXs[0] - 4*ArcXs[1] + 2*ArcXs[2];
-		double xCoordVector2 = -2*ArcXs[0] + 2*ArcXs[1];
 
-		double yCoordVector1 = 2*ArcXs[0] - 4*ArcXs[1] + 2*ArcXs[2];
-		double yCoordVector2 = -2*ArcXs[0] + 2*ArcXs[1];
-
-		//tX = move[0] ???
-		//tY = move[1] ???
-//		double newTX = tX + nextDistance/((distance*(tX*xCoordVector1 +xCoordVector2)));
-//		double newTY = tX + nextDistance/((distance*(tY*xCoordVector1 +xCoordVector2)));
 		// distance += 0.00005;
         //if distance == 1, we're done
 
@@ -260,7 +287,7 @@ public class Robot extends TimedRobot {
 		velocity[0] = move[3]-move[1]; //FWD
 		velocity[1] = move[2]-move[0]; //STR
 
-		//t = t + nextDistance/(totalArcLength*v1*v2)
+
 		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
 			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
 			velocity[0] = Math.signum(velocity[0]);
@@ -352,7 +379,7 @@ public class Robot extends TimedRobot {
 
 		String choice;
 
-		choice = "/home/lvuser/deploy/RightStartToRightRocket.csv";
+		choice = "/home/lvuser/deploy/Test.csv";
 
 		SmartDashboard.putString("Autonomous File", choice);
 
@@ -442,28 +469,28 @@ public class Robot extends TimedRobot {
 				ArcYs[1] = commands[arrayIndex][10];
 				ArcYs[2] = commands[arrayIndex][11];
 
-				if (commands[arrayIndex][14] != 0.0) {
-					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
-					Elevator.setPosition(hatchSetpoints[setpoint]);
-				}
+//				if (commands[arrayIndex][14] != 0.0) {
+//					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
+//					Elevator.setPosition(hatchSetpoints[setpoint]);
+//				}
 
-				if (commands[arrayIndex][15] != 0.0) {
-					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
-					Elevator.setPosition(hatchSetpoints[setpoint]);
-				}
+//				if (commands[arrayIndex][15] != 0.0) {
+//					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
+//					Elevator.setPosition(hatchSetpoints[setpoint]);
+//				}
 
-				if (commands[arrayIndex][16] == 0.0) {
-					Cargo.set(false, false);
-//					Hatch.set(false, false); //Obsolete for the hatch?
-				} else if (commands[arrayIndex][16] == 1.0) {
-					Hatch.set(true, false); //Maybe have limit switch to know when to stop instead of doing it at next command
-				} else if (commands[arrayIndex][16] == 2.0) {
-					Hatch.set(false, true);
-				} else if (commands[arrayIndex][16] == 3.0) {
-					Cargo.set(true, false);
-				} else if (commands[arrayIndex][16] == 4.0) {
-					Cargo.set(false, true);
-				}
+//				if (commands[arrayIndex][16] == 0.0) {
+//					Cargo.set(false, false);
+////					Hatch.set(false, false); //Obsolete for the hatch?
+//				} else if (commands[arrayIndex][16] == 1.0) {
+//					Hatch.set(true, false); //Maybe have limit switch to know when to stop instead of doing it at next command
+//				} else if (commands[arrayIndex][16] == 2.0) {
+//					Hatch.set(false, true);
+//				} else if (commands[arrayIndex][16] == 3.0) {
+//					Cargo.set(true, false);
+//				} else if (commands[arrayIndex][16] == 4.0) {
+//					Cargo.set(false, true);
+//				}
 
 				if (commands[arrayIndex][2] != -1) {
 					FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
@@ -553,7 +580,7 @@ public class Robot extends TimedRobot {
 //				if (robotBackwards) {
 //					driveTrain.drive(new Vector(-STR, FWD), RCW);
 //				} else {
-					driveTrain.drive(new Vector(STR, FWD), -RCW);
+					driveTrain.drive(new Vector(-STR, FWD), -RCW);
 					//FIXME, if point rotation happens, switch FL with BR and L with R
 //				}
 
@@ -700,7 +727,7 @@ public class Robot extends TimedRobot {
 			STR = decelSTR.calculate();
 		}
 
-			System.out.println(RCW + "||" + robotRotation + "||" + rcwAccel.calculate());
+//			System.out.println(RCW + "||" + robotRotation + "||" + rcwAccel.calculate());
 
 
 		prevRCW[cmdCounter] = RCW;
@@ -807,7 +834,7 @@ public class Robot extends TimedRobot {
 //			RCW = 0.0;
 //		}
 		keepAngle();
-		driveTrain.drive(new Vector(-STR, FWD), RCW); // x = str, y = fwd, rotation = rcw
+		driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
 //		}
 
 //		RRLogger.writeFromQueue();

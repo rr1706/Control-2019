@@ -163,10 +163,12 @@ class SwerveMotor {
 //            lastValidVelocity2 = counterEncoder.getVelocity();
 //        }
 
-//        if (id == 1) {
-//            SmartDashboard.putNumber("Front Right Ticks", lastValidDistanceClockwise);
+        if (id == 1) {
+//            SmartDashboard.putNumber("Front Right Command", lastValidDistanceClockwise);
 //            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
-//        } else if (id == 2) {
+            System.out.println(MathUtils.resolveDeg((lastValidDistanceClockwise + lastValidDistanceCounter)*36.0) + "||" + (MAX_RPM*clockwiseCommand) +"||" + (MAX_RPM*counterCommand )+ "||" + clockwiseEncoder.getVelocity() + "||" + counterEncoder.getVelocity());
+        }
+//        else if (id == 2) {
 //            SmartDashboard.putNumber("Front Left Ticks", lastValidDistanceClockwise);
 //            SmartDashboard.putNumber("Front Left Velocity", clockwiseEncoder.getVelocity());
 //        } else if (id == 3) {

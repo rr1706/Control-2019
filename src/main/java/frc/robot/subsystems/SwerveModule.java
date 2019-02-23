@@ -99,9 +99,11 @@ public class SwerveModule {
     void drive() {
         distance = swerveMotor.getDistance() * DISTANCE_PER_PULSE;
 
+        wheelOffset = 0.0;
+
         angleOld = angle;
         //Low Pass Filter
-        angle = MathUtils.resolveDeg(wheelOffset+swerveMotor.getAngle());
+        angle = MathUtils.resolveDeg(/*wheelOffset+*/swerveMotor.getAngle());
         angleFilteredOld = angleFiltered;
 
         if (angle-angleOld >= 45) {
@@ -237,6 +239,7 @@ public class SwerveModule {
          * go opposite to command and reverse translation
          */
 
+
             if (Math.abs(trueError) > TICKS_PER_REVOLUTION / 4.0) {
                 angleCommand = MathUtils.reverseWheelDirection(angleCommand);
                 speedCommand *= -1;
@@ -332,8 +335,12 @@ back_right_drift=0.0059,0.0027
 //            }
 
 //        if (id == 2/*1 || id== 2 || id ==3*/) {
-
-        swerveMotor.set(speedCommand, rotationCommand);
+//        if (id == 1 || id == 4) {
+//            System.out.println(angleCommand);
+            swerveMotor.set(speedCommand, rotationCommand);
+//        } else {
+//            swerveMotor.set(0.0, 0.0);
+//        }
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
 //        }
