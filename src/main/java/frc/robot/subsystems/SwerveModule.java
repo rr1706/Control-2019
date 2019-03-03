@@ -334,16 +334,15 @@ back_right_drift=0.0059,0.0027
 //                rotationCommand = 0.0;
 //            }
 
-//        if (id == 2/*1 || id== 2 || id ==3*/) {
-//        if (id == 1 || id == 4) {
+
+//        if (id == 2) {
 //            System.out.println(angleCommand);
             swerveMotor.set(speedCommand, rotationCommand);
+//            System.out.println(speedCommand);
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
 //        }
-//        } else {
-//            swerveMotor.set(0.0, 0.0);
-//        }
+
 
 /*
 front_right_drift=-0.001,-0.001

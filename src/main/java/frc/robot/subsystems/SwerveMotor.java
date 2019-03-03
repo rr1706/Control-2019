@@ -10,6 +10,7 @@ import frc.robot.utilities.MathUtils;
 class SwerveMotor {
     private static final int CAN_TIMEOUT = 20;
     private static final double SMALL_NUMBER = 0.02; //Was 0.05
+    private static final double MAX_RPM = 3175 /*80*(Ds.getBatteryVoltage()-8)*/; //Todo: Bad equation, fix later
 
     private double[] moduleDrift;
 
@@ -109,7 +110,6 @@ class SwerveMotor {
      * @param rotationCommand Moves wheel clockwise
      */
     void set(double speedCommand, double rotationCommand) {
-          double MAX_RPM = 4000 /*80*(Ds.getBatteryVoltage()-8)*/; //Todo: Bad equation, fix later
 //        speedCommand*=0.8;
 //        rotationCommand*=0.8;
 
@@ -163,11 +163,11 @@ class SwerveMotor {
 //            lastValidVelocity2 = counterEncoder.getVelocity();
 //        }
 
-        if (id == 1) {
-//            SmartDashboard.putNumber("Front Right Command", lastValidDistanceClockwise);
-//            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
-            System.out.println(MathUtils.resolveDeg((lastValidDistanceClockwise + lastValidDistanceCounter)*36.0) + "||" + (MAX_RPM*clockwiseCommand) +"||" + (MAX_RPM*counterCommand )+ "||" + clockwiseEncoder.getVelocity() + "||" + counterEncoder.getVelocity());
-        }
+//        if (id == 1) {
+////            SmartDashboard.putNumber("Front Right Command", lastValidDistanceClockwise);
+////            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
+//            System.out.println(MathUtils.resolveDeg((lastValidDistanceClockwise + lastValidDistanceCounter)*36.0) + "||" + (MAX_RPM*clockwiseCommand) +"||" + (MAX_RPM*counterCommand )+ "||" + clockwiseEncoder.getVelocity() + "||" + counterEncoder.getVelocity());
+//        }
 //        else if (id == 2) {
 //            SmartDashboard.putNumber("Front Left Ticks", lastValidDistanceClockwise);
 //            SmartDashboard.putNumber("Front Left Velocity", clockwiseEncoder.getVelocity());
@@ -195,6 +195,7 @@ class SwerveMotor {
 
         if (Math.abs(clockwiseCommand) > SMALL_NUMBER) {
             clockwiseCommand*=MAX_RPM;
+//            clockwiseCommand = 0.0;
             clockwisePID.setReference(clockwiseCommand, ControlType.kVelocity);
 //            clockwisePID.setReference(clockwiseCommand, ControlType.kVoltage);
 //            clockwiseMotor.set(clockwiseCommand);
@@ -204,6 +205,7 @@ class SwerveMotor {
 
         if (Math.abs(counterCommand) > SMALL_NUMBER) {
             counterCommand*=MAX_RPM;
+//            counterCommand = 0.2*MAX_RPM;
             counterPID.setReference(-counterCommand, ControlType.kVelocity);
 //            counterPID.setReference(-counterCommand, ControlType.kVoltage);
 //            counterMotor.set(-counterCommand);

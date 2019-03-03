@@ -27,155 +27,200 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-	private SendableChooser<Integer> autoChooser;
+    private final double ACCEL_SPEED= 0.045;
+    private final double DECEL_SPEED= 0.03;
 
-	private Compressor compressor;
+    private SendableChooser<Integer> autoChooser;
 
-	public static XboxController xbox1 = new XboxController(0);
-	public static XboxController xbox2 = new XboxController(1);
+//    private Compressor compressor;
 
-//	private JetsonServer jet;
+    public static XboxController xbox1 = new XboxController(0);
+    public static XboxController xbox2 = new XboxController(1);
+
+    //	private JetsonServer jet;
 //	private Thread t;
-	private SwerveDrivetrain driveTrain;
-	private IMU imu;
+    private SwerveDrivetrain driveTrain;
+    private IMU imu;
 
 //	private boolean robotBackwards;
 
-	private double robotOffset;
+    private double robotOffset;
 
-	private int disabled = 0;
+    private int disabled = 0;
 
-	private double[][] commands;
-	private int arrayIndex = -1;
-	private int autoMove = 0;
-	private int translateType;
-	private double autonomousAngle;
-	private double tSpeed;
-	private double rSpeed;
-	private double previousDistance = 0.0;
-	private double currentDistance = 0.0;
-	private boolean override;
-	private boolean driveDone;
-	private boolean turnDone;
-	private boolean timeDone;
-	private double offsetDeg;
-	private double prevOffset = 0;
-	private double timeBase;
-	private boolean timeCheck;
-	private double smoothArc;
-	private double smoothAccelerate;
-	private double smoothAccelerateNum;
-	private double initialAngle;
-	private final double minSpeed = 0.2;
+    private double[][] commands;
+    private int arrayIndex = -1;
+    private int autoMove = 0;
+    private int translateType;
+    private double autonomousAngle;
+    private double tSpeed;
+    private double rSpeed;
+    private double previousDistance = 0.0;
+    private double currentDistance = 0.0;
+    private boolean override;
+    private boolean driveDone;
+    private boolean turnDone;
+    private boolean timeDone;
+    private double offsetDeg;
+    private double prevOffset = 0;
+    private double timeBase;
+    private boolean timeCheck;
+    private double smoothArc;
+    private double smoothAccelerate;
+    private double smoothAccelerateNum;
+    private double initialAngle;
+    private final double minSpeed = 0.2;
 
-	private int dx = -1;
+    private int dx = -1;
 
-	private double FWD;
-	private double STR;
-	private double RCW;
+    private double FWD;
+    private double STR;
+    private double RCW;
 
-	private double[] prevFWD = {0.0, 0.0, 0.0, 0.0, 0.0};
-	private double[] prevSTR = {0.0, 0.0, 0.0, 0.0, 0.0};
-	private double[] prevRCW = {0.0, 0.0, 0.0, 0.0, 0.0};
+    private double[] prevFWD = {0.0, 0.0, 0.0, 0.0, 0.0};
+    private double[] prevSTR = {0.0, 0.0, 0.0, 0.0, 0.0};
+    private double[] prevRCW = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-	private  double[] hatchSetpoints = {7.07, 33.26, 60/*62.8*/};
-	private  double[] ballSetpoints = {12.4, 39.5, 60/*63.6*/};
-
-
-	private double wheelRamp = 0;
-	private double rampRate = 0;
-	private double currentRampTime = 0;
-	private double prevRampTime = 0;
-
-	private double keepAngle;
-
-	private boolean autonomous;
-
-	private boolean fieldOriented = true; // start on field orientation
-	private boolean previousOrientedButton = false;
-	private boolean currentOrientedButton = false;
-
-	private PIDController SwerveCompensate;
-
-	private double lead;
-
-	private double robotRotation;
-
-	private double imuOffset = 0;
-
-	private Properties application = new Properties();
-	private File offsets = new File("/home/lvuser/deploy/SWERVE_OFFSET.txt");
-
-	private boolean rumble = false;
-	private int rumbleTime = 0;
-
-	private Acceleration accel;
-	private Acceleration rcwAccel;
-
-	private Acceleration decelFWD;
-	private Acceleration decelSTR;
-	private Acceleration decelRCW;
-	private int cmdCounter = 0;
-
-	private double[] ArcXs = new double[3];
-	private double[] ArcYs = new double[3];
-	double[] curveVelocity = {0.0, 0.0};
-	private  double position = 0.0;
-
-	private int arcResolution = 200;
-	private int[] arcLengths = new int[arcResolution+1];
+    private  double[] hatchSetpoints = {7.07, 33.26, 60/*62.8*/};
+    private  double[] ballSetpoints = {12.4, 39.5, 60/*63.6*/};
 
 
+    private double wheelRamp = 0;
+    private double rampRate = 0;
+    private double currentRampTime = 0;
+    private double prevRampTime = 0;
 
-	private void keepAngle() {
-		//This causes the point rotation when wheels are flipped over y=x
-		// LABEL keepAngle
-		SwerveCompensate.enable();
+    private double keepAngle;
 
-		double leadNum = SmartDashboard.getNumber("leadNum", 0);
-		lead = RCW * leadNum;
+    private boolean autonomous;
+
+    private boolean fieldOriented = true; // start on field orientation
+    private boolean previousOrientedButton = false;
+    private boolean currentOrientedButton = false;
+
+    private PIDController SwerveCompensate;
+
+    private double lead;
+
+    private double robotRotation;
+
+    private double imuOffset = 0;
+
+    private Properties application = new Properties();
+    private File offsets = new File("/home/lvuser/deploy/SWERVE_OFFSET.txt");
+
+    private boolean rumble = false;
+    private int rumbleTime = 0;
+
+    private Acceleration accel;
+    private Acceleration rcwAccel;
+
+    private Acceleration decelFWD;
+    private Acceleration decelSTR;
+    private Acceleration decelRCW;
+    private int cmdCounter = 0;
+    private boolean decel = false;
+    private int accelState = -1;
+
+
+    private double[] ArcXs = new double[3];
+    private double[] ArcYs = new double[3];
+    double[] curveVelocity = {0.0, 0.0};
+    private  double position = 0.0;
+    private int currentIndex = 0;
+    private int prevIndex = -1;
+    private double totalArcLength = 0.0;
+    private double deltaX = 0.0;
+    private double deltaY = 0.0;
+
+    private boolean arcCalculated = false;
+
+
+    //	private int arcResolution = 100;
+//	private int[] arcLengths = new int[arcResolution+1];
+    private double[][] arcPoints = new double[3][101];
+
+    private void wallAlign(double angle,  double side,  double front, double moveAngle, double sideDistance, double frontDistance) {
+        if (Math.abs(MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0)) >= 4) {
+            RCW = MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0) *0.005;
+            if (RCW > 0.16) {
+                RCW = 0.16;
+            }
+            keepAngle = angle;
+        } else {
+            RCW = 0.0;
+        }
+
+        //        min dist to wall        max dist to wall
+        if (side <= sideDistance-1.5 || side >= sideDistance+1.5) {
+            //                                                                               setpoint     P
+            STR = Math.sin(Math.toRadians(moveAngle)) * (side - sideDistance) * 0.03;
+        }
+        // max speed
+        if (Math.abs(STR) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
+            STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side - sideDistance) * 0.4;
+        }
+
+        //        min dist to wall        max dist to wall
+        if (front <= frontDistance-3.0 || front >= frontDistance+2.0) {
+            //                                                                               setpoint     P
+            FWD = Math.cos(Math.toRadians(moveAngle)) * (front - frontDistance) * 0.03;
+        }
+        // max speed
+        if (Math.abs(FWD) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
+            FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front - frontDistance) * 0.4;
+        }
+    }
+
+    private void keepAngle() {
+        //This causes the point rotation when wheels are flipped over y=x
+        // LABEL keepAngle
+        SwerveCompensate.enable();
+
+        double leadNum = SmartDashboard.getNumber("leadNum", 0);
+        lead = RCW * leadNum;
 
 //		System.out.println(Math.abs(xbox1.LStickX()));
 
-		// This will update the angle to keep the robot's orientation
-		if (Math.abs(xbox1.RStickX()) > 0.05 || // If right stick is pressed
-				(Math.abs(FWD) < 0.05 && Math.abs(STR) < 0.05) && // If left stick is not pressed
-						(xbox1.DPad() == -1) && // If dpad is not pressed
-						(!autonomous)) { // If teleop
+        // This will update the angle to keep the robot's orientation
+        if (Math.abs(xbox1.RStickX()) > 0.05 || // If right stick is pressed
+                (Math.abs(FWD) < 0.05 && Math.abs(STR) < 0.05) && // If left stick is not pressed
+                        (xbox1.DPad() == -1) && // If dpad is not pressed
+                        (!autonomous)) { // If teleop
 
-			SwerveCompensate.setPID(0.015/*0.015*/, 0.0, 0.0);
-			keepAngle = imu.getAngle();
-		} else {
-			SwerveCompensate.setPID(0.008/*0.008*/, 0.0, 0.0);
+            SwerveCompensate.setPID(0.015/*0.015*/, 0.0, 0.0);
+            keepAngle = imu.getAngle();
+        } else {
+            SwerveCompensate.setPID(0.008/*0.008*/, 0.0, 0.0);
 
-			SwerveCompensate.setInput(imu.getAngle());
-			SwerveCompensate.setSetpoint(keepAngle);
+            SwerveCompensate.setInput(imu.getAngle());
+            SwerveCompensate.setSetpoint(keepAngle);
 
-			if (!SwerveCompensate.onTarget()) {
-				SwerveCompensate.setPID(0.007/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
-			}
+            if (!SwerveCompensate.onTarget()) {
+                SwerveCompensate.setPID(0.007/*0.005*/, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+            }
 
-			robotRotation = SwerveCompensate.performPID();
+            robotRotation = SwerveCompensate.performPID();
 
-			RCW = robotRotation;
+            RCW = robotRotation;
 
-			SmartDashboard.putNumber("Robot Rotation 1", robotRotation);
-		}
-	}
+            SmartDashboard.putNumber("Robot Rotation 1", robotRotation);
+        }
+    }
 
-	/**
-	 * Each potentiometer is positioned slightly differently so its initial value is different than the others,
-	 * so even when the wheels are pointing straight there are differences.
-	 * Proper values may be found and must be calculated for each wheel.
-	 */
-	private void loadOffsets() {
-		// LABEL load offsets
+    /**
+     * Each potentiometer is positioned slightly differently so its initial value is different than the others,
+     * so even when the wheels are pointing straight there are differences.
+     * Proper values may be found and must be calculated for each wheel.
+     */
+    private void loadOffsets() {
+        // LABEL load offsets
 
-		// Set the position of each wheel from a file on the roborio
-		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setPosition(Vector.load(application.getProperty("front_right_pos", "0.0,0.0")));
-		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setPosition(Vector.load(application.getProperty("front_left_pos", "0.0,0.0")));
-		SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setPosition(Vector.load(application.getProperty("back_left_pos", "0.0,0.0")));
-		SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setPosition(Vector.load(application.getProperty("back_right_pos", "0.0,0.0")));
+        // Set the position of each wheel from a file on the roborio
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setPosition(Vector.load(application.getProperty("front_right_pos", "0.0,0.0")));
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setPosition(Vector.load(application.getProperty("front_left_pos", "0.0,0.0")));
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setPosition(Vector.load(application.getProperty("back_left_pos", "0.0,0.0")));
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setPosition(Vector.load(application.getProperty("back_right_pos", "0.0,0.0")));
 
 //		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setDrift(application.getProperty("front_right_drift", "0.0,0.0").split(","));
 //		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setDrift(application.getProperty("front_left_drift", "0.0,0.0").split(","));
@@ -183,29 +228,29 @@ public class Robot extends TimedRobot {
 //		SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setDrift(application.getProperty("back_right_drift", "0.0,0.0").split(","));
 
 //		robotBackwards = Boolean.parseBoolean(application.getProperty("robot_backwards", "false"));
-}
+    }
 
-	private void autonomousAngle(double angle) {
-		// LABEL autonomous angle
+    private void autonomousAngle(double angle) {
+        // LABEL autonomous angle
 
-		SwerveCompensate.setInput(imu.getAngle());
-		SwerveCompensate.setSetpoint(angle);
+        SwerveCompensate.setInput(imu.getAngle());
+        SwerveCompensate.setSetpoint(angle);
 
-		SwerveCompensate.setTolerance(7);
-		if (!SwerveCompensate.onTarget()) {
-			SwerveCompensate.setPID(0.013, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
-		} else {
-			SwerveCompensate.setPID(0.015, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
-		}
+        SwerveCompensate.setTolerance(7);
+        if (!SwerveCompensate.onTarget()) {
+            SwerveCompensate.setPID(0.013, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+        } else {
+            SwerveCompensate.setPID(0.015, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+        }
 
-		robotRotation = SwerveCompensate.performPID();
+        robotRotation = SwerveCompensate.performPID();
 
-		RCW = (robotRotation);
-	}
+        RCW = (robotRotation);
+    }
 
-	//Might be helpful for verification
-	//Once robotDistance+= calculateLength distance, finish step
-	public double calculateLength(double[] ArcXs, double[] ArcYs) {
+    //Might be helpful for verification
+    //Once robotDistance+= calculateLength distance, finish step
+    private double calculateLength(double[] ArcXs, double[] ArcYs) {
         double vx = 2 * (ArcXs[1] - ArcXs[0]);
         double vy = 2 * (ArcYs[1] - ArcYs[0]);
         double wx = ArcXs[2] - 2 * ArcXs[1] + ArcXs[0];
@@ -225,98 +270,112 @@ public class Robot extends TimedRobot {
         double t4 = (float) (2 * Math.sqrt(uu * ww));
 
         return (((t1 * t2 - t3 * Math.log(t2 + t1) - (vv * t4 - t3 * Math.log(vv + t4))) / (8 * Math.pow(uu, 1.5))));
-        /*
-Calculate N points on the curve using t and store the arc-length(aka the length of the curve) at that position into an array
-To map T onto t, first multiply T by the total length of the curve to get u and then search the array of
-lengths for the index of the largest value that's smaller than u
-If we had an exact hit, return the array value at that index divided by N, if not interpolate a bit between the point we
-found and the next one, divide the thing once again by N and return.
-         */
     }
 
-    public void makeCurve(double curveLength, double aX, double bX, double cX, double aY, double bY, double cY) {
-		arcLengths[0] = 0;
-		int N = 0; //clen
-		double zeroX = getPoint(0,  aX,  bX,  cX,  aY,  bY,  cY)[0];
-		double zeroY = getPoint(0,  aX,  bX,  cX,  aY,  bY,  cY)[1];
+    public void makePoints(double curveLength, double[] ArcXs, double[] ArcYs) {
+        double[] prevPoint = new double[2];
+        double distance = 0.0;
+        double aX = ArcXs[0];
+        double bX = ArcXs[1];
+        double cX = ArcXs[2];
+        double aY = ArcYs[0];
+        double bY = ArcYs[1];
+        double cY = ArcYs[2];
+        for (int index = 0; index <= 100; index += 1) { //If curve length is 100 inches, t will be 1/100
+            double t  = index / 100.0;
 
-		for (int i = 0;  i <= arcResolution; i++) {
-			double x = getPoint((i*0.05),  aX,  bX,  cX,  aY,  bY,  cY)[0];
-			double y = getPoint((i*0.05),  aX,  bX,  cX,  aY,  bY,  cY)[1];
-			double dX = zeroX-x;
-			double dY = zeroY-y;
-			N += Math.sqrt(dX*dX + dY*dY);
-			arcLengths[i] = N;
-			zeroX = x;
-			zeroY = y;
-		}
-		double length = N;
-	}
+            arcPoints[0][index] = getPoint(t, aX, bX, cX, aY, bY, cY)[0];
+            arcPoints[1][index] = getPoint(t, aX, bX, cX, aY, bY, cY)[1];
+            if (index > 0) {
+                distance += Math.sqrt(Math.pow(arcPoints[0][index] - prevPoint[0], 2) + Math.pow(arcPoints[1][index] - prevPoint[1], 2));
+                arcPoints[2][index] = distance/curveLength; //Percent of arcDistance the returned point will be on the arc
+            } else {
+                arcPoints[2][index] = 0.0; //Percent of arcDistance the returned point will be on the arc
+            }
+            prevPoint[0] = arcPoints[0][index];
+            prevPoint[1] = arcPoints[1][index];
+        }
+    }
 
-	//This function will return the x and ys of the curve at a given time when given the points
-	public double[] getPoint(double t, double aX, double bX, double cX, double aY, double bY, double cY) {
-		double[] point = new double[2];
-		point[0] = (1-t)*(1-t)*aX + 2*t*(1-t)*bX + t*t*cX;
-		point[1] = (1-t)*(1-t)*aY + 2*t*(1-t)*bY + t*t*cY;
-		return point;
-	}
-	//This function will return the scaled FWD and STR commands based off the arc points
-    public double[] calculatePath(double[] ArcXs, double[] ArcYs, double distance) {
-		//We need to scale returned FWD and STR cmds based off
-		double[] velocity = new double[2];
-		double[] move = new double[4];
-		distance /= calculateLength(ArcXs, ArcYs);
-		double nextDistance = distance + 0.00001; //scale to speed later
+    //This function will return the x and ys of the curve at a given time when given the points
+    public double[] getPoint(double t, double aX, double bX, double cX, double aY, double bY, double cY) {
+        double[] point = new double[2];
+        point[0] = (1-t)*(1-t)*aX + 2*t*(1-t)*bX + t*t*cX;
+        point[1] = (1-t)*(1-t)*aY + 2*t*(1-t)*bY + t*t*cY;
+        return point;
+    }
 
-		// distance += 0.00005;
+    //This function will return the scaled FWD and STR commands based off the arc points
+    public double[] calculatePath(double distance) {
+        double[] velocity = new double[2];
+//		double[] move = new double[4];
+//		distance /= calculateLength(ArcXs, ArcYs);
+//		double nextDistance = distance + 0.00001; //scale to speed later
+
+        while (distance  > totalArcLength*arcPoints[2][currentIndex+1] && currentIndex <99) {
+            currentIndex++;
+        }
+        if (currentIndex > prevIndex) {
+            deltaX = arcPoints[0][currentIndex+1] - arcPoints[0][currentIndex];
+            deltaY = arcPoints[1][currentIndex+1] - arcPoints[1][currentIndex];
+        }
+
+
+        velocity[0] = deltaY/(totalArcLength*(arcPoints[2][currentIndex+1]-arcPoints[2][currentIndex])); //FWD
+        velocity[1] = deltaX/(totalArcLength*(arcPoints[2][currentIndex+1]-arcPoints[2][currentIndex])); //STR
+        prevIndex = currentIndex;
+//		System.out.println(currentIndex + "| |"  + arcPoints[2][currentIndex] + "| |" + deltaX + "| |" + deltaY + "| |" + velocity[0] + "| |" + velocity[1]);
+
+//		System.out.println(arcPoints[0][currentIndex] + "| |" + arcPoints[1][currentIndex] + "| |" + arcPoints[2][currentIndex]);
+// 		distance += 0.00005;
         //if distance == 1, we're done
 
-		//move[0] = robot's xcoord, move[1] = ycoord
-		//move[2] = robot's xcoord in next tiny second, move[3] = that but for ycoord
-        move[0] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(distance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * distance + ArcXs[0];
-        move[1] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(distance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * distance + ArcYs[0];
-		
-		move[2] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * nextDistance + ArcXs[0];
-        move[3] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * nextDistance + ArcYs[0];
+        //move[0] = robot's xcoord, move[1] = ycoord
+        //move[2] = robot's xcoord in next tiny second, move[3] = that but for ycoord
+//        move[0] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(distance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * distance + ArcXs[0];
+//        move[1] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(distance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * distance + ArcYs[0];
+
+//		move[2] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * nextDistance + ArcXs[0];
+//        move[3] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * nextDistance + ArcYs[0];
 
         // distanceDelta += Math.sqrt(Math.pow(prevPoint[0] - move[0], 2) + Math.pow(prevPoint[1] - move[1], 2));
-		//When distanceDelta = calculateDistance, we should be done
+        //When distanceDelta = calculateDistance, we should be done
         // prevPoint[0] = move[0];
-		// prevPoint[1] = move[1];
+        // prevPoint[1] = move[1];
 
-		velocity[0] = move[3]-move[1]; //FWD
-		velocity[1] = move[2]-move[0]; //STR
+//		velocity[0] = move[3]-move[1]; //FWD
+//		velocity[1] = move[2]-move[0]; //STR
 
 
-		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
-			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
-			velocity[0] = Math.signum(velocity[0]);
-		} else {
-			velocity[0] = Math.signum(velocity[1])*velocity[0]/velocity[1];
-			velocity[1] = Math.signum(velocity[1]);
-		}
+//		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
+//			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
+//			velocity[0] = Math.signum(velocity[0]);
+//		} else {
+//			velocity[0] = Math.signum(velocity[1])*velocity[0]/velocity[1];
+//			velocity[1] = Math.signum(velocity[1]);
+//		}
 
 //		System.out.println(velocity[0] + " || " + velocity[1]);
+//		velocity[0] = 0.0; //FWD
+//		velocity[1] = 0.0; //STR
+        return velocity;
+    }
 
+    /**
+     * This function is run when the robot is first started up and should be used for any initialization code.
+     */
+    public void robotInit() {
+        // LABEL robot init
+        // Load the wheel offset file from the roborio
 
-		return velocity;
-	}
-	
-	/**
-	 * This function is run when the robot is first started up and should be used for any initialization code.
-	 */
-	public void robotInit() {
-		// LABEL robot init
-		// Load the wheel offset file from the roborio
+        try {
+            FileInputStream in = new FileInputStream(offsets);
+            application.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		try {
-			FileInputStream in = new FileInputStream(offsets);
-			application.load(in);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		// Connect to jetson
+        // Connect to jetson
 //		try {
 //			jet = new JetsonServer((short) 5800, (short) 5801);
 //			t = new Thread(jet);
@@ -326,148 +385,147 @@ found and the next one, divide the thing once again by N and return.
 //			throw new RuntimeException(e);
 //		}
 
-		compressor = new Compressor(0);
+//        compressor = new Compressor(0);
 
-		xbox1.setDeadband(0.01);
+        xbox1.setDeadband(0.01);
 
-		Time.start();
+        Time.start();
 
-		SwerveDrivetrain.loadPorts();
-		driveTrain = new SwerveDrivetrain();
-		loadOffsets();
+        SwerveDrivetrain.loadPorts();
+        driveTrain = new SwerveDrivetrain();
+        loadOffsets();
 
 //		SmartDashboard.putNumber("CompensateP", 0.02);
 //		SmartDashboard.putNumber("CompensateI", 0.0);
 //		SmartDashboard.putNumber("CompensateD", 0.0);
 
-		SmartDashboard.putNumber("Autonomous Delay", 0);
+        SmartDashboard.putNumber("Autonomous Delay", 0);
 
-		autoChooser = new SendableChooser<>();
-		autoChooser.addDefault("Middle", 1);
-		autoChooser.addObject("Left", 2);
-		autoChooser.addObject("Right", 3);
-		autoChooser.addObject("Forward", 4);
-		SmartDashboard.putData("Autonomous Mode Chooser", autoChooser);
+        autoChooser = new SendableChooser<>();
+        autoChooser.addDefault("Middle", 1);
+        autoChooser.addObject("Left", 2);
+        autoChooser.addObject("Right", 3);
+        autoChooser.addObject("Forward", 4);
+        SmartDashboard.putData("Autonomous Mode Chooser", autoChooser);
 
-		imu = new IMU();
-		imu.IMUInit();
+        imu = new IMU();
+        imu.IMUInit();
 
-		keepAngle = imu.getAngle();
+        keepAngle = imu.getAngle();
 
-		SwerveCompensate = new PIDController(0.015, 0.00, 0.00);
-		SwerveCompensate.setContinuous(true);
-		SwerveCompensate.setOutputRange(-1.0, 1.0);
-		SwerveCompensate.setInputRange(0.0, 360.0);
-		SwerveCompensate.setTolerance(1.0);
+        SwerveCompensate = new PIDController(0.015, 0.00, 0.00);
+        SwerveCompensate.setContinuous(true);
+        SwerveCompensate.setOutputRange(-1.0, 1.0);
+        SwerveCompensate.setInputRange(0.0, 360.0);
+        SwerveCompensate.setTolerance(1.0);
 
-		SwerveCompensate.enable();
+        SwerveCompensate.enable();
 
-		accel = new Acceleration();
-		decelFWD = new Acceleration();
-		decelSTR = new Acceleration();
+        accel = new Acceleration();
+        decelFWD = new Acceleration();
+        decelSTR = new Acceleration();
 
-		decelRCW = new Acceleration();
-		rcwAccel = new Acceleration();
-	}
+        decelRCW = new Acceleration();
+        rcwAccel = new Acceleration();
+    }
 
-	public void autonomousInit() {
-		// LABEL autonomous init
+    public void autonomousInit() {
+        // LABEL autonomous init
 //		jet.setAuto(); // this line is important because it does clock synchronization
 
-		timeCheck = true;
-		imu.reset(0);
+        timeCheck = true;
+        imu.reset(0);
 
-		String choice;
+        String choice;
 
-		choice = "/home/lvuser/deploy/Test.csv";
+        choice = "/home/lvuser/deploy/Test.csv";
 
-		SmartDashboard.putString("Autonomous File", choice);
+        SmartDashboard.putString("Autonomous File", choice);
 
-		imu.reset(0);
-		arrayIndex = 0;
-		initialAngle = imu.getAngle();
-		turnDone = false;
-		driveDone = false;
+        imu.reset(0);
+        arrayIndex = 0;
+        initialAngle = imu.getAngle();
+        turnDone = false;
+        driveDone = false;
 
-		// Fill the array of commands from a csv file on the roborio
-		try {
-			List<String> lines = Files.readAllLines(Paths.get(choice));
-			commands = new double[lines.size()][];
-			int l = 0;
-			for (String line : lines) {
-				String[] parts = line.split(",");
-				double[] linel = new double[parts.length];
-				int i = 0;
-				for (String part : parts) {
-					linel[i++] = Double.parseDouble(part);
+        // Fill the array of commands from a csv file on the roborio
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(choice));
+            commands = new double[lines.size()][];
+            int l = 0;
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                double[] linel = new double[parts.length];
+                int i = 0;
+                for (String part : parts) {
+                    linel[i++] = Double.parseDouble(part);
 //					System.out.println(Double.parseDouble(part));
-				}
-				commands[l++] = linel;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (NumberFormatException e) {
-			System.err.println("Error in configuration!");
-		}
-	}
+                }
+                commands[l++] = linel;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("Error in configuration!");
+        }
+    }
 
-	/**
-	 * This function is called periodically during autonomous
-	 */
-	public void autonomousPeriodic() {
-		// LABEL autonomous periodic
+    /**
+     * This function is called periodically during autonomous
+     */
+    public void autonomousPeriodic() {
+        // LABEL autonomous periodic
 
-		SmartDashboard.putNumber("IMU Angle", imu.getAngle());
+        SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
-		if (timeCheck) {
-			timeBase = Time.get();
-			timeCheck = false;
-		}
+        if (timeCheck) {
+            timeBase = Time.get();
+            timeCheck = false;
+        }
 
 //		SmartDashboard.putNumber("Elapsed Time", Time.get());
 
-		switch (autoMove) {
+        switch (autoMove) {
 
-			// Pause the robot for x seconds at the start of auto
-			case 0:
+            // Pause the robot for x seconds at the start of auto
+            case 0:
 
-				driveTrain.drive(new Vector(FWD, STR), 0);
-				if (Time.get() > timeBase + SmartDashboard.getNumber("Autonomous Delay", 0)) {
-					autoMove = 1;
-				}
-				previousDistance = currentDistance;
+                driveTrain.drive(new Vector(FWD, STR), 0);
+                if (Time.get() > timeBase + SmartDashboard.getNumber("Autonomous Delay", 0)) {
+                    autoMove = 1;
+                }
+                previousDistance = currentDistance;
 
-				break;
+                break;
 
 
-			case 1:
+            case 1:
 
-				SmartDashboard.putNumber("Array Index", arrayIndex);
-//				SmartDashboard.putNumber("IMU Angle", imu.getAngle());
+                SmartDashboard.putNumber("Array Index", arrayIndex);
 
-				/*
-				 * 0 = translate speed, 1 = rotate speed, 2 = direction to translate, 3 = direction to face,
-				 * 4 = distance(in), 5 = How to accelerate(0 = no modification, 1 = transition, 2 = accelerate, 3 = decelerate)
-				 * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2],  9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
-				 * 12 = time out(seconds), 13 = imu offset
-				 * 14 = hatch placement (0 = none, 1 = hatch low, 2 = hatch mid, 3 = hatch high),
-				  * 15 = ball placement (0 = none, 1 = ball low, 2 = ball mid, 3 = ball high),
-				 * 16 = intake/outake (0 = none, 1 = get hatch, 2 = put hatch, 3 = get ball, 4 = put ball)
-				 *
-				 */
+                /*
+                 * 0 = translate speed, 1 = rotate speed, 2 = direction to translate, 3 = direction to face,
+                 * 4 = distance(in), 5 = How to accelerate(0 = no modification, 1 = transition, 2 = accelerate, 3 = decelerate)
+                 * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2],  9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
+                 * 12 = time out(seconds), 13 = imu offset
+                 * 14 = hatch placement (0 = none, 1 = hatch low, 2 = hatch mid, 3 = hatch high),
+                 * 15 = ball placement (0 = none, 1 = ball low, 2 = ball mid, 3 = ball high),
+                 * 16 = intake/outake (0 = none, 1 = get hatch, 2 = put hatch, 3 = get ball, 4 = put ball)
+                 *
+                 */
 
-				//Only use translation for RCW and Arc Speed
+                //Only use translation for RCW and Arc Speed
 
-				tSpeed = commands[arrayIndex][0];
-				rSpeed = commands[arrayIndex][1];
+                tSpeed = commands[arrayIndex][0];
+                rSpeed = commands[arrayIndex][1];
 
-				ArcXs[0] = commands[arrayIndex][6];
-				ArcXs[1] = commands[arrayIndex][7];
-				ArcXs[2] = commands[arrayIndex][8];
+                ArcXs[0] = commands[arrayIndex][6];
+                ArcXs[1] = commands[arrayIndex][7];
+                ArcXs[2] = commands[arrayIndex][8];
 
-				ArcYs[0] = commands[arrayIndex][9];
-				ArcYs[1] = commands[arrayIndex][10];
-				ArcYs[2] = commands[arrayIndex][11];
+                ArcYs[0] = commands[arrayIndex][9];
+                ArcYs[1] = commands[arrayIndex][10];
+                ArcYs[2] = commands[arrayIndex][11];
 
 //				if (commands[arrayIndex][14] != 0.0) {
 //					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
@@ -492,102 +550,105 @@ found and the next one, divide the thing once again by N and return.
 //					Cargo.set(false, true);
 //				}
 
-				if (commands[arrayIndex][2] != -1) {
-					FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
-					STR = Math.sin(Math.toRadians(commands[arrayIndex][2]));
-				} else {
-					FWD = 0;
-					STR = 0;
-				}
+                if (commands[arrayIndex][2] != -1) {
+                    FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
+                    STR = Math.sin(Math.toRadians(commands[arrayIndex][2]));
+                } else {
+                    FWD = 0;
+                    STR = 0;
+                }
 
-				if (ArcXs[0] != 999) {
-					curveVelocity = calculatePath(ArcXs, ArcYs, SmartDashboard.getNumber("Distance", 0) - previousDistance);
-					STR = -curveVelocity[0];
-					FWD = curveVelocity[1];
-					commands[arrayIndex][4] = calculateLength(ArcXs, ArcYs);
-				}
-				
-				keepAngle = commands[arrayIndex][3];
+                if (ArcXs[0] != 999) {
+                    commands[arrayIndex][4] = calculateLength(ArcXs, ArcYs);
+                    totalArcLength = commands[arrayIndex][4];
+                    if (!arcCalculated) {
+                        makePoints(totalArcLength, ArcXs, ArcYs);
+                        arcCalculated = true;
+                    }
+                    curveVelocity = calculatePath(SmartDashboard.getNumber("Distance", 0) - previousDistance);
+                    STR = -curveVelocity[0];
+                    FWD = curveVelocity[1];
+                }
 
-				if (Math.abs(MathUtils.getAngleError(imu.getAngle(), commands[arrayIndex][3])) < 5.0) {
-					initialAngle = imu.getAngle();
-					turnDone = true;
-				} else {
-					double direction;
-					direction = MathUtils.getAngleError(initialAngle, commands[arrayIndex][3]);
-					if (Math.abs(direction) > 180.0) {
-						direction *= -1.0;
-					}
-					RCW = Math.signum(direction);
-					turnDone = false;
-				}
+                keepAngle = commands[arrayIndex][3];
 
-				if (commands[arrayIndex][5] == 1) {
-					smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex+1][0], SmartDashboard.getNumber("Distance", 0)));
-					smoothAccelerate = smoothAccelerateNum;
-					FWD *= smoothAccelerate;
-					STR *= smoothAccelerate;
-				} else if (commands[arrayIndex][5] == 2) {
-					smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], minSpeed, commands[arrayIndex][0], SmartDashboard.getNumber("Distance", 0)));
-					smoothAccelerate = smoothAccelerateNum;
-					FWD *= smoothAccelerate;
-					STR *= smoothAccelerate;
-				} else if (commands[arrayIndex][5] == 3) {
-					smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], minSpeed, SmartDashboard.getNumber("Distance", 0)));
-					 smoothAccelerate = smoothAccelerateNum;
-					FWD *= smoothAccelerate;
-					STR *= smoothAccelerate;
-				} else {
-					FWD *= tSpeed;
-					STR *= tSpeed;
-				}
+                if (Math.abs(MathUtils.getAngleError(imu.getAngle(), commands[arrayIndex][3])) < 5.0) {
+                    initialAngle = imu.getAngle();
+                    turnDone = true;
+                } else {
+                    double direction;
+                    direction = MathUtils.getAngleError(initialAngle, commands[arrayIndex][3]);
+                    if (Math.abs(direction) > 180.0) {
+                        direction *= -1.0;
+                    }
+                    RCW = Math.signum(direction);
+                    turnDone = false;
+                }
 
-				Vector driveCommands;
-				driveCommands = MathUtils.convertOrientation(Math.toRadians(imu.getAngle()), FWD, STR);
-				FWD = driveCommands.getY();
-				STR = driveCommands.getX();
-				RCW *= rSpeed;
+                if (commands[arrayIndex][5] == 1) {
+                    smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex+1][0], SmartDashboard.getNumber("Distance", 0)));
+                    smoothAccelerate = smoothAccelerateNum;
+                    FWD *= smoothAccelerate;
+                    STR *= smoothAccelerate;
+                } else if (commands[arrayIndex][5] == 2) {
+                    smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], minSpeed, commands[arrayIndex][0], SmartDashboard.getNumber("Distance", 0)));
+                    smoothAccelerate = smoothAccelerateNum;
+                    FWD *= smoothAccelerate;
+                    STR *= smoothAccelerate;
+                } else if (commands[arrayIndex][5] == 3) {
+                    smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], minSpeed, SmartDashboard.getNumber("Distance", 0)));
+                    smoothAccelerate = smoothAccelerateNum;
+                    FWD *= smoothAccelerate;
+                    STR *= smoothAccelerate;
+                } else {
+                    FWD *= tSpeed;
+                    STR *= tSpeed;
+                }
 
-				SmartDashboard.putNumber("Previous Distance", previousDistance);
+                Vector driveCommands;
+                driveCommands = MathUtils.convertOrientation(Math.toRadians(imu.getAngle()), FWD, STR);
+                FWD = driveCommands.getY();
+                STR = driveCommands.getX();
+                RCW *= rSpeed;
 
-				if ((Math.abs(SmartDashboard.getNumber("Distance", 0) - previousDistance) >= commands[arrayIndex][4])) {
-					driveDone = true;
-//					STR = 0;
-//					FWD = 0;
-				}
+                SmartDashboard.putNumber("Previous Distance", previousDistance);
 
-				SmartDashboard.putNumber("Auto Distance Gone", Math.abs(currentDistance - previousDistance));
-				SmartDashboard.putNumber("Auto Distance Command", commands[arrayIndex][4]);
+                if ((Math.abs(SmartDashboard.getNumber("Distance", 0) - previousDistance) >= commands[arrayIndex][4])) {
+                    driveDone = true;
+                }
 
-				SwerveCompensate.setTolerance(1);
+                SmartDashboard.putNumber("Auto Distance Gone", Math.abs(currentDistance - previousDistance));
+                SmartDashboard.putNumber("Auto Distance Command", commands[arrayIndex][4]);
 
-				if (Time.get() > timeBase + commands[arrayIndex][12] && commands[arrayIndex][12] > 0) {
-					override = true;
-				} else if (commands[arrayIndex][12] == 0) {
-					timeDone = true;
-				}
+                SwerveCompensate.setTolerance(1);
 
-				imuOffset = commands[arrayIndex][13];
+                if (Time.get() > timeBase + commands[arrayIndex][12] && commands[arrayIndex][12] > 0) {
+                    override = true;
+                } else if (commands[arrayIndex][12] == 0) {
+                    timeDone = true;
+                }
 
-				if (turnDone) {
-					keepAngle();
-				}
+                imuOffset = commands[arrayIndex][13];
 
-				SmartDashboard.putNumber("FWD", FWD);
-				SmartDashboard.putNumber("STR", STR);
-				SmartDashboard.putNumber("RCW", RCW);
+                if (turnDone) {
+                    keepAngle();
+                }
+
+                SmartDashboard.putNumber("FWD", FWD);
+                SmartDashboard.putNumber("STR", STR);
+                SmartDashboard.putNumber("RCW", RCW);
 
 //				if (robotBackwards) {
 //					driveTrain.drive(new Vector(-STR, FWD), RCW);
 //				} else {
-					driveTrain.drive(new Vector(-STR, FWD), -RCW);
-					//FIXME, if point rotation happens, switch FL with BR and L with R
+                driveTrain.drive(new Vector(-STR, FWD), -RCW);
+                //FIXME, if point rotation happens, switch FL with BR and L with R
 //				}
 
-				if (override) {
-					driveDone = true;
-					turnDone = true;
-				}
+                if (override) {
+                    driveDone = true;
+                    turnDone = true;
+                }
 
 //				System.out.println("Drive: " + driveDone);
 //				System.out.println("Turn: " + turnDone);
@@ -595,291 +656,350 @@ found and the next one, divide the thing once again by N and return.
 //				System.out.println("Time: " + timeDone);
 //				System.out.println("TimeNum: " + Time.get() + " | " + (timeBase + commands[arrayIndex][10]));
 
-				SmartDashboard.putNumber("Array", arrayIndex);
+                SmartDashboard.putNumber("Array", arrayIndex);
 
-				if (driveDone) {
-					arrayIndex++;
-					driveDone = false;
-					initialAngle = imu.getAngle();
-					previousDistance = SmartDashboard.getNumber("Distance", 0);//currentDistance;
-					turnDone = false;
-					timeDone = false;
-					override = false;
-					timeBase = Time.get();
+//				System.out.println(driveDone + "||" + arcCalculated + "||" + commands[arrayIndex][4] + "||" + (SmartDashboard.getNumber("Distance", 0) - previousDistance));
 
-				}
-				break;
-		}
-	}
+                if (driveDone) {
+                    arcCalculated = false;
+                    arrayIndex++;
+                    driveDone = false;
+                    initialAngle = imu.getAngle();
+                    previousDistance = SmartDashboard.getNumber("Distance", 0);//currentDistance;
+                    turnDone = false;
+                    timeDone = false;
+                    override = false;
+                    timeBase = Time.get();
+                    currentIndex = 0;
+                    prevIndex = -1;
+                }
+                break;
+        }
+    }
 
-	public void teleopInit() {
+    public void teleopInit() {
 //		jet.startTeleop();
 
-		imu.setOffset(imuOffset);
+        imu.setOffset(imuOffset);
 //Sets ids
-		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setID(1);
-		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setID(2);
-		SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setID(4);
-		SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setID(3);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setID(1);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setID(2);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setID(4);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setID(3);
 
 //		RRLogger.start();
 
-	}
+    }
 
-	/**
-	 * This function is called periodically during operator control
-	 */
-	public void teleopPeriodic() {
-		// LABEL teleop periodic
-		autonomous = false;
+    /**
+     * This function is called periodically during operator control
+     */
+    public void teleopPeriodic() {
+        // LABEL teleop periodic
+        autonomous = false;
 
-		SmartDashboard.putNumber("IMU Angle", imu.getAngle());
-		SmartDashboard.putNumber("Elevator Setpoint", position);
-		SmartDashboard.putNumber("L Trig", xbox2.LTrig());
-		SmartDashboard.putNumber("R Trig", xbox2.RTrig());
+        SmartDashboard.putNumber("IMU Angle", imu.getAngle());
+        SmartDashboard.putNumber("Elevator Setpoint", position);
+        SmartDashboard.putNumber("L Trig", xbox2.LTrig());
+        SmartDashboard.putNumber("R Trig", xbox2.RTrig());
 
 
-		xbox1.setDeadband(0.2);
-		xbox2.setDeadband(0.2);
+        xbox1.setDeadband(0.2);
+        xbox2.setDeadband(0.2);
 
-		if (xbox2.RTrig() != 0.0) { //Hatch
-			if (xbox2.DPad() == 180) { //Low
-				position = hatchSetpoints[0]; //For later, make it a toggle
-			}
-			else if (xbox2.DPad() == 0) { //High
-				position = hatchSetpoints[2]; //63
-			}
-			else if (xbox2.DPad() == 90){ //Middle
-				position = hatchSetpoints[1];
-			}
-			Elevator.setPosition(position);
-		}
-		else if (xbox2.LTrig() != 0.0) { //Ball
-			if (xbox2.DPad() == 180) { //Low
-				position = ballSetpoints[0]; //For later, make it a toggle
-			}
-			else if (xbox2.DPad() == 0) { //High
-				position = ballSetpoints[2]; //63
-			}
-			else if (xbox2.DPad() == 270) { //Middle
-				position = ballSetpoints[1];
-			}
-			Elevator.setPosition(position);
-		}
-		else {
-			Elevator.setPower(xbox2.LStickY());
-		}
+        Lidar.read();
+        SmartDashboard.putNumber("Sensor 1", Lidar.getRightSide());
+        SmartDashboard.putNumber("Sensor 2", Lidar.getRightFront());
+        SmartDashboard.putNumber("Sensor 3", Lidar.getLeftFront());
+        SmartDashboard.putNumber("Sensor 4", Lidar.getLeftSide());
 
-		SmartDashboard.putNumber("DPad", xbox2.DPad());
-
-		Hatch.set(xbox2.A(), xbox2.B());
-
-		Cargo.set(xbox2.X(), xbox2.Y());
-
-		compressor.start();
-
-//		SmartDashboard.putNumber("DistanceFR", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getDistance());
-//		SmartDashboard.putNumber("DistanceFL", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getDistance());
-//		SmartDashboard.putNumber("DistanceBL", SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getDistance());
-//		SmartDashboard.putNumber("DistanceBR", SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getDistance());
-//
-//		SmartDashboard.putNumber("AngleFR", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngle());
-//		SmartDashboard.putNumber("AngleFL", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngle());
-//		SmartDashboard.putNumber("AngleBL", SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngle());
-//		SmartDashboard.putNumber("AngleBR", SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngle());
-
-		if (xbox1.Back()) {
-			imu.reset(0); // robot should be perpendicular to field when pressed.
-		} else if (xbox1.Y()) {
-			imu.reset(180);
-		} else if (xbox1.X()) {
-			imu.reset(270);
-		} else if (xbox1.B()) {
-			imu.reset(90);
-		}
-
-		// forward command (-1.0 to 1.0)
-//		if (Math.abs(xbox1.LStickY()) >= 0.5) {
-			FWD = -xbox1.LStickY()/* / 10.5 * Ds.getBatteryVoltage() * 1.0*/;
-//		}
-//		System.out.println(FWD + "||" + STR + "||" + RCW);
-		// strafe command (-1.0 to 1.0)
-//		if (Math.abs(xbox1.LStickX()) >= 0.05) {
-			STR = xbox1.LStickX() /*/ 10.5 * Ds.getBatteryVoltage() * 1.0*/;
-//		}
-
-		// Increase the time it takes for the robot to accelerate
-
-		//Get pressure sensor to disable once above 100 psi
-		//Base it off actuations
-		if (FWD != 0.0 || STR != 0.0) {
-//			compressor.start();
-			FWD *= accel.calculate();
-			STR *= accel.calculate();
-			if (Math.abs(FWD) > 0.3 || Math.abs(STR) > 0.3) {
-				decelFWD.set(prevFWD[cmdCounter], 0.0, 0.8);
-				decelSTR.set( prevSTR[cmdCounter], 0.0, 0.8);
-			}
+		if (Elevator.getPosition() < 62.7 && Elevator.getPosition() > 5.0 ) {
+			Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton());
 		} else {
-//			compressor.stop();
-			accel.set(0.0, 1.0, 2);
-			FWD = decelFWD.calculate();
-			STR = decelSTR.calculate();
+			Elevator.setPower(-Math.signum(Elevator.getPosition()-15.0) *0.4);
 		}
 
-//			System.out.println(RCW + "||" + robotRotation + "||" + rcwAccel.calculate());
+        SmartDashboard.putNumber("DPad", xbox2.DPad());
+
+//		Hatch.set(xbox2.A(), xbox2.B());
+
+//		Cargo.set(xbox2.X(), xbox2.Y());
+
+//        compressor.start();
+
+        if (xbox1.Back()) {
+            imu.reset(0); // robot should be perpendicular to field when pressed.
+        } else if (xbox1.Y()) {
+            imu.reset(180);
+        } else if (xbox1.X()) {
+            imu.reset(270);
+        } else if (xbox1.B()) {
+            imu.reset(90);
+        }
+
+        // forward command (-1.0 to 1.0)
+//		if (Math.abs(xbox1.LStickY()) >= 0.5) {
+        FWD = -xbox1.LStickY()/* / 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		}
+
+        // strafe command (-1.0 to 1.0)
+//		if (Math.abs(xbox1.LStickX()) >= 0.05) {
+        STR = xbox1.LStickX() /*/ 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//		}
+
+        RCW =  xbox1.RStickX() * 0.3;
+
+        // Increase the time it takes for the robot to accelerate
+
+        //Get pressure sensor to disable once above 100 psi
+        //Base it off actuations
 
 
-		prevRCW[cmdCounter] = RCW;
-		prevFWD[cmdCounter] = FWD;
-		prevSTR[cmdCounter] = STR;
+//		System.out.println(FWD + "| |" + prevFWD[cmdCounter] + "| |" + STR + "| |" + prevSTR[cmdCounter] + "| |" + Math.toDegrees(Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter])) + "| |" + Math.toDegrees(Math.abs(Math.atan2(FWD, STR) - Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter]))));
+//				Math.toDegrees(Math.atan2(FWD, STR)) + "| |"  + Math.toDegrees(Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter])) + "| |"  + prevSTR[cmdCounter] + "| |"  + prevFWD[cmdCounter]); //Change cmdCounter to actually get old values
+//		if (Math.abs(FWD- prevFWD[cmdCounter]) > 1.0) {
+//			decelFWD.set(prevFWD[cmdCounter], 0.0, 0.5);
+//			FWD = decelFWD.calculate();
+//		}
 
-		SmartDashboard.putNumber("PrevFWD", prevFWD[cmdCounter]);
-		SmartDashboard.putNumber("Counter", cmdCounter);
 
-		if (cmdCounter > 4) {
-			cmdCounter = 0;
-		}
+
+
+
+        SmartDashboard.putNumber("PrevFWD", prevFWD[cmdCounter]);
+        SmartDashboard.putNumber("Counter", cmdCounter);
+
+//		if (cmdCounter > 4) {
+//			cmdCounter = 0;
+//		}
 
 //		System.out.println(STR);
 
 
-		if (imu.collisionDetected()) {
-			xbox1.rumbleRight(1.0);
-			xbox1.rumbleLeft(1.0);
-		} else {
-			xbox1.stopRumble();
-		}
+        if (imu.collisionDetected()) {
+            xbox1.rumbleRight(1.0);
+            xbox1.rumbleLeft(1.0);
+        } else {
+            xbox1.stopRumble();
+        }
 
-		if (rumble) {
-			xbox2.rumbleRight(0.5);
-			xbox2.rumbleLeft(0.5);
-			rumbleTime++;
-			if (rumbleTime > 20) {
-				rumble = false;
-			}
-		} else {
-			xbox2.stopRumble();
-		}
+        if (rumble) {
+            xbox2.rumbleRight(0.5);
+            xbox2.rumbleLeft(0.5);
+            rumbleTime++;
+            if (rumbleTime > 20) {
+                rumble = false;
+            }
+        } else {
+            xbox2.stopRumble();
+        }
 
-		SmartDashboard.putNumber("FWD", FWD);
-		SmartDashboard.putNumber("STR", STR);
-		SmartDashboard.putNumber("RCW", RCW);
-		SmartDashboard.putNumber("IMU Angle", imu.getAngle());
+        SmartDashboard.putNumber("FWD", FWD);
+        SmartDashboard.putNumber("STR", STR);
+        SmartDashboard.putNumber("RCW", RCW);
+        SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
-		double headingDeg = imu.getAngle();
-		double headingRad = Math.toRadians(headingDeg);
+        double headingDeg = imu.getAngle();
+        double headingRad = Math.toRadians(headingDeg);
 
-		currentOrientedButton = xbox1.A();
-		if (currentOrientedButton && !previousOrientedButton) {
-			fieldOriented = !fieldOriented;
+        currentOrientedButton = xbox1.A();
+        if (currentOrientedButton && !previousOrientedButton) {
+            fieldOriented = !fieldOriented;
 
-		}
-		previousOrientedButton = currentOrientedButton;
+        }
+        previousOrientedButton = currentOrientedButton;
 
-		SmartDashboard.putBoolean("Field Oriented", fieldOriented);
+        SmartDashboard.putBoolean("Field Oriented", fieldOriented);
 
-		if (fieldOriented) {//Fix field oriented
-			Vector commands;
-			commands = MathUtils.convertOrientation(headingRad, FWD, STR);
-			FWD = commands.getY();
-			STR = commands.getX();
-		} else {
+        if (fieldOriented) {
+            Vector commands;
+            commands = MathUtils.convertOrientation(headingRad, FWD, STR);
+            FWD = commands.getY();
+            STR = commands.getX();
+        } else {
 //			if (!robotBackwards) {
-				FWD *= -1;
-				STR *= -1;
+            FWD *= 0.5;
+            STR *= 0.5;
+            RCW *= 0.5;
 //			}
-		}
+        }
 
-//		SmartDashboard.putBoolean("Field Oriented", fieldOriented);
+        keepAngle();
 
-//		SmartDashboard.putNumber("FWD", FWD);
-//		SmartDashboard.putNumber("STR", STR);
-//		SmartDashboard.putNumber("RCW", RCW);
+//        System.out.println(xbox1.DPad());
+//        System.out.println(MathUtils.calculateContinuousError(45.0, imu.getAngle(), 360.0, 0.0));
+//        System.out.println(Math.abs(MathUtils.calculateContinuousError(45.0, imu.getAngle(), 360.0, 0.0)) >= 3);
 
-		// rotate clockwise command (-1.0 to 1.0)
-		// Limited to half speed because of wheel direction calculation issues when rotating quickly
-		// Let robot rotate at full speed if it is not translating
 
-		if (FWD + STR == 0.0) { //Change this, when robot nears 0 it rotates too slow
-			//FIXME, BIG ISSUE! Robot turns in the direction RCW is when Ian rotates while driving
-			RCW = xbox1.RStickX();
-			if (RCW != 0.0) {
-				RCW *=rcwAccel.calculate();
-				SmartDashboard.putNumber("Robot Rotation 2", rcwAccel.calculate());
-				if (Math.abs(RCW) > 1) {
-					decelRCW.set(prevRCW[cmdCounter], 0.0, 2);
-				}
-			} else {
-				rcwAccel.set(0.0, 1, 1);
-				RCW = decelRCW.calculate();
-			}
-		} else {
-			RCW = xbox1.RStickX()/2;
-		}
+        if (xbox1.DPad() != -1) {
+            FWD = 0.0;
+            STR = 0.0;
+            RCW = 0.0;
+        }
 
-//		SmartDashboard.putBoolean("Backwards", robotBackwards);
-//		if (robotBackwards) {
-//			driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
-//		} else {
-//		if (xbox1.LTrig() != 0.0) {
-//			FWD = 0.2;
-//		} else {
-//			FWD = 0.0;
-//			STR = 0.0;
-//		}
-//		if (xbox1.RTrig() != 0.0) {
-//			RCW = 0.1;
-//		} else {
-//			RCW = 0.0;
-//		}
-		keepAngle();
-		driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
+        double placeholderName = 0.45;
+
+        if (xbox1.DPad() == 45.0) {
+            wallAlign(27.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),27.0, 13.5, 7.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        } else if (xbox1.DPad() == 135) {
+            wallAlign(144.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 144.0, 13.5, 7.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        } else if (xbox1.DPad() == 180 && xbox1.LTrig() > 0.25) {
+            wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),  225.0, 12.0, 4.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        } else if (xbox1.DPad() == 180 && xbox1.RTrig() > 0.25) {
+            wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 135.0, 12.0, 4.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        } else if (xbox1.DPad() == 225) {
+            wallAlign(216.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 216.0, 13.5, 7.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        } else if (xbox1.DPad() == 315) {
+            wallAlign(333.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
+                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 333.0, 13.5, 7.0);
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
+
+        }
+
+        System.out.println(xbox1.DPad() + " | " + xbox1.RStickX());
+        SmartDashboard.putNumber("STR", STR);
+        SmartDashboard.putNumber("FWD", FWD);
+
+        if (xbox1.DPad() != -1) {
+            Vector commands;
+            commands = MathUtils.convertOrientation(headingRad, FWD, STR);
+            FWD = commands.getY();
+            STR = commands.getX();
+        }
+
+        if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
+            if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
+                if (FWD - prevFWD[cmdCounter] > 0.0) {
+                    FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
+                } else {
+                    FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
+                }
+            }
+        } else {
+            if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
+                if (FWD - prevFWD[cmdCounter] > 0.0) {
+                    FWD = prevFWD[cmdCounter] + DECEL_SPEED;
+                } else {
+                    FWD = prevFWD[cmdCounter] - DECEL_SPEED;
+                }
+            }
+        }
+
+        if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
+            if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
+                if (STR - prevSTR[cmdCounter] > 0.0) {
+                    STR = prevSTR[cmdCounter] + ACCEL_SPEED;
+                } else {
+                    STR = prevSTR[cmdCounter] - ACCEL_SPEED;
+                }
+            }
+        } else {
+            if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
+                if (STR - prevSTR[cmdCounter] > 0.0) {
+                    STR = prevSTR[cmdCounter] + DECEL_SPEED;
+                } else {
+                    STR = prevSTR[cmdCounter] - DECEL_SPEED;
+                }
+            }
+        }
+
+        if (FWD + STR != 0.0) {
+            if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
+                if (Math.abs(RCW - prevRCW[cmdCounter]) > ACCEL_SPEED) {
+                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+                        RCW = prevRCW[cmdCounter] + ACCEL_SPEED;
+                    } else {
+                        RCW = prevRCW[cmdCounter] - ACCEL_SPEED;
+                    }
+                }
+            } else {
+                if (Math.abs(RCW - prevRCW[cmdCounter]) > DECEL_SPEED) {
+                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+                        RCW = prevRCW[cmdCounter] + DECEL_SPEED;
+                    } else {
+                        RCW = prevRCW[cmdCounter] - DECEL_SPEED;
+                    }
+                }
+            }
+        }
+
+        if (Math.abs(RCW) > 0.3) {
+            RCW = Math.signum(RCW)*0.3;
+        }
+
+        //System.out.println(FWD + "|     |"  + STR + "|     |"  + prevFWD[cmdCounter] + "|     |"  +prevSTR[cmdCounter]);
+
+        prevRCW[cmdCounter] = RCW;
+        prevFWD[cmdCounter] = FWD;
+        prevSTR[cmdCounter] = STR;
+
+        driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
 //		}
 
 //		RRLogger.writeFromQueue();
 
-	}
+    }
 
-	public void robotPeriodic() {
-		currentDistance += SwerveDrivetrain.getRobotDistance();
+    public void robotPeriodic() {
+        currentDistance += SwerveDrivetrain.getRobotDistance();
 //		System.out.println("Robot Dist: " + SwerveDrivetrain.getRobotDistance());
-		SmartDashboard.putNumber("Distance", currentDistance);
+        SmartDashboard.putNumber("Distance", currentDistance);
 
-		if (xbox1.Start()) {
-			driveTrain.resetWheels();
-		}
-	}
+        if (xbox1.Start()) {
+            driveTrain.resetWheels();
+        }
+    }
 
-	public void disabledInit() {
+    public void disabledInit() {
 //		jet.setDisabled();
-		autoMove = 0;
+        autoMove = 0;
 
-		// When robot is turned on, disabledInit is called once
-		if (disabled < 1) {
-			System.out.println("Hello, I am Otto");
-			disabled++;
-		}
+        // When robot is turned on, disabledInit is called once
+        if (disabled < 1) {
+            System.out.println("Hello, I am Otto");
+            disabled++;
+        }
 
-	}
+    }
 
-	/**
-	 * This function is called periodically during test mode
-	 */
-	public void testPeriodic() {
-		// LABEL test
-		double speed = (xbox1.RStickX() * 0.3);
+    /**
+     * This function is called periodically during test mode
+     */
+    public void testPeriodic() {
+        // LABEL test
+        double speed = (xbox1.RStickX() * 0.3);
 
-		if (xbox1.DPad() != -1) {
-			dx = xbox1.DPad();
-		}
+        if (xbox1.DPad() != -1) {
+            dx = xbox1.DPad();
+        }
 
 //		System.out.println("FL Angle: " + MathUtils.resolveDeg(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngle()));
 //		System.out.println("BL Angle: " + MathUtils.resolveDeg(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngle()));
 //		System.out.println("BR Angle: " + MathUtils.resolveDeg(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngle()));
 //		System.out.println("FR Angle: " + MathUtils.resolveDeg(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngle()));
 
-		// Move a single motor from the drivetrain depending on Dpad and right stick
+        // Move a single motor from the drivetrain depending on Dpad and right stick
 //		if (dx == 0) {
 //			SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setDirectTranslateCommand(speed);
 //
@@ -975,5 +1095,5 @@ found and the next one, divide the thing once again by N and return.
 //			SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setDirectRotateCommand(0);
 //			SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setDirectTranslateCommand(0);
 //		}
-	}
+    }
 }
