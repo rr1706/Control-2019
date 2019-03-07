@@ -31,7 +31,7 @@ public class Elevator {
             pos = lastPos;
         }
         lastPos = pos;
-
+ 
         if (pos < getPosition()) {
             pid.setP(0.045);
         } else {

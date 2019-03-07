@@ -697,6 +697,11 @@ public class Robot extends TimedRobot {
         // LABEL teleop periodic
         autonomous = false;
 
+        if (xbox2.RB()) {
+            LiftV1.climb(1);
+        } else {
+            LiftV1.climb(0);
+        }
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
         SmartDashboard.putNumber("Elevator Setpoint", position);
         SmartDashboard.putNumber("L Trig", xbox2.LTrig());
