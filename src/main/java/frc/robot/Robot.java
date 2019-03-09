@@ -8,9 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
+
+//import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.SwerveDrivetrain.WheelType;
@@ -19,6 +21,7 @@ import frc.robot.RRLogger;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.opencv.core.Mat;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as described in the IterativeRobot
@@ -27,12 +30,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-    private final double ACCEL_SPEED= 0.045;
+    private final double ACCEL_SPEED= 0.03/*0.045*/;
     private final double DECEL_SPEED= 0.03;
 
     private SendableChooser<Integer> autoChooser;
 
-//    private Compressor compressor;
+    private Compressor compressor;
 
     public static XboxController xbox1 = new XboxController(0);
     public static XboxController xbox2 = new XboxController(1);
@@ -60,6 +63,8 @@ public class Robot extends TimedRobot {
     private boolean override;
     private boolean driveDone;
     private boolean turnDone;
+    private boolean hatchDone;
+    private boolean cargoDone;
     private boolean timeDone;
     private double offsetDeg;
     private double prevOffset = 0;
@@ -80,10 +85,6 @@ public class Robot extends TimedRobot {
     private double[] prevFWD = {0.0, 0.0, 0.0, 0.0, 0.0};
     private double[] prevSTR = {0.0, 0.0, 0.0, 0.0, 0.0};
     private double[] prevRCW = {0.0, 0.0, 0.0, 0.0, 0.0};
-
-    private  double[] hatchSetpoints = {7.07, 33.26, 60/*62.8*/};
-    private  double[] ballSetpoints = {12.4, 39.5, 60/*63.6*/};
-
 
     private double wheelRamp = 0;
     private double rampRate = 0;
@@ -121,6 +122,7 @@ public class Robot extends TimedRobot {
     private int cmdCounter = 0;
     private boolean decel = false;
     private int accelState = -1;
+    private int gameState = 0;
 
 
     private double[] ArcXs = new double[3];
@@ -134,42 +136,66 @@ public class Robot extends TimedRobot {
     private double deltaY = 0.0;
 
     private boolean arcCalculated = false;
+    private int setpoint = 0;
+
+    private double placeholderName = 0.45;
+    private boolean robotAligned = false;
+    private boolean elevatorDescending = false;
+    private boolean toggleCompresor = false;
+    private boolean prevRB = false;
+    private int elevatorCase = 0;
+
 
 
     //	private int arcResolution = 100;
 //	private int[] arcLengths = new int[arcResolution+1];
     private double[][] arcPoints = new double[3][101];
 
-    private void wallAlign(double angle,  double side,  double front, double moveAngle, double sideDistance, double frontDistance) {
-        if (Math.abs(MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0)) >= 4) {
-            RCW = MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0) *0.005;
-            if (RCW > 0.16) {
+    private boolean wallAlign(double angle,  double side,  double front, double moveAngle, double sideDistance, double frontDistance) {
+        int done = 0;
+
+        if (Math.abs(MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0)) >= 2) {
+            RCW = MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0) *0.01;
+            if (RCW > 0.16) { //0.16
                 RCW = 0.16;
             }
             keepAngle = angle;
         } else {
             RCW = 0.0;
+            done++;
         }
 
         //        min dist to wall        max dist to wall
-        if (side <= sideDistance-1.5 || side >= sideDistance+1.5) {
-            //                                                                               setpoint     P
+        if (side <= sideDistance-0.75 || side >= sideDistance+0.75) {
+            //                                                                                     setpoint                     P
             STR = Math.sin(Math.toRadians(moveAngle)) * (side - sideDistance) * 0.03;
+        } else {
+            done++;
         }
         // max speed
         if (Math.abs(STR) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
             STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side - sideDistance) * 0.4;
         }
 
-        //        min dist to wall        max dist to wall
-        if (front <= frontDistance-3.0 || front >= frontDistance+2.0) {
-            //                                                                               setpoint     P
+        //  min dist to wall                            max dist to wall
+        if (front <= frontDistance-1.5 || front >= frontDistance+2.0) {
+            //                                                                                              setpoint                  P
             FWD = Math.cos(Math.toRadians(moveAngle)) * (front - frontDistance) * 0.03;
+        } else {
+            done++;
         }
         // max speed
         if (Math.abs(FWD) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
             FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front - frontDistance) * 0.4;
         }
+
+        return (done == 3);
+
+//        if (RCW == 0.0 && Math.abs(STR) < 0.05 && Math.abs(FWD) < 0.05) {
+//            robotAligned = true;
+//        } else {
+//            robotAligned = false;
+//        }
     }
 
     private void keepAngle() {
@@ -307,9 +333,6 @@ public class Robot extends TimedRobot {
     //This function will return the scaled FWD and STR commands based off the arc points
     public double[] calculatePath(double distance) {
         double[] velocity = new double[2];
-//		double[] move = new double[4];
-//		distance /= calculateLength(ArcXs, ArcYs);
-//		double nextDistance = distance + 0.00001; //scale to speed later
 
         while (distance  > totalArcLength*arcPoints[2][currentIndex+1] && currentIndex <99) {
             currentIndex++;
@@ -323,40 +346,6 @@ public class Robot extends TimedRobot {
         velocity[0] = deltaY/(totalArcLength*(arcPoints[2][currentIndex+1]-arcPoints[2][currentIndex])); //FWD
         velocity[1] = deltaX/(totalArcLength*(arcPoints[2][currentIndex+1]-arcPoints[2][currentIndex])); //STR
         prevIndex = currentIndex;
-//		System.out.println(currentIndex + "| |"  + arcPoints[2][currentIndex] + "| |" + deltaX + "| |" + deltaY + "| |" + velocity[0] + "| |" + velocity[1]);
-
-//		System.out.println(arcPoints[0][currentIndex] + "| |" + arcPoints[1][currentIndex] + "| |" + arcPoints[2][currentIndex]);
-// 		distance += 0.00005;
-        //if distance == 1, we're done
-
-        //move[0] = robot's xcoord, move[1] = ycoord
-        //move[2] = robot's xcoord in next tiny second, move[3] = that but for ycoord
-//        move[0] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(distance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * distance + ArcXs[0];
-//        move[1] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(distance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * distance + ArcYs[0];
-
-//		move[2] = (ArcXs[0] - 2 * ArcXs[1] + ArcXs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcXs[1] - ArcXs[0]) * nextDistance + ArcXs[0];
-//        move[3] = (ArcYs[0] - 2 * ArcYs[1] + ArcYs[2]) * Math.pow(nextDistance, 2) + 2 * (ArcYs[1] - ArcYs[0]) * nextDistance + ArcYs[0];
-
-        // distanceDelta += Math.sqrt(Math.pow(prevPoint[0] - move[0], 2) + Math.pow(prevPoint[1] - move[1], 2));
-        //When distanceDelta = calculateDistance, we should be done
-        // prevPoint[0] = move[0];
-        // prevPoint[1] = move[1];
-
-//		velocity[0] = move[3]-move[1]; //FWD
-//		velocity[1] = move[2]-move[0]; //STR
-
-
-//		if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
-//			velocity[1] = Math.signum(velocity[0])*velocity[1]/velocity[0];
-//			velocity[0] = Math.signum(velocity[0]);
-//		} else {
-//			velocity[0] = Math.signum(velocity[1])*velocity[0]/velocity[1];
-//			velocity[1] = Math.signum(velocity[1]);
-//		}
-
-//		System.out.println(velocity[0] + " || " + velocity[1]);
-//		velocity[0] = 0.0; //FWD
-//		velocity[1] = 0.0; //STR
         return velocity;
     }
 
@@ -384,7 +373,7 @@ public class Robot extends TimedRobot {
 //			throw new RuntimeException(e);
 //		}
 
-//        compressor = new Compressor(0);
+        compressor = new Compressor(0);
 
         xbox1.setDeadband(0.01);
 
@@ -401,10 +390,9 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Autonomous Delay", 0);
 
         autoChooser = new SendableChooser<>();
-        autoChooser.addDefault("Middle", 1);
-        autoChooser.addObject("Left", 2);
-        autoChooser.addObject("Right", 3);
-        autoChooser.addObject("Forward", 4);
+        autoChooser.addOption("Left", 1);
+        autoChooser.addOption("Right", 2);
+//        autoChooser.addOption("Forward", 3);
         SmartDashboard.putData("Autonomous Mode Chooser", autoChooser);
 
         imu = new IMU();
@@ -434,6 +422,7 @@ public class Robot extends TimedRobot {
 
         timeCheck = true;
         imu.reset(0);
+        setpoint = 1;
 
         String choice;
 
@@ -446,6 +435,8 @@ public class Robot extends TimedRobot {
         initialAngle = imu.getAngle();
         turnDone = false;
         driveDone = false;
+        hatchDone = false;
+        cargoDone = false;
 
         // Fill the array of commands from a csv file on the roborio
         try {
@@ -488,7 +479,7 @@ public class Robot extends TimedRobot {
 
             // Pause the robot for x seconds at the start of auto
             case 0:
-
+                imu.setOffset(commands[arrayIndex][13]);
                 driveTrain.drive(new Vector(FWD, STR), 0);
                 if (Time.get() > timeBase + SmartDashboard.getNumber("Autonomous Delay", 0)) {
                     autoMove = 1;
@@ -507,14 +498,13 @@ public class Robot extends TimedRobot {
                  * 4 = distance(in), 5 = How to accelerate(0 = no modification, 1 = transition, 2 = accelerate, 3 = decelerate)
                  * 6 = ArcXs[0], 7 = ArcXs[1], 8 = ArcXs[2],  9 = ArcYs[0], 10 = ArcYs[1], 11 = ArcYs[2]
                  * 12 = time out(seconds), 13 = imu offset
-                 * 14 = hatch placement (0 = none, 1 = hatch low, 2 = hatch mid, 3 = hatch high),
-                 * 15 = ball placement (0 = none, 1 = ball low, 2 = ball mid, 3 = ball high),
-                 * 16 = intake/outake (0 = none, 1 = get hatch, 2 = put hatch, 3 = get ball, 4 = put ball)
-                 *
+                 * 14 = elevator  (0 = none, 1 = hatch low, 2 = hatch mid, 3 = hatch high, 4 = cargo low, 5 = cargo mid, 6 = cargo high),
+                 * 15 = hatch (0 = none, 1 = put hatch, 2 = get hatch),
+                 * 16 = cargo (0 = none, 1 = put cargo , 2 = get cargo)
+                 * 17 = use wall align (0 = none, 1 = use)
                  */
 
                 //Only use translation for RCW and Arc Speed
-
                 tSpeed = commands[arrayIndex][0];
                 rSpeed = commands[arrayIndex][1];
 
@@ -526,28 +516,80 @@ public class Robot extends TimedRobot {
                 ArcYs[1] = commands[arrayIndex][10];
                 ArcYs[2] = commands[arrayIndex][11];
 
-//				if (commands[arrayIndex][14] != 0.0) {
-//					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
-//					Elevator.setPosition(hatchSetpoints[setpoint]);
-//				}
 
-//				if (commands[arrayIndex][15] != 0.0) {
-//					int setpoint = Math.round(Math.round(commands[arrayIndex][14]-1));
-//					Elevator.setPosition(hatchSetpoints[setpoint]);
-//				}
 
-//				if (commands[arrayIndex][16] == 0.0) {
-//					Cargo.set(false, false);
-////					Hatch.set(false, false); //Obsolete for the hatch?
-//				} else if (commands[arrayIndex][16] == 1.0) {
-//					Hatch.set(true, false); //Maybe have limit switch to know when to stop instead of doing it at next command
-//				} else if (commands[arrayIndex][16] == 2.0) {
-//					Hatch.set(false, true);
-//				} else if (commands[arrayIndex][16] == 3.0) {
-//					Cargo.set(true, false);
-//				} else if (commands[arrayIndex][16] == 4.0) {
-//					Cargo.set(false, true);
-//				}
+				System.out.println(Hatch.get());
+				//Place hatch
+                if (commands[arrayIndex][15] == 1.0 && elevatorCase == 1) { //If we want to put the hatch and the elevator is in position
+                    Hatch.set(false, true); //Move on to next command once finished with intaking. Cargo will have a sensor
+                    if (!Hatch.get()) { //If we no longer have a hatch, we placed it
+                        hatchDone = true;
+                    } else {
+                        hatchDone = false;
+                    }
+                } else if (commands[arrayIndex][15] == 2.0 && elevatorCase == 1) {
+                    Hatch.set(true, false);
+                    if (Hatch.get()) { //If we have a hatch, we grabbed it
+                        hatchDone = true;
+                    } else {
+                        hatchDone = false;
+                    }
+                } else {
+                    hatchDone = true;
+                }
+
+
+                if (commands[arrayIndex][16] == 1.0 && elevatorCase == 1) { //If we want to put the hatch and the elevator is in position
+                    Cargo.set(false, false, true, Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
+                    if (Lidar.hasCargo() > 30.0) {
+                        cargoDone = true;
+                    } else {
+                        cargoDone = false;
+                    }
+                } else if (commands[arrayIndex][16] == 2.0 && elevatorCase == 1) {
+                    Cargo.set(true, false, false, Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
+                    if (Lidar.hasCargo() < 5.0) {
+                        cargoDone = true;
+                    } else {
+                        cargoDone = false;
+                    }
+                } else {
+                    cargoDone = true;
+                }
+
+                if (commands[arrayIndex][14] != 0.0) {
+                    switch (elevatorCase) {
+                        case 0: //Going up
+                            setpoint = (int) commands[arrayIndex][14];
+                            if (setpoint > 3) { //Moving for cargo
+                                Elevator.setPosition(0.0, 1.0, 0.0, false, false, setpoint-3);
+                                cargoDone = false;
+                            } else { //Moving for ball
+                                Elevator.setPosition(0.0, 0.0, 0.0, false, false, setpoint);
+                                hatchDone = false;
+                            }
+                            if (Elevator.atPosition()) {
+                                elevatorCase = 1;
+                            }
+                            break;
+                        case 1: //Placing
+                            if (hatchDone && cargoDone) {
+//                                Hatch.set(false, false);
+                                setpoint = 1;
+                                elevatorCase = 2;
+                            }
+                            break;
+                        case 2: //Going down
+                            override = true;
+                            setpoint = 1;
+                            elevatorCase = 0;
+                            break;
+                    }
+                } else {
+                    Elevator.setPosition(0.0, 0.0, 0.0, false, false, 1);
+                }
+
+//                setpoint = (int) commands[arrayIndex][14];
 
                 if (commands[arrayIndex][2] != -1) {
                     FWD = Math.cos(Math.toRadians(commands[arrayIndex][2]));
@@ -584,17 +626,17 @@ public class Robot extends TimedRobot {
                     turnDone = false;
                 }
 
-                if (commands[arrayIndex][5] == 1) {
+                if (commands[arrayIndex][5] == 1.0) {
                     smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex+1][0], SmartDashboard.getNumber("Distance", 0)));
                     smoothAccelerate = smoothAccelerateNum;
                     FWD *= smoothAccelerate;
                     STR *= smoothAccelerate;
-                } else if (commands[arrayIndex][5] == 2) {
+                } else if (commands[arrayIndex][5] == 2.0) {
                     smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], minSpeed, commands[arrayIndex][0], SmartDashboard.getNumber("Distance", 0)));
                     smoothAccelerate = smoothAccelerateNum;
                     FWD *= smoothAccelerate;
                     STR *= smoothAccelerate;
-                } else if (commands[arrayIndex][5] == 3) {
+                } else if (commands[arrayIndex][5] == 3.0) {
                     smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], minSpeed, SmartDashboard.getNumber("Distance", 0)));
                     smoothAccelerate = smoothAccelerateNum;
                     FWD *= smoothAccelerate;
@@ -640,6 +682,21 @@ public class Robot extends TimedRobot {
 //				if (robotBackwards) {
 //					driveTrain.drive(new Vector(-STR, FWD), RCW);
 //				} else {
+
+                if (commands[arrayIndex][17] == 1.0) {
+                    if (commands[arrayIndex + 1][14] != 0.0 || commands[arrayIndex + 1][15] != 0.0) {
+                        if (wallAlign(commands[arrayIndex][3], (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                                (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(), 180+commands[arrayIndex][2], commands[arrayIndex][18], commands[arrayIndex][19])) {
+                            override = true;
+                        }
+                    } else if (commands[arrayIndex][17] == 1.0 && commands[arrayIndex+1][16] != 0.0) {
+                        //Do the placement things here
+                    }
+//                    if (robotAligned) {
+//                        override = true;
+//                    }
+                }
+
                 driveTrain.drive(new Vector(-STR, FWD), -RCW);
                 //FIXME, if point rotation happens, switch FL with BR and L with R
 //				}
@@ -647,6 +704,8 @@ public class Robot extends TimedRobot {
                 if (override) {
                     driveDone = true;
                     turnDone = true;
+                    hatchDone = true;
+                    cargoDone = true;
                 }
 
 //				System.out.println("Drive: " + driveDone);
@@ -659,7 +718,9 @@ public class Robot extends TimedRobot {
 
 //				System.out.println(driveDone + "||" + arcCalculated + "||" + commands[arrayIndex][4] + "||" + (SmartDashboard.getNumber("Distance", 0) - previousDistance));
 
-                if (driveDone) {
+
+                if (driveDone && hatchDone && cargoDone) {
+//                    robotAligned = false;
                     arcCalculated = false;
                     arrayIndex++;
                     driveDone = false;
@@ -687,7 +748,7 @@ public class Robot extends TimedRobot {
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setID(3);
 
 //		RRLogger.start();
-
+        Elevator.init();
     }
 
     /**
@@ -697,6 +758,7 @@ public class Robot extends TimedRobot {
         // LABEL teleop periodic
         autonomous = false;
 
+//        Lift.climb(xbox1.RB(), xbox1.LB());
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
         SmartDashboard.putNumber("Elevator Setpoint", position);
         SmartDashboard.putNumber("L Trig", xbox2.LTrig());
@@ -706,25 +768,37 @@ public class Robot extends TimedRobot {
         xbox1.setDeadband(0.2);
         xbox2.setDeadband(0.2);
 
-        Lidar.read();
-        SmartDashboard.putNumber("Sensor 1", Lidar.getRightSide());
-        SmartDashboard.putNumber("Sensor 2", Lidar.getRightFront());
-        SmartDashboard.putNumber("Sensor 3", Lidar.getLeftFront());
-        SmartDashboard.putNumber("Sensor 4", Lidar.getLeftSide());
-
-		if (Elevator.getPosition() < 62.7 && Elevator.getPosition() > 5.0 ) {
-			Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton());
+		if (Elevator.getPosition() < 105.0 && Elevator.getPosition() > 3.0 ) {
+		    if (xbox2.X() || xbox2.Start()) {
+                Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(), true, 0);
+            }  else {
+		        Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(),  false, 0);
+		    }
 		} else {
-			Elevator.setPower(-Math.signum(Elevator.getPosition()-15.0) *0.4);
+			Elevator.setPower(-Math.signum(Elevator.getPosition()-13.5) *0.4);
 		}
 
         SmartDashboard.putNumber("DPad", xbox2.DPad());
 
-//		Hatch.set(xbox2.A(), xbox2.B());
+		Hatch.set(xbox2.A(), xbox2.B());
 
-//		Cargo.set(xbox2.X(), xbox2.Y());
+		Cargo.set(xbox2.Start(), xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
 
-//        compressor.start();
+
+		SmartDashboard.putBoolean("Compressor", compressor.enabled());
+
+		if (xbox2.RB() && !prevRB) {
+		    toggleCompresor = !toggleCompresor;
+            prevRB = true;
+        } else if (!xbox2.RB()){
+            prevRB = false;
+        }
+
+        if (toggleCompresor) {
+            compressor.start();
+        } else {
+            compressor.stop();
+        }
 
         if (xbox1.DPad() != -1) {
             imu.reset(-xbox1.DPad());
@@ -733,6 +807,7 @@ public class Robot extends TimedRobot {
         // forward command (-1.0 to 1.0)
 //		if (Math.abs(xbox1.LStickY()) >= 0.5) {
         FWD = -xbox1.LStickY()/* / 10.5 * Ds.getBatteryVoltage() * 1.0*/;
+//
 //		}
 
         // strafe command (-1.0 to 1.0)
@@ -787,11 +862,6 @@ public class Robot extends TimedRobot {
             xbox2.stopRumble();
         }
 
-        SmartDashboard.putNumber("FWD", FWD);
-        SmartDashboard.putNumber("STR", STR);
-        SmartDashboard.putNumber("RCW", RCW);
-        SmartDashboard.putNumber("IMU Angle", imu.getAngle());
-
         double headingDeg = imu.getAngle();
         double headingRad = Math.toRadians(headingDeg);
 
@@ -830,50 +900,43 @@ public class Robot extends TimedRobot {
             RCW = 0.0;
         }
 
-        double placeholderName = 0.45;
-
-        System.out.println(xbox1.buttonPad());
-
-        if (xbox1.buttonPad() == 45) {
-            wallAlign(27.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),27.0, 13.5, 7.0);
+        if (xbox1.buttonPad() == 45) { //
+            wallAlign(25.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(),25.0, 15.0, 5.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(144.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 144.0, 13.5, 7.0);
+            wallAlign(152.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(), 152.0, 14.0, 6.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
-            wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),  225.0, 12.0, 4.0);
+            wallAlign(180.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(),  225.0, 12.0, 4.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
-            wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 135.0, 12.0, 4.0);
+            wallAlign(180.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(), 135.0, 12.0, 4.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 225) {
-            wallAlign(216.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 216.0, 13.5, 7.0);
+            wallAlign(216.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(), 216.0, 13.5, 6.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 315) {
-            wallAlign(333.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
-                    (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 333.0, 13.5, 7.0);
+            wallAlign(333.0, (Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor() : Lidar.getFLLeftSensor(),
+                    (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor()) ? Lidar.getFRFrontSensor() : Lidar.getFLFrontSensor(), 333.0, 13.5, 6.0);
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
-
         }
 
-        SmartDashboard.putNumber("STR", STR);
-        SmartDashboard.putNumber("FWD", FWD);
 
         if (xbox1.buttonPad() != -1) {
             Vector commands;
@@ -938,8 +1001,8 @@ public class Robot extends TimedRobot {
             }
         }
 
-        if (Math.abs(RCW) > 0.3) {
-            RCW = Math.signum(RCW)*0.3;
+        if (Math.abs(RCW) > 0.5) {
+            RCW = Math.signum(RCW)*0.5;
         }
 
         //System.out.println(FWD + "|     |"  + STR + "|     |"  + prevFWD[cmdCounter] + "|     |"  +prevSTR[cmdCounter]);
@@ -947,6 +1010,12 @@ public class Robot extends TimedRobot {
         prevRCW[cmdCounter] = RCW;
         prevFWD[cmdCounter] = FWD;
         prevSTR[cmdCounter] = STR;
+
+
+        SmartDashboard.putNumber("FWD", FWD);
+        SmartDashboard.putNumber("STR", STR);
+        SmartDashboard.putNumber("RCW", RCW);
+        SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
         driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
 //		}
@@ -963,12 +1032,22 @@ public class Robot extends TimedRobot {
         if (xbox1.Start()) {
             driveTrain.resetWheels();
         }
+        Lidar.read();
+        SmartDashboard.putNumber("Sensor 1", Lidar.getFRRightSensor());
+        SmartDashboard.putNumber("Sensor 2", Lidar.getFRFrontSensor());
+        SmartDashboard.putNumber("Sensor 3", Lidar.getFLFrontSensor());
+        SmartDashboard.putNumber("Sensor 4", Lidar.getFLLeftSensor());
+        SmartDashboard.putNumber("Sensor 5", Lidar.getBLLeftSensor());
+        SmartDashboard.putNumber("Sensor 6", Lidar.getBRRightSensor());
+        SmartDashboard.putNumber("Sensor 7", Lidar.hasCargo());
     }
 
     public void disabledInit() {
 //		jet.setDisabled();
-        autoMove = 0;
 
+        autoMove = 0;
+        Elevator.setPower(0.0);
+        driveTrain.drive(new Vector(0.0,0.0),  0.0);
         // When robot is turned on, disabledInit is called once
         if (disabled < 1) {
             System.out.println("Hello, I am Otto");

@@ -9,6 +9,7 @@ public class Hatch {
 
     private static double prevTime = 0.0;
     private static int step = 0;
+    private static boolean hasHatch = true;
 
     public static void set(boolean grab, boolean place) {
 //        if (grab) {
@@ -21,60 +22,76 @@ public class Hatch {
 //        } else {
 //            push.set(Value.kReverse);
 //        }
-//Add@logic@so@that@the@TOF can line it up properly
         switch (step) {
-            case 0:
+            case 0: //Default holding position
                 beak.set(Value.kForward);
                 push.set(Value.kReverse);
                 if (grab) {
                     prevTime = Time.get();
                     step = 1;
+                    hasHatch = false;
                 } else if (place) {
                     step = 4;
+                    hasHatch = true;
                 }
                 break;
-            case 1:
+            //Grab hatch
+            case 1:  //Close beak
                 beak.set(Value.kReverse);
                 if (Time.get() - prevTime > 0.1) {
                     prevTime = Time.get();
                     step = 2;
                 }
+
                 break;
-            case 2:
+            case 2: //Push piston forward
                 push.set(Value.kForward);
-                if (Time.get() - prevTime > 0.2) {
+                if (Time.get() - prevTime > 0.15) {
                     prevTime = Time.get();
                     step = 3;
                 }
                 break;
-            case 3:
+            case 3: //Open beak and return to default position
                 beak.set(Value.kForward);
-                if (Time.get() - prevTime > 0.2) {
+                if (Time.get() - prevTime > 0.1) {
                     prevTime = Time.get();
+                    step = 7;
+                }
+                break;
+            case 7:
+                push.set(Value.kReverse);
+                if (Time.get() - prevTime > 0.1) {
+                    prevTime = Time.get();
+                    hasHatch = true;
                     step = 0;
                 }
                 break;
-            case 4:
+            //Put hatch
+            case 4: //Push piston forward
                 push.set(Value.kForward);
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
                     step = 5;
                 }
                 break;
-            case 5:
+            case 5: //Close beak
                 beak.set(Value.kReverse);
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
                     step = 6;
                 }
                 break;
-            case 6:
+            case 6: //Pull piston back and reset to default position
                 push.set(Value.kReverse);
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
                     step = 0;
+                    hasHatch = false;
                 }
                 break;
         }
+    }
+    public static boolean get() {
+        return hasHatch;
     }
 }
