@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bc92e98-4b98-41f0-a155-aaa0fa3e3eb0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/Test.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/Test.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -24,24 +31,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="314">
-              <caret line="834" column="44" selection-start-line="834" selection-start-column="44" selection-end-line="834" selection-end-column="44" />
+            <state relative-caret-position="125">
+              <caret line="839" column="37" selection-start-line="839" selection-start-column="37" selection-end-line="839" selection-end-column="37" />
               <folding>
                 <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="103" column="21" lean-forward="true" selection-start-line="103" selection-start-column="21" selection-end-line="103" selection-end-column="21" />
-              <folding>
-                <element signature="e#2096#2097#0" expanded="true" />
-                <element signature="e#2188#2189#0" expanded="true" />
-                <element signature="e#2278#2279#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -107,6 +100,15 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="136">
+              <caret line="73" column="26" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="287">
@@ -159,6 +161,8 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
+      <find>arcpoint</find>
+      <find>calculatePath</find>
       <find>hatchSetpoints</find>
       <find>`</find>
       <find>robotperio</find>
@@ -187,8 +191,6 @@
       <find>rcw</find>
       <find>stick</find>
       <find>rocketHatch</find>
-      <find>xbox1</find>
-      <find>dpad</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -197,6 +199,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/utilities/Acceleration.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java" />
@@ -210,7 +213,6 @@
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" />
       </list>
     </option>
@@ -303,7 +305,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551651810479" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551649833846" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../Autonomous-2019" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -378,12 +380,12 @@
       <workItem from="1550502695970" duration="37617000" />
       <workItem from="1550609379268" duration="40912000" />
       <workItem from="1550882031502" duration="61306000" />
-      <workItem from="1551394742697" duration="52456000" />
+      <workItem from="1551394742697" duration="50879000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="214431000" />
+    <option name="totallyTimeSpent" value="212854000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
@@ -430,6 +432,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
           <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="896">
+          <caret line="82" column="44" selection-start-line="82" selection-start-column="44" selection-end-line="82" selection-end-column="44" />
         </state>
       </provider>
     </entry>
@@ -674,22 +683,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="103" column="21" lean-forward="true" selection-start-line="103" selection-start-column="21" selection-end-line="103" selection-end-column="21" />
-          <folding>
-            <element signature="e#2096#2097#0" expanded="true" />
-            <element signature="e#2188#2189#0" expanded="true" />
-            <element signature="e#2278#2279#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="834" column="44" selection-start-line="834" selection-start-column="44" selection-end-line="834" selection-end-column="44" />
+        <state relative-caret-position="125">
+          <caret line="839" column="37" selection-start-line="839" selection-start-column="37" selection-end-line="839" selection-end-column="37" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

@@ -99,28 +99,6 @@ public class XboxController extends Joystick {
 		return stick.getPOV();
 	}
 
-	public int buttonPad() {
-		if (Y() && B()) {
-			return 45;
-		} else if (B() && A()) {
-			return 135;
-		} else if (A() && X()) {
-			return 225;
-		} else if (X() && Y()) {
-			return 315;
-		} else if (Y()) {
-			return 0;
-		} else if (B()) {
-			return 90;
-		} else if (A()) {
-			return 180;
-		} else if (X()) {
-			return 270;
-		} else {
-			return -1;
-		}
-	}
-
 	public void setDeadband(double band) {
 		this.deadband = band;
 	}

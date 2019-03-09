@@ -180,11 +180,12 @@ public class Robot extends TimedRobot {
         double leadNum = SmartDashboard.getNumber("leadNum", 0);
         lead = RCW * leadNum;
 
+//		System.out.println(Math.abs(xbox1.LStickX()));
 
         // This will update the angle to keep the robot's orientation
         if (Math.abs(xbox1.RStickX()) > 0.05 || // If right stick is pressed
                 (Math.abs(FWD) < 0.05 && Math.abs(STR) < 0.05) && // If left stick is not pressed
-                        (xbox1.buttonPad() == -1) && // If dpad is not pressed
+                        (xbox1.DPad() == -1) && // If dpad is not pressed
                         (!autonomous)) { // If teleop
 
             SwerveCompensate.setPID(0.015/*0.015*/, 0.0, 0.0);
@@ -731,8 +732,14 @@ public class Robot extends TimedRobot {
 
 //        compressor.start();
 
-        if (xbox1.DPad() != -1) {
-            imu.reset(-xbox1.DPad());
+        if (xbox1.Back()) {
+            imu.reset(0); // robot should be perpendicular to field when pressed.
+        } else if (xbox1.Y()) {
+            imu.reset(180);
+        } else if (xbox1.X()) {
+            imu.reset(270);
+        } else if (xbox1.B()) {
+            imu.reset(90);
         }
 
         // forward command (-1.0 to 1.0)
@@ -800,7 +807,7 @@ public class Robot extends TimedRobot {
         double headingDeg = imu.getAngle();
         double headingRad = Math.toRadians(headingDeg);
 
-        currentOrientedButton = xbox1.RB();
+        currentOrientedButton = xbox1.A();
         if (currentOrientedButton && !previousOrientedButton) {
             fieldOriented = !fieldOriented;
 
@@ -829,7 +836,7 @@ public class Robot extends TimedRobot {
 //        System.out.println(Math.abs(MathUtils.calculateContinuousError(45.0, imu.getAngle(), 360.0, 0.0)) >= 3);
 
 
-        if (xbox1.buttonPad() != -1) {
+        if (xbox1.DPad() != -1) {
             FWD = 0.0;
             STR = 0.0;
             RCW = 0.0;
@@ -837,50 +844,49 @@ public class Robot extends TimedRobot {
 
         double placeholderName = 0.45;
 
-        System.out.println(xbox1.buttonPad());
-
-        if (xbox1.buttonPad() == 45) {
+        if (xbox1.DPad() == 45.0) {
             wallAlign(27.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),27.0, 13.5, 7.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
-        } else if (xbox1.buttonPad() == 135) {
+        } else if (xbox1.DPad() == 135) {
             wallAlign(144.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 144.0, 13.5, 7.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
-        } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
+        } else if (xbox1.DPad() == 180 && xbox1.LTrig() > 0.25) {
             wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(),  225.0, 12.0, 4.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
-        } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
+        } else if (xbox1.DPad() == 180 && xbox1.RTrig() > 0.25) {
             wallAlign(180.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 135.0, 12.0, 4.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
-        } else if (xbox1.buttonPad() == 225) {
+        } else if (xbox1.DPad() == 225) {
             wallAlign(216.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 216.0, 13.5, 7.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
-        } else if (xbox1.buttonPad() == 315) {
+        } else if (xbox1.DPad() == 315) {
             wallAlign(333.0, (Lidar.getRightSide() < Lidar.getLeftSide()) ? Lidar.getRightSide() : Lidar.getLeftSide(),
                     (Lidar.getRightFront() < Lidar.getLeftFront()) ? Lidar.getRightFront() : Lidar.getLeftFront(), 333.0, 13.5, 7.0);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            STR += xbox1.RStickX() * placeholderName;
+            FWD -= xbox1.RStickY() * placeholderName;
 
         }
 
+        System.out.println(xbox1.DPad() + " | " + xbox1.RStickX());
         SmartDashboard.putNumber("STR", STR);
         SmartDashboard.putNumber("FWD", FWD);
 
-        if (xbox1.buttonPad() != -1) {
+        if (xbox1.DPad() != -1) {
             Vector commands;
             commands = MathUtils.convertOrientation(headingRad, FWD, STR);
             FWD = commands.getY();
