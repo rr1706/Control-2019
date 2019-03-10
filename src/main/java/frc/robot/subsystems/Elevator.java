@@ -10,6 +10,7 @@ public class Elevator {
     private static CANPIDController pid = new CANPIDController(motor);
     private  static double lastPos = 13.0;
     private  static double pos = 13.0;
+    private static int motorSafety = 0;
 
     private static double motorOffTime = -10.0;
 
@@ -24,7 +25,7 @@ public class Elevator {
     }
 //Add safeguards. Set upper and lower limits where the elevator cannot be commanded past
     //Use button to set position to current
-    public static void setPosition(double stickY, double tune, double stickX, boolean override, boolean buttonX, int auto) {
+    public static void setPosition(double stickY, double tune, double stickX, boolean override, boolean buttonX, int auto, boolean groundHatch) {
         tune *= 10.0; //This changes between hatch setpoints and cargo setpoints
         //When pressed, tune will add 5 to each setpoint
 
@@ -48,6 +49,10 @@ public class Elevator {
             pos  = 95.5 + tune;
         }
 
+        if (groundHatch) {
+            pos = 1.3;
+        }
+
         lastPos = pos;
 
         if (pos < getPosition()) {
@@ -64,23 +69,26 @@ public class Elevator {
         SmartDashboard.putNumber("Elevator Setpoint", pos);
         SmartDashboard.putNumber("Motor Temp", motor.getMotorTemperature());
         SmartDashboard.putNumber("Motor Off Time", motorOffTime);
-        if (Time.get()-motorOffTime > 10.0) {
-            if (override) {
-                setPower(-stickY);
-            } else {
+
+        switch (motorSafety) {
+            case 0:
                 pid.setReference(pos, ControlType.kPosition);
-            }
+                if (motor.getMotorTemperature() >= 90.0) {
+                    motorSafety = 1;
+                }
+                break;
+
+            case 1:
+                System.out.println("Elevator Disabled: Temperature");
+                motor.set(0.0);
+                if (motor.getMotorTemperature() < 80.0) {
+                    motorSafety = 0;
+                }
+                break;
         }
 
-        if (motor.getMotorTemperature() > 100.0) {
-            System.out.println("Elevator motor off  " + motor.getMotorTemperature() +  "| |" + motor.getAppliedOutput());
-            motorOffTime = Time.get();
-            motor.set(0.0);
+       if (motor.getMotorTemperature() > 65.0) {
             SmartDashboard.putBoolean("Motor Warning", true);
-        } else if (motor.getMotorTemperature() > 65.0) {
-//            SmartDashboard.putBoolean("Motor Warning", true);
-            System.out.println(motor.getMotorTemperature() +  "| |" + motor.getAppliedOutput());
-
         } else {
             SmartDashboard.putBoolean("Motor Warning", false);
         }

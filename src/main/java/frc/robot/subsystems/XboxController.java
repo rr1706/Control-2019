@@ -133,8 +133,11 @@ public class XboxController extends Joystick {
 		stick.setRumble(RumbleType.kLeftRumble, val);
 	}
 
-	public void stopRumble() {
-		stick.setRumble(RumbleType.kRightRumble, 0);
+	public void stopLeftRumble() {
 		stick.setRumble(RumbleType.kLeftRumble, 0);
+	}
+
+	public void stopRightRumble() {
+		stick.setRumble(RumbleType.kRightRumble, 0);
 	}
 }

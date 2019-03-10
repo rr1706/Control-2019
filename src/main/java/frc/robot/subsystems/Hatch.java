@@ -6,22 +6,14 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 public class Hatch {
     private static DoubleSolenoid beak = new DoubleSolenoid(2, 7);
     private static DoubleSolenoid push = new DoubleSolenoid(3,6);
+    private static DoubleSolenoid ground = new DoubleSolenoid(5,4);
 
     private static double prevTime = 0.0;
     private static int step = 0;
     private static boolean hasHatch = true;
 
-    public static void set(boolean grab, boolean place) {
-//        if (grab) {
-//            beak.set(Value.kForward);
-//        } else {
-//            beak.set(Value.kReverse);
-//        }
-//        if (place) {
-//            push.set(Value.kForward);
-//        } else {
-//            push.set(Value.kReverse);
-//        }
+    public static void set(boolean grab, boolean place, boolean receive) {
+
         switch (step) {
             case 0: //Default holding position
                 beak.set(Value.kForward);
@@ -33,6 +25,8 @@ public class Hatch {
                 } else if (place) {
                     step = 4;
                     hasHatch = true;
+                } else if (receive) {
+                    step = 8;
                 }
                 break;
             //Grab hatch
@@ -89,8 +83,31 @@ public class Hatch {
                     hasHatch = false;
                 }
                 break;
+
+            case 8:
+                beak.set(Value.kReverse);
+                if (!receive) {
+                    if (Time.get() - prevTime > 1.5) {
+                        step = 0;
+                        Elevator.setPosition(1.0, 0.0, 0.0,  false, false,  0, false);
+                        hasHatch = true;
+                    }
+                } else {
+                    prevTime = Time.get();
+                }
+                break;
         }
     }
+
+    public static void ground(boolean lift) {
+        if (lift) {
+            ground.set(Value.kForward);
+        } else {
+            ground.set(Value.kReverse);
+        }
+
+    }
+
     public static boolean get() {
         return hasHatch;
     }
