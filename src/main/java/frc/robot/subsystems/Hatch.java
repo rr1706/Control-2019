@@ -12,7 +12,7 @@ public class Hatch {
     private static int step = 0;
     private static boolean hasHatch = true;
 
-    public static void set(boolean grab, boolean place, boolean receive) {
+    public static void set(boolean grab, boolean place, boolean receive, boolean safe) {
 
         switch (step) {
             case 0: //Default holding position
@@ -22,7 +22,7 @@ public class Hatch {
                     prevTime = Time.get();
                     step = 1;
                     hasHatch = false;
-                } else if (place) {
+                } else if (place && safe) {
                     step = 4;
                     hasHatch = true;
                 } else if (receive) {

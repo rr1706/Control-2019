@@ -13,17 +13,17 @@ public class Lift {
 
     public static void climb(boolean in, boolean out){
 
-//        if (in) {
-//            motor1.set(ControlMode.PercentOutput, -0.5);
-//            motor2.set(ControlMode.PercentOutput, -0.5);
-//
-//        } else if (out) {
-//            motor1.set(ControlMode.PercentOutput, 0.5);
-//            motor2.set(ControlMode.PercentOutput, 0.5);
-//        }
-//        else {
-//            motor1.set(ControlMode.PercentOutput, 0.0);
-//            motor2.set(ControlMode.PercentOutput, 0.0);
-//        }
+        if (in) {
+            motor1.set(ControlMode.PercentOutput, -0.5);
+            motor2.set(ControlMode.PercentOutput, -0.5);
+
+        } else if (out) {
+            motor1.set(ControlMode.PercentOutput, 0.5);
+            motor2.set(ControlMode.PercentOutput, 0.5);
+        }
+        else {
+            motor1.set(ControlMode.PercentOutput, 0.0);
+            motor2.set(ControlMode.PercentOutput, 0.0);
+        }
     }
 }

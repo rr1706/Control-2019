@@ -91,6 +91,10 @@ class SwerveMotor {
 
         clockwiseMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 3); //5 is the good value
         counterMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 3);
+
+
+        //FIXME, enable voltage comp. later to deal with bad sound. Max draw of motors needs to be put in place, but it will mess with motors
+
 //        System.out.println(clockwiseMotor.getIdleMode() + "||" + counterMotor.getIdleMode());
 //        counterMotor.setClosedLoopRampRate(30);
 //        System.out.println(clockwiseMotor.getClosedLoopRampRate() + "||" + counterMotor.getClosedLoopRampRate() + "||" + clockwiseMotor.getOpenLoopRampRate() + "||" + counterMotor.getOpenLoopRampRate());

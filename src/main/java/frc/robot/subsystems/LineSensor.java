@@ -18,8 +18,12 @@ public class LineSensor {
         } else {
             command = 0; //Couldn't find line
         }
+
+        System.out.println(left.get() + "||" + right.get());
         SmartDashboard.putBoolean("Line Left", left.get());
         SmartDashboard.putBoolean("Line Right", right.get());
+        SmartDashboard.putBoolean("Cargo Aligned", (left.get() || right.get()));
+
 
         return command;
     }

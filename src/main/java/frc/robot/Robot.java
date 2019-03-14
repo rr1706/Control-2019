@@ -3,25 +3,25 @@ package frc.robot;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.channels.CancelledKeyException;
+//import java.nio.channels.CancelledKeyException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
+//import edu.wpi.first.wpilibj.DigitalInput;
 
 //import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.SwerveDrivetrain.WheelType;
 import frc.robot.utilities.*;
-import frc.robot.RRLogger;
+//import frc.robot.RRLogger;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.opencv.core.Mat;
+//import org.opencv.core.Mat;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as described in the IterativeRobot
@@ -54,8 +54,8 @@ public class Robot extends TimedRobot {
     private double[][] commands;
     private int arrayIndex = -1;
     private int autoMove = 0;
-    private int translateType;
-    private double autonomousAngle;
+//    private int translateType;
+//    private double autonomousAngle;
     private double tSpeed;
     private double rSpeed;
     private double previousDistance = 0.0;
@@ -66,11 +66,11 @@ public class Robot extends TimedRobot {
     private boolean hatchDone;
     private boolean cargoDone;
     private boolean timeDone;
-    private double offsetDeg;
-    private double prevOffset = 0;
+//    private double offsetDeg;
+//    private double prevOffset = 0;
     private double timeBase;
     private boolean timeCheck;
-    private double smoothArc;
+//    private double smoothArc;
     private double smoothAccelerate;
     private double smoothAccelerateNum;
     private double initialAngle;
@@ -86,10 +86,10 @@ public class Robot extends TimedRobot {
     private double[] prevSTR = {0.0, 0.0, 0.0, 0.0, 0.0};
     private double[] prevRCW = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-    private double wheelRamp = 0;
-    private double rampRate = 0;
-    private double currentRampTime = 0;
-    private double prevRampTime = 0;
+//    private double wheelRamp = 0;
+//    private double rampRate = 0;
+//    private double currentRampTime = 0;
+//    private double prevRampTime = 0;
 
     private double keepAngle;
 
@@ -110,8 +110,8 @@ public class Robot extends TimedRobot {
     private Properties application = new Properties();
     private File offsets = new File("/home/lvuser/deploy/SWERVE_OFFSET.txt");
 
-    private boolean rumble = false;
-    private int rumbleTime = 0;
+//    private boolean rumble = false;
+//    private int rumbleTime = 0;
 
     private Acceleration accel;
     private Acceleration rcwAccel;
@@ -120,9 +120,9 @@ public class Robot extends TimedRobot {
     private Acceleration decelSTR;
     private Acceleration decelRCW;
     private int cmdCounter = 0;
-    private boolean decel = false;
-    private int accelState = -1;
-    private int gameState = 0;
+//    private boolean decel = false;
+//    private int accelState = -1;
+//    private int gameState = 0;
 
 
     private double[] ArcXs = new double[3];
@@ -139,11 +139,12 @@ public class Robot extends TimedRobot {
     private int setpoint = 0;
 
     private double placeholderName = 0.45;
-    private boolean robotAligned = false;
-    private boolean elevatorDescending = false;
+//    private boolean robotAligned = false;
+//    private boolean elevatorDescending = false;
     private boolean toggleCompresor = false;
     private boolean prevRB = false;
     private int elevatorCase = 0;
+    private boolean safeToPutHatch = false;
 
 
 
@@ -169,7 +170,7 @@ public class Robot extends TimedRobot {
         }
 
         //        min dist to wall        max dist to wall
-        if (side <= sideDistance-1.1 || side >= sideDistance+1.1) {
+        if ((side <= sideDistance-1.1 || side >= sideDistance+1.1) /*&& sideDistance != 999.0*/) {
             //                                                                                     setpoint                     P
             STR = Math.sin(Math.toRadians(moveAngle)) * (side - sideDistance) * 0.0325;
             System.out.println("STR BAD");
@@ -272,23 +273,23 @@ public class Robot extends TimedRobot {
 //		robotBackwards = Boolean.parseBoolean(application.getProperty("robot_backwards", "false"));
     }
 
-    private void autonomousAngle(double angle) {
-        // LABEL autonomous angle
-
-        SwerveCompensate.setInput(imu.getAngle());
-        SwerveCompensate.setSetpoint(angle);
-
-        SwerveCompensate.setTolerance(7);
-        if (!SwerveCompensate.onTarget()) {
-            SwerveCompensate.setPID(0.013, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
-        } else {
-            SwerveCompensate.setPID(0.015, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
-        }
-
-        robotRotation = SwerveCompensate.performPID();
-
-        RCW = (robotRotation);
-    }
+//    private void autonomousAngle(double angle) {
+//        // LABEL autonomous angle
+//
+//        SwerveCompensate.setInput(imu.getAngle());
+//        SwerveCompensate.setSetpoint(angle);
+//
+//        SwerveCompensate.setTolerance(7);
+//        if (!SwerveCompensate.onTarget()) {
+//            SwerveCompensate.setPID(0.013, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+//        } else {
+//            SwerveCompensate.setPID(0.015, SmartDashboard.getNumber("CompensateI", 0.0), SmartDashboard.getNumber("CompensateD", 0.0));
+//        }
+//
+//        robotRotation = SwerveCompensate.performPID();
+//
+//        RCW = (robotRotation);
+//    }
 
     //Might be helpful for verification
     //Once robotDistance+= calculateLength distance, finish step
@@ -443,7 +444,7 @@ public class Robot extends TimedRobot {
 
         String choice;
 
-        choice = "/home/lvuser/deploy/Test.csv";
+        choice = "/home/lvuser/deploy/RightCargo.csv";
 
         SmartDashboard.putString("Autonomous File", choice);
 
@@ -483,6 +484,14 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
         // LABEL autonomous periodic
 
+        //Add to Autonomous Cargo? after line sensor
+        /*
+        0.07,0.1,0.0,0.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,999.0,5.0
+0.0,0.0,0.0,0.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0
+0.6,0.2,127.0,180,192.93,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+0.6,0,0,180,47.23,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+0.1,0.1,135.0,180.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,180.0,0.0,0.0,0.0,1.0,12.0,4.9
+         */
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
         if (timeCheck) {
@@ -519,6 +528,8 @@ public class Robot extends TimedRobot {
                  * 15 = hatch (0 = none, 1 = put hatch, 2 = get hatch),
                  * 16 = cargo (0 = none, 1 = put cargo , 2 = get cargo)
                  * 17 = use wall align (0 = none, 1 = use)
+                 * 18 = side distance for wall align set-point
+                 * 19 = front distance for wall align set-point
                  */
 
                 //Only use translation for RCW and Arc Speed
@@ -536,12 +547,13 @@ public class Robot extends TimedRobot {
 
 
 				System.out.println(Hatch.get());
+
 				//Place hatch
                 if (commands[arrayIndex][15] == 1.0 && elevatorCase == 1) { //If we want to put the hatch and the elevator is in position
-                    Hatch.set(false, true, false); //Move on to next command once finished with intaking. Cargo will have a sensor
+                    Hatch.set(false, true, false, true); //Move on to next command once finished with intaking. Cargo will have a sensor
                     hatchDone = !Hatch.get();
                 } else if (commands[arrayIndex][15] == 2.0 && elevatorCase == 1) {
-                    Hatch.set(true, false, false);
+                    Hatch.set(true, false, false, true);
                     hatchDone = Hatch.get();
                 } else {
                     hatchDone = true;
@@ -799,7 +811,7 @@ public class Robot extends TimedRobot {
         // LABEL teleop periodic
         autonomous = false;
 
-//        Lift.climb(xbox1.RB(), xbox1.LB());
+        Lift.climb(xbox1.RB(), xbox1.LB());
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
         SmartDashboard.putNumber("Elevator Setpoint", position);
         SmartDashboard.putNumber("L Trig", xbox2.LTrig());
@@ -825,7 +837,13 @@ public class Robot extends TimedRobot {
 
         SmartDashboard.putNumber("DPad", xbox2.DPad());
 
-		Hatch.set(xbox2.A(), xbox2.B(), xbox2.LB());
+        if (Lidar.getFRFrontSensor() < 20.0 && Lidar.getFLFrontSensor() < 20.0) {
+            safeToPutHatch = true;
+        } else {
+            safeToPutHatch = false;
+        }
+
+		Hatch.set(xbox2.A(), xbox2.B(), xbox2.LB(), safeToPutHatch);
         Hatch.ground(xbox2.LB());
 
 		Cargo.set(xbox2.Start(), xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
@@ -863,7 +881,11 @@ public class Robot extends TimedRobot {
         STR = xbox1.LStickX() /*/ 10.5 * Ds.getBatteryVoltage() * 1.0*/;
 //		}
 
-        RCW =  xbox1.RStickX() * 0.3;
+        if (xbox1.RStickButton()) {
+            RCW =  xbox1.RStickX() * 0.3;
+        } else {
+            RCW = xbox1.RStickX();
+        }
 
         // Increase the time it takes for the robot to accelerate
 
@@ -950,35 +972,36 @@ public class Robot extends TimedRobot {
         }
 
         if (xbox1.buttonPad() == 45) {
-            wallAlign(25.0, 25.0, 15.0, 6.3);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(25.0, 25.0, 13.5, 5.7);
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 152.0, 14.0, 6.3);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(152.0, 152.0, 14.0, 5.7);
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
-            wallAlign(180.0,  225.0, 12.0, 4.0);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(180.0,  225.0, 12.0, 3.5);
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
-            wallAlign(180.0, 135.0, 12.0, 4.0);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(180.0, 135.0, 12.0, 3.5); //FIXME, this reverses
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 225) {
-            wallAlign(216.0, 216.0, 13.5, 6.3);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(216.0, 216.0, 13.5, 5.7);
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 315) {
-            wallAlign(333.0, 333.0, 13.5, 6.3);
-            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(333.0, 333.0, 13.5, 5.7);
+//            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
-        } else if (xbox1.buttonPad() == 90 || xbox1.buttonPad() == 0 || xbox1.buttonPad() == 270) {
+        }
+//        else if (xbox1.buttonPad() == 90 || xbox1.buttonPad() == 0 || xbox1.buttonPad() == 270) {
 //            keepAngle = 90;
 //            if (LineSensor.get() == 1) {
 //                STR += 0.1;
@@ -989,7 +1012,8 @@ public class Robot extends TimedRobot {
 //            keepAngle = 270;
 //        } else if (xbox1.buttonPad() == 0) {
 
-        }
+//        }
+
         if (xbox1.buttonPad() != -1) {
             Vector commands;
             commands = MathUtils.convertOrientation(headingRad, FWD, STR);
@@ -1106,10 +1130,9 @@ public class Robot extends TimedRobot {
         driveTrain.drive(new Vector(0.0,0.0),  0.0);
         // When robot is turned on, disabledInit is called once
         if (disabled < 1) {
-            System.out.println("Hello, this is the Ratchet Rockers' Robot, Rocket Rocker");
+            System.out.println("Hello, I am the Ratchet Rockers' Robot, Rocket Rocker");
             disabled++;
         }
-
     }
 
     /**
