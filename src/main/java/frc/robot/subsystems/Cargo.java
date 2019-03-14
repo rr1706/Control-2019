@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Cargo {
     private static TalonSRX motor = new TalonSRX(12);
-    private static DoubleSolenoid piston1 = new DoubleSolenoid(0, 1);
+    private static DoubleSolenoid piston1 = new DoubleSolenoid(6, 0);
     private static int step = 0;
     private static int counter = 0;
 //    private static Lidar ballSensor = new Lidar();

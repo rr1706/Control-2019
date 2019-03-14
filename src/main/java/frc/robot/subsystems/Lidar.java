@@ -35,8 +35,8 @@ public  class Lidar {
             sensor3 = compBuffer.getShort() * 0.0394; //Front Left Wheel, Front Sensor
             sensor4 = compBuffer.getShort() * 0.0394; //Front Left Wheel, Left Sensor
 
-            sensor5 = compBuffer.getShort() * 0.0394; //Back Left Wheel, Left Sensor
-            sensor6 = compBuffer.getShort() * 0.0394; //Back Right Wheel, Right Sensor
+            sensor5 = compBuffer.getShort() * 0.0394; //Back Left Wheel, Back Sensor
+            sensor6 = compBuffer.getShort() * 0.0394; //Back Right Wheel, Back Sensor
             sensor7 = compBuffer.getShort() * 0.0394; //Cargo Intake Sensor
 
         } catch (BufferUnderflowException e) {

@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Hatch {
-    private static DoubleSolenoid beak = new DoubleSolenoid(2, 7);
-    private static DoubleSolenoid push = new DoubleSolenoid(3,6);
+    private static DoubleSolenoid beak = new DoubleSolenoid(7, 2);
+    private static DoubleSolenoid push = new DoubleSolenoid(3,1);
     private static DoubleSolenoid ground = new DoubleSolenoid(5,4);
 
     private static double prevTime = 0.0;
