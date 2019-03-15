@@ -37,6 +37,9 @@ public class Elevator {
             pos = 56.0 + tune;
         } else if (stickY <= -0.5) {
             pos = 95.5 + tune;
+        } else if (lastPos == 4.0){
+            pos = 13.0;
+            lastPos = 13.0;
         } else {
             pos = lastPos;
     }
@@ -51,6 +54,10 @@ public class Elevator {
 
         if (groundHatch) {
             pos = 1.3;
+        }
+
+        if (override) {
+            pos = lastPos;
         }
 
         lastPos = pos;
@@ -72,7 +79,7 @@ public class Elevator {
 
         switch (motorSafety) {
             case 0:
-                pid.setReference(pos, ControlType.kPosition);
+                    pid.setReference(pos, ControlType.kPosition);
                 if (motor.getMotorTemperature() >= 90.0) {
                     motorSafety = 1;
                 }
@@ -97,6 +104,7 @@ public class Elevator {
     public static double getPosition() {
         return encoder.getPosition();
     }
+
     public static boolean atPosition() {
         if (Math.abs(encoder.getPosition()-pos) < 2.0) {
             return true;

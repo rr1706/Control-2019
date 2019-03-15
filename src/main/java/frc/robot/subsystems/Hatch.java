@@ -11,18 +11,22 @@ public class Hatch {
     private static double prevTime = 0.0;
     private static int step = 0;
     private static boolean hasHatch = true;
+    private static  boolean running = false;
 
-    public static void set(boolean grab, boolean place, boolean receive, boolean safe) {
+    public static boolean set(boolean grab, boolean place, boolean receive, boolean safe) {
 
         switch (step) {
             case 0: //Default holding position
                 beak.set(Value.kForward);
                 push.set(Value.kReverse);
+                running = false;
                 if (grab) {
+                    running = true;
                     prevTime = Time.get();
                     step = 1;
                     hasHatch = false;
                 } else if (place && safe) {
+                    running = true;
                     step = 4;
                     hasHatch = true;
                 } else if (receive) {
@@ -97,6 +101,7 @@ public class Hatch {
                 }
                 break;
         }
+        return running;
     }
 
     public static void ground(boolean lift) {

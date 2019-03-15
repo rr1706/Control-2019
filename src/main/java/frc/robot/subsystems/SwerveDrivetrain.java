@@ -148,4 +148,11 @@ public class SwerveDrivetrain {
 		swerveModules.get(SwerveDrivetrain.WheelType.BACK_LEFT).resetDistance();
 		swerveModules.get(SwerveDrivetrain.WheelType.BACK_RIGHT).resetDistance();
 	}
+
+	public void resetAngle(boolean set) {
+		swerveModules.get(SwerveDrivetrain.WheelType.FRONT_RIGHT).resetAngle(set);
+		swerveModules.get(SwerveDrivetrain.WheelType.FRONT_LEFT).resetAngle(set);
+		swerveModules.get(SwerveDrivetrain.WheelType.BACK_LEFT).resetAngle(set);
+		swerveModules.get(SwerveDrivetrain.WheelType.BACK_RIGHT).resetAngle(set);
+	}
 }

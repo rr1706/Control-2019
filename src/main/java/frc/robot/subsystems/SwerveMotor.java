@@ -114,6 +114,9 @@ class SwerveMotor {
      * @param rotationCommand Moves wheel clockwise
      */
     void set(double speedCommand, double rotationCommand) {
+//        clockwiseMotor.setSmartCurrentLimit(80, 80);
+//        counterMotor.setSmartCurrentLimit(80, 80);
+
 //        speedCommand*=0.8;
 //        rotationCommand*=0.8;
 

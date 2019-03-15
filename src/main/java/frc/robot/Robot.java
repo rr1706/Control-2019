@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
 
     private final double ACCEL_SPEED= 0.03/*0.045*/;
-    private final double DECEL_SPEED= 0.03;
+    private final double DECEL_SPEED= 0.033;
 
     private SendableChooser<Integer> autoChooser;
 
@@ -185,7 +185,7 @@ public class Robot extends TimedRobot {
         }
 
         //  min dist to wall                            max dist to wall
-        if (front <= frontDistance-1.8 || front >= frontDistance+3.1) {
+        if (front <= frontDistance-2.2 || front >= frontDistance+2.9) {
             //                                                                                              setpoint                  P
             FWD = Math.cos(Math.toRadians(moveAngle)) * (front - frontDistance) * 0.025;
             System.out.println("FWD BAD");
@@ -267,6 +267,10 @@ public class Robot extends TimedRobot {
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setPosition(Vector.load(application.getProperty("back_left_pos", "0.0,0.0")));
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setPosition(Vector.load(application.getProperty("back_right_pos", "0.0,0.0")));
 
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setOffset(0.0/*259.1312255859375*/);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setOffset(0.0/*73.0799560546875*/);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setOffset(0.0/*253.8753662109375*/);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setOffset(0.0/*77.2393798828125*/);
 //		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setDrift(application.getProperty("front_right_drift", "0.0,0.0").split(","));
 //		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setDrift(application.getProperty("front_left_drift", "0.0,0.0").split(","));
 //		SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setDrift(application.getProperty("back_left_drift", "0.0,0.0").split(","));
@@ -826,7 +830,7 @@ public class Robot extends TimedRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        System.out.println(FWD + "| |" + STR + "| |" + RCW);
+//        System.out.println(FWD + "| |" + STR + "| |" + RCW);
         // LABEL teleop periodic
         autonomous = false;
 
@@ -856,14 +860,11 @@ public class Robot extends TimedRobot {
 
         SmartDashboard.putNumber("DPad", xbox2.DPad());
 
-        if (Lidar.getFRFrontSensor() < 20.0 && Lidar.getFLFrontSensor() < 20.0) {
+        if (Lidar.getFRFrontSensor() < 20.0 || Lidar.getFLFrontSensor() < 20.0) {
             safeToPutHatch = true;
         } else {
             safeToPutHatch = false;
-        }
-
-		Hatch.set(xbox2.A(), xbox2.B(), xbox2.LB(), safeToPutHatch);
-        Hatch.ground(xbox2.LB());
+    }
 
 		Cargo.set(xbox2.Start(), xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
 
@@ -991,32 +992,32 @@ public class Robot extends TimedRobot {
         }
 
         if (xbox1.buttonPad() == 45) {
-            wallAlign(25.0, 25.0, 13.5, 5.7);
+            wallAlign(25.0, 25.0, 14.5, 5.2);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 152.0, 14.0, 5.7);
+            wallAlign(152.0, 152.0, 14.5, 5.2);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
-            wallAlign(180.0,  225.0, 12.0, 3.5);
+            wallAlign(180.0,  225.0, 12.0, 2.5);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
-            wallAlign(180.0, 135.0, 12.0, 3.5); //FIXME, this reverses
+            wallAlign(180.0, 135.0, 12.0, 2.5);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 225) {
-            wallAlign(216.0, 216.0, 13.5, 5.7);
+            wallAlign(216.0, 216.0, 14.5, 5.2);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 315) {
-            wallAlign(333.0, 333.0, 13.5, 5.7);
+            wallAlign(333.0, 333.0, 14.5, 5.2);
 //            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
         }
@@ -1116,8 +1117,26 @@ public class Robot extends TimedRobot {
 
         LineSensor.get();
 
-        driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
-//		}
+        Hatch.ground(xbox2.LB());
+
+        if (Hatch.set(xbox2.A(), xbox2.B(), xbox2.LB(), safeToPutHatch)) {
+            FWD = 0.0;
+            STR = 0.0;
+            RCW = 0.0;
+            Elevator.setPosition(0, 0, 0, true, false, 0, false);
+        }
+
+//        if (xbox1.Back()) {
+            driveTrain.resetAngle(xbox1.Back());
+        if (!xbox1.Back()) {
+            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setFoundFlag();
+            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setFoundFlag();
+            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setFoundFlag();
+            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setFoundFlag();
+        }
+//        } else {
+            driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
+//        }
 
 //		RRLogger.writeFromQueue();
 
@@ -1149,7 +1168,11 @@ public class Robot extends TimedRobot {
         driveTrain.drive(new Vector(0.0,0.0),  0.0);
         // When robot is turned on, disabledInit is called once
         if (disabled < 1) {
-            System.out.println("Hello, I am the Ratchet Rockers' Robot, Rocket Rocker");
+            if (Math.random() % 2 == 1) {
+                System.out.println("Hello, I am Suzie");
+            } else {
+                System.out.println("Hello, I am Maya");
+            }
             disabled++;
         }
     }
