@@ -9,7 +9,7 @@ import frc.robot.utilities.MathUtils;
 
 class SwerveMotor {
     private static final int CAN_TIMEOUT = 20;
-    private static final double SMALL_NUMBER = 0.02; //Was 0.05
+    private static final double SMALL_NUMBER = 0.015; //Was 0.05
     private static final double MAX_RPM = 3500/*3500*/ /*80*(Ds.getBatteryVoltage()-8)*/; //Todo: Bad equation, fix later
 
     private double[] moduleDrift;

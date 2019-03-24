@@ -14,6 +14,7 @@ public class SwerveModule {
     private static final double DISTANCE_PER_PULSE = 1.0;//0.91;
 
     private Vector position;
+    private boolean disableSpeed = false;
     private double speedCommand;
     private double angleCommand;
     private double distance;
@@ -53,14 +54,13 @@ public class SwerveModule {
 //    private double kI = 1.6e-6;
 //    private double kD = 8.0e-5;
 
-    // Third attempt
-    private double kP = 1.3e-3; //1.8 Joey change
+    private double kP = 1.5e-3;//8.0e-4; //1.8, 1.3e-3
     private double kI = 0.0;
-    private double kD = 0.0/*5.7e-5*/;
+    private double kD = 5.7e-5/*6.4e-5*/; //5.9e-5
 
     private double maxRPM = 5676;
 
-//    private double omega_dRPM = 138.4615/400.0; //mechanical
+//    private double omega_dRPM = 138.4615/400.0;
     private double Max_dRPM = 400.0;
 //    private double max_omega = omega_dRPM * Max_dRPM;
 //    private double alpha_er = 0.0;
@@ -88,7 +88,7 @@ public class SwerveModule {
         super();
 
         swerveMotor = new SwerveMotor(canPortC, canPortCC);
-//TODO, Kp was 0.0012
+
         anglePID = new PIDController(0.0, 0.0, 0.0);
         anglePID.setContinuous();
         anglePID.setInputRange(0.0, 360.0);
@@ -216,7 +216,7 @@ public class SwerveModule {
 
             if (!wheelSensor.get()) {
                 SmartDashboard.putNumber("BR Sensor Angle ",  angle);
-//
+
 //                if (wheelOffsetFirst == 0.0) {
 //                    wheelOffsetFirst = angle;
 //                } else {
@@ -224,11 +224,6 @@ public class SwerveModule {
 //                }
             }
         }
-
-//        if (id == 3) {
-//            System.out.println(angle + " | | " + Time.get());
-//            System.out.println(dRPM_command + " | | " + alpha_er + " | | " + raw_turn_time + " | | " + turn_command_counts + " | | " + omega_command);
-//        }
 
         // if (wheelReversed) {
             delta = previousDistance - distance;
@@ -241,18 +236,15 @@ public class SwerveModule {
          * go opposite to command and reverse translation
          */
 
+        //FIXME, the angleCommand will flip 180 even without this logic at times
 
-            if (Math.abs(trueError) > TICKS_PER_REVOLUTION / 4.0) {
-                angleCommand = MathUtils.reverseWheelDirection(angleCommand);
-                speedCommand *= -1;
-                wheelReversed = true;
-            } else {
-                wheelReversed = false;
-            }
-
-            if (id == 1) {
-                SmartDashboard.putBoolean("Wheel 1 Reversed ", wheelReversed);
-            }
+//            if (Math.abs(trueError) > TICKS_PER_REVOLUTION / 4.0) {
+//                angleCommand = MathUtils.reverseWheelDirection(angleCommand);
+//                speedCommand *= -1;
+//                wheelReversed = true;
+//            } else {
+//                wheelReversed = false;
+//            }
 
         anglePID.setPID(SmartDashboard.getNumber("kP", kP/*0.9e-3, 1e-3*/), SmartDashboard.getNumber("kI", kI/*6.8e-6, 1e-5*/), SmartDashboard.getNumber("kD", kD/*1.9e-4, 2e-4*/));
 
@@ -272,8 +264,6 @@ back_right_drift=0.0059,0.0027
 //        anglePID.setSetpoint(90*speedCommand);
 
 
-        //Todo
-
 //        if (id == 4) {
 //            System.out.println(trueError + "||" + angle + "||" + angleCommand);
 //        }
@@ -281,17 +271,10 @@ back_right_drift=0.0059,0.0027
 
 //        alpha_er = trueError;
 
-        /*
-         * If wheel is not translating, keep the wheel turned where it is
-         */
-
-        if (Math.abs(speedCommand) > 0.01) {
+        if (Math.abs(speedCommand) > 0.01) { //KeepAngle for modules
             anglePID.setSetpoint(angleCommand);
-//            if(id == 3 || id == 2) {
-//                System.out.println(angleCommand);
-//            }
         } else {
-            speedCommand = 0.0;
+            speedCommand = 0.1;
         }
 
         /*
@@ -299,7 +282,6 @@ back_right_drift=0.0059,0.0027
          * then set wheel speed command to 0 while wheel is turning.
          */
 
-        //FIXME this might cause Arcs to jitter once they get closer to their center point
 //        if (Math.abs(anglePID.getError()) > TICKS_PER_REVOLUTION / 16) {
 //            speedCommand = 0.0;
 //        }
@@ -317,12 +299,6 @@ back_right_drift=0.0059,0.0027
 //        }
 //
 //        if (Math.abs(trueError) <= 2.0) {
-//            rotationCommand = 0.0;
-//        }
-
-//        if (Math.abs(trueError) > 1) {
-//            rotationCommand = trueError/1020.0;
-//        } else {
 //            rotationCommand = 0.0;
 //        }
 
@@ -377,7 +353,11 @@ back_right_drift=0.0059,0.0027
 
 //        System.out.println(testing);
 //            System.out.println(speedCommand + "||" + testing);
-            swerveMotor.set(speedCommand,  rotationCommand);
+
+        if (disableSpeed) { //FIXME, use this to cut speedCommand when a wheel is not at the right angle
+            speedCommand = 0.0;
+        }
+        swerveMotor.set(speedCommand,  rotationCommand);
 //            System.out.println(speedCommand);
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
@@ -428,6 +408,10 @@ back_right_drift=0.0028,0.0028
         this.speedCommand = speedCommand;
     }
 
+    public void disableSpeed(boolean disableSpeed) {
+        this.disableSpeed = disableSpeed;
+    }
+
     public void setRotationCommand(double rotationCommand) {
         this.testing = rotationCommand;
     }
@@ -457,7 +441,7 @@ back_right_drift=0.0028,0.0028
         return speedCommand;
     }
 
-    double getAngleCommand() {
+    public double getAngleCommand() {
         return angleCommand;
     }
 
@@ -469,18 +453,16 @@ back_right_drift=0.0028,0.0028
         this.position = position;
     }
 
-    public boolean getAngleError() {
-        if (wheelReversed) {
-            angle += 180;
-        }
-        if (angle-angleOld >= 45) {
-            angleOld += 360;
-        } else if (angleOld-angle >= 45) {
-            angleOld -= 360;
+    public boolean getAngleOff() {
+//        if (wheelReversed) {
+//            angle = MathUtils.resolveDeg(angle + 180);
+//        }
+        double angleError = Math.abs(MathUtils.getAngleError(angle, angleCommand));
+        if  (Math.abs(MathUtils.getAngleError(angle, Math.abs(MathUtils.reverseWheelDirection(angleCommand)))) < Math.abs(MathUtils.getAngleError(angle, angleCommand))) {
+            angleError = Math.abs(MathUtils.getAngleError(angle, Math.abs(MathUtils.reverseWheelDirection(angleCommand))));
         }
 
-        MathUtils.resolveDeg(Math.abs(angleCommand - angle));
-        return false;
+        return (angleError > 25.0);
     }
 
     public double getDistance() {

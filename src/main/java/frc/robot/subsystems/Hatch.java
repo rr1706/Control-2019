@@ -81,7 +81,7 @@ public class Hatch {
                 break;
             case 6: //Pull piston back and reset to default position
                 push.set(Value.kReverse);
-                System.out.println("Going Back");
+//                System.out.println("Going Back");
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
                     step = 0;

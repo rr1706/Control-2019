@@ -152,8 +152,12 @@ public class RRLogger {
 //            }
 
             if (m_dataAdder.length() > 0) {
+                System.out.println("Adding");
                 m_DataLogFile.write(m_dataAdder.toString());
+                System.out.println("Deletng");
                 m_dataAdder.delete(0, m_dataAdder.length() - 1);
+                System.out.println("Closing");
+                m_DataLogFile.close();
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
