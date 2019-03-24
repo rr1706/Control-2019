@@ -14,7 +14,6 @@ public class Hatch {
     private static  boolean running = false;
 
     public static boolean set(boolean grab, boolean place, boolean receive, boolean safe) {
-
         switch (step) {
             case 0: //Default holding position
                 beak.set(Value.kForward);
@@ -26,6 +25,7 @@ public class Hatch {
                     step = 1;
                     hasHatch = false;
                 } else if (place && safe) {
+//                    putting = true;
                     running = true;
                     step = 4;
                     hasHatch = true;
@@ -81,10 +81,12 @@ public class Hatch {
                 break;
             case 6: //Pull piston back and reset to default position
                 push.set(Value.kReverse);
+                System.out.println("Going Back");
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
                     step = 0;
                     hasHatch = false;
+//                    running = false; //FIXME Do the same for the intake
                 }
                 break;
 
@@ -115,5 +117,9 @@ public class Hatch {
 
     public static boolean get() {
         return hasHatch;
+    }
+
+    public static boolean isRunning() {
+        return running;
     }
 }

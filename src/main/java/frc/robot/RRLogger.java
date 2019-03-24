@@ -11,9 +11,10 @@ public class RRLogger {
 
     private static ConcurrentLinkedQueue<String> m_PowerBuffer = new ConcurrentLinkedQueue<String>();
     private static ConcurrentLinkedQueue<String> m_DataBuffer = new ConcurrentLinkedQueue<String>();
+    private static StringBuilder  m_dataAdder = new StringBuilder();
     private static PrintWriter m_LogFile;
     private static PrintWriter m_DataLogFile;
-    private static String directory = "/home/lvuser/e/";
+    private static String directory = "/home/lvuser/logger/";
     private static String logFileName = "power";
     private static String dataDumpFileName = "data";
     private static long startTime;
@@ -59,9 +60,9 @@ public class RRLogger {
 				test = new File(directory + dataDumpFileName + "_" + i + ".csv");
 				i++;
 			} while (test.exists());
-			f.renameTo(test); // Renames log file if exists instead of rewriting
+			f.renameTo(test); // Renames log file if it exists instead of rewriting
 			try {
-				f = new File(directory + dataDumpFileName + ".csv");
+//				f = new File(directory + dataDumpFileName + ".csv");
 				f.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -101,9 +102,9 @@ public class RRLogger {
     public static void addData(String dataType, double value) {
 
         String sep = ",";
-        String str = dataType + sep + value + sep + ((double) (System.nanoTime() - startTime) / 1000000000.0);
-        m_DataBuffer.add(str);
-
+        String str = dataType + sep + value + sep + ((double) (System.nanoTime() - startTime) / 1000000000.0) + sep;
+//        m_DataBuffer.add(str);
+        m_dataAdder.append(str);
     }
 
 //    public static void addPower(String dataType, double value) {
@@ -115,7 +116,8 @@ public class RRLogger {
 //    }
 
     public static void newLine() {
-        m_DataBuffer.add("\n");
+//        m_DataBuffer.add("\n");
+        m_dataAdder.append("\n");
     }
 
     public static void newPowerLine() {
@@ -131,25 +133,29 @@ public class RRLogger {
 //                return;
 //            }
 
-            if (!m_PowerBuffer.isEmpty()) {
+//            if (!m_PowerBuffer.isEmpty()) {
+//
+//                String s = m_PowerBuffer.toString();
+//                System.out.println("messagebuffer");
+//
+//                m_LogFile.println(s);
+//
+//            }
+//            if (!m_DataBuffer.isEmpty()) {
+//
+//                String s = m_DataBuffer.toString();
+//                m_DataBuffer.clear();
+////                System.out.println("databuffer");
+//
+//                m_DataLogFile.println(s);
+//
+//            }
 
-                String s = m_PowerBuffer.toString();
-                System.out.println("messagebuffer");
-
-                m_LogFile.println(s);
-
-            }
-            if (!m_DataBuffer.isEmpty()) {
-
-                String s = m_DataBuffer.toString();
-                m_DataBuffer.clear();
-//                System.out.println("databuffer");
-
-                m_DataLogFile.println(s);
-
+            if (m_dataAdder.length() > 0) {
+                m_DataLogFile.write(m_dataAdder.toString());
+                m_dataAdder.delete(0, m_dataAdder.length() - 1);
             }
         } catch (NullPointerException e) {
-
             e.printStackTrace();
         }
     }

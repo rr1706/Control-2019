@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 public class Cargo {
@@ -11,6 +12,9 @@ public class Cargo {
     private static DoubleSolenoid piston1 = new DoubleSolenoid(6, 0);
     private static int step = 0;
     private static int counter = 0;
+    private static int counter2 = 0;
+
+
 //    private static Lidar ballSensor = new Lidar();
 
 //    private static DoubleSolenoid piston2 = new DoubleSolenoid(4, 5);
@@ -55,14 +59,21 @@ public class Cargo {
             }
         }
 
-        if (in) {
-            motor.set(ControlMode.PercentOutput, 0.75);
+        if (distanceToCargo < 5.0) {
+            counter2++;
+        } else {
+            counter2 = 0;
+        }
+
+        SmartDashboard.putNumber("Counter 2", counter2);
+        if (in && counter2 < 10) {
+            motor.set(ControlMode.PercentOutput, 0.6);
             piston1.set(Value.kForward);
         } else if (out) {
             piston1.set(Value.kReverse);
             motor.set(ControlMode.PercentOutput, -0.75);
             step = 0;
-        } else if (!autoIntake){
+        } else if (!autoIntake || counter2 > 10){ //Auto stop the intake if the ball is already in
             motor.set(ControlMode.PercentOutput, 0.0);
             piston1.set(Value.kReverse);
         }

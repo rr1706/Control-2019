@@ -4,13 +4,13 @@ import com.revrobotics.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Ds;
-import frc.robot.RRLogger;
+//import frc.robot.RRLogger;
 import frc.robot.utilities.MathUtils;
 
 class SwerveMotor {
     private static final int CAN_TIMEOUT = 20;
     private static final double SMALL_NUMBER = 0.02; //Was 0.05
-    private static final double MAX_RPM = 3500 /*80*(Ds.getBatteryVoltage()-8)*/; //Todo: Bad equation, fix later
+    private static final double MAX_RPM = 3500/*3500*/ /*80*(Ds.getBatteryVoltage()-8)*/; //Todo: Bad equation, fix later
 
     private double[] moduleDrift;
 
@@ -24,7 +24,6 @@ class SwerveMotor {
     private CANPIDController counterPID;
 
     private final double THEORETICAL_MAX = 5676;
-    //4900 works at 12.7 Volts
     private double kMaxOutput = 0.9;
     private double kMinOutput = -0.9;
 //Ian Idea for future: set maxRPM based off battery voltage, so battery doesn't inhibit drive train
@@ -89,9 +88,14 @@ class SwerveMotor {
         counterPID.setFF(motorF);
         counterPID.setOutputRange(kMinOutput, kMaxOutput);
 
-        clockwiseMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 3); //5 is the good value
-        counterMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 3);
+        clockwiseMotor.setSmartCurrentLimit(30, 30);
+        counterMotor.setSmartCurrentLimit(30, 30);
 
+        clockwiseMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 5); //5 is the good value
+        counterMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 5);
+
+        clockwiseMotor.burnFlash();
+        counterMotor.burnFlash();
 
         //FIXME, enable voltage comp. later to deal with bad sound. Max draw of motors needs to be put in place, but it will mess with motors
 
@@ -114,9 +118,6 @@ class SwerveMotor {
      * @param rotationCommand Moves wheel clockwise
      */
     void set(double speedCommand, double rotationCommand) {
-//        clockwiseMotor.setSmartCurrentLimit(80, 80);
-//        counterMotor.setSmartCurrentLimit(80, 80);
-
 //        speedCommand*=0.8;
 //        rotationCommand*=0.8;
 
@@ -170,7 +171,9 @@ class SwerveMotor {
 //            lastValidVelocity2 = counterEncoder.getVelocity();
 //        }
 
-        if (id == 1) {
+        if (id == 2) {
+//            System.out.println((MathUtils.resolveDeg((lastValidDistanceClockwise + lastValidDistanceCounter)*36.0)) + "| |" + clockwiseEncoder.getPosition() + "| |" + counterEncoder.getPosition());
+
             SmartDashboard.putNumber("Wheel Temp", clockwiseMotor.getMotorTemperature());
 ////            SmartDashboard.putNumber("Front Right Command", lastValidDistanceClockwise);
 ////            SmartDashboard.putNumber("Front Right Velocity", clockwiseEncoder.getVelocity());
@@ -223,7 +226,6 @@ class SwerveMotor {
         }
     }
 
-
     /**
      * @return sum of both encoders, wrapped from 0 to 360
      */
@@ -251,6 +253,7 @@ class SwerveMotor {
     }
 
     void reset() {
+//        System.out.println(clockwiseEncoder.getPosition());
         clockwiseEncoder.setPosition(0);
         counterEncoder.setPosition(0);
     }

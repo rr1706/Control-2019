@@ -24,6 +24,20 @@ public class MathUtils {
 		return new Vector(x, y);
 	}
 
+	public static double[] instertionSort(double[] array) {
+		for (int i=1; i<array.length; ++i)  {
+			double key = array[i];
+			int j = i-1;
+
+			while (j >=0 && array[j] > key) {
+				array[j+1] = array[j];
+				j = j-1;
+			}
+			array[j+1] = key;
+		}
+		return array;
+	}
+
 	/**
 	 * Reverses the direction of a wheel
 	 * @param direction Direction of wheel in radians
