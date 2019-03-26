@@ -9,6 +9,7 @@ public class Hatch {
     private static DoubleSolenoid ground = new DoubleSolenoid(5,4);
 
     private static double prevTime = 0.0;
+    private static boolean startingHatch = false;
     private static int step = 0;
     private static boolean hasHatch = true;
     private static  boolean running = false;
@@ -115,11 +116,11 @@ public class Hatch {
 
     }
 
-    public static boolean get() {
+    public static boolean hasHatch() {
         return hasHatch;
     }
 
-    public static boolean isRunning() {
-        return running;
-    }
+//    public static boolean startHatch() {
+//        return startingHatch;
+//    }
 }
