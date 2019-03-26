@@ -273,6 +273,47 @@ public class Robot extends TimedRobot {
         return (done == 3);
     }
 
+    private boolean HABAlign(){
+        int HABCase = 0;
+        boolean done = false;
+        double robotAngle = imu.getAngle();
+        double frontRight = Lidar.getFRFrontSensor();
+        double frontLeft = Lidar.getFLFrontSensor();
+        double HABTime = 0.0;
+
+        switch(HABCase){
+            case 0:
+                if(Math.abs(MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0)) >= 2.8){
+                    RCW = MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0) * 0.011;
+                    if(RCW>0.16){
+                        RCW = 0.16;
+                    }
+                    keepAngle = 180.0;
+                }else{
+                    RCW = 0.0;
+                    HABCase = 1;
+                }
+                break;
+            case 1:
+                if(frontRight > 7.75 || frontLeft > 7.75){
+                    FWD = -0.1;
+                }else if(frontRight < 7.25 || frontLeft < 7.25){
+                    FWD = 0.1;
+                }else{
+                    HABTime = Time.get();
+                    HABCase = 2;
+                }
+                break;
+            case 2:
+                if(HABTime >= 1.0){
+                    Lift.climb(true);
+                    done = true;
+                }
+                break;
+        }
+        SmartDashboard.putBoolean("HAB Aligned", done);
+        return done;
+    }
     private boolean sideRocketAlign (double angle) {
         int done = 0;
         double robotAngle = imu.getAngle();
@@ -950,7 +991,10 @@ public class Robot extends TimedRobot {
         // LABEL teleop periodic
         autonomous = false;
 
-//        Lift.climb(xbox1.RB(), xbox1.LB());
+        if(xbox1.RB()){
+            HABAlign();
+        }
+
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
         SmartDashboard.putNumber("Elevator Setpoint", position);
         SmartDashboard.putNumber("L Trig", xbox2.LTrig());
