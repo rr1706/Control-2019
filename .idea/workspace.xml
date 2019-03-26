@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bc92e98-4b98-41f0-a155-aaa0fa3e3eb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -28,25 +24,22 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="1176" column="47" lean-forward="true" selection-start-line="1176" selection-start-column="47" selection-end-line="1176" selection-end-column="47" />
+            <state relative-caret-position="250">
+              <caret line="1017" column="9" lean-forward="true" selection-start-line="1017" selection-start-column="9" selection-end-line="1017" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <marker date="1553460827560" expanded="true" signature="46153:46639" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-512">
-              <caret line="16" column="61" lean-forward="true" selection-start-line="16" selection-start-column="61" selection-end-line="16" selection-end-column="61" />
+            <state relative-caret-position="234">
+              <caret line="20" column="32" lean-forward="true" selection-start-line="20" selection-start-column="32" selection-end-line="20" selection-end-column="32" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3927#3928#0" expanded="true" />
-                <element signature="e#3966#3967#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -54,12 +47,12 @@
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/deploy/RightHatch.csv">
-          <provider editor-type-id="csv-text-editor">
-            <state relative-caret-position="16">
-              <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+          <provider selected="true" editor-type-id="csv-text-editor">
+            <state relative-caret-position="48">
+              <caret line="3" selection-start-line="3" selection-end-line="3" />
             </state>
           </provider>
-          <provider selected="true" editor-type-id="csv-table-editor">
+          <provider editor-type-id="csv-table-editor">
             <state showInfoPanel="false" fixedHeaders="false" rowLines="3">
               <column index="0" width="35" />
               <column index="1" width="35" />
@@ -86,14 +79,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="140">
-              <caret line="84" column="50" lean-forward="true" selection-start-line="84" selection-start-column="50" selection-end-line="84" selection-end-column="50" />
+            <state relative-caret-position="109">
+              <caret line="117" column="23" selection-start-line="117" selection-start-column="23" selection-end-line="117" selection-end-column="23" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3997#3998#0" expanded="true" />
-                <element signature="e#4068#4069#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -102,54 +93,19 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="160">
-              <caret line="276" column="30" selection-start-line="276" selection-start-column="30" selection-end-line="276" selection-end-column="30" />
+            <state relative-caret-position="797">
+              <caret line="359" column="35" selection-start-line="359" selection-start-column="35" selection-end-line="359" selection-end-column="35" />
               <folding>
-                <element signature="e#14347#14348#0" expanded="true" />
-                <element signature="e#14406#14407#0" expanded="true" />
-                <element signature="e#14510#14511#0" expanded="true" />
-                <element signature="e#14612#14613#0" expanded="true" />
-                <element signature="e#14720#14721#0" expanded="true" />
-                <element signature="e#14816#14817#0" expanded="true" />
-                <element signature="e#15442#15443#0" expanded="true" />
-                <element signature="e#15516#15517#0" expanded="true" />
-                <element signature="e#15575#15576#0" expanded="true" />
-                <element signature="e#15663#15664#0" expanded="true" />
-                <element signature="e#16297#16298#0" expanded="true" />
-                <element signature="e#16367#16368#0" expanded="true" />
-                <element signature="e#16444#16445#0" expanded="true" />
-                <element signature="e#16510#16511#0" expanded="true" />
-                <element signature="e#16580#16581#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="23">
-              <caret line="60" column="31" selection-start-line="60" selection-start-column="31" selection-end-line="60" selection-end-column="31" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/utilities/MathUtils.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="70" column="26" lean-forward="true" selection-start-line="70" selection-start-column="26" selection-end-line="70" selection-end-column="26" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="30" column="37" lean-forward="true" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
-              <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#16834#16835#0" expanded="true" />
+                <element signature="e#16865#16866#0" expanded="true" />
+                <element signature="e#16900#16901#0" expanded="true" />
+                <element signature="e#16935#16936#0" expanded="true" />
+                <element signature="e#16971#16972#0" expanded="true" />
+                <element signature="e#17012#17013#0" expanded="true" />
+                <element signature="e#17047#17048#0" expanded="true" />
+                <element signature="e#17078#17079#0" expanded="true" />
+                <element signature="e#17115#17116#0" expanded="true" />
+                <element signature="e#17148#17149#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -166,7 +122,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>disablewhe</find>
       <find>disabl</find>
       <find>speedcommand, t</find>
       <find>wheelOffset</find>
@@ -196,6 +151,7 @@
       <find>?</find>
       <find>reverse</find>
       <find>speedcommand = 0</find>
+      <find>xbox1.lstickb</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -233,7 +189,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="143" />
     <option name="y" value="40" />
     <option name="width" value="1400" />
@@ -405,13 +361,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="518726000" />
+    <option name="totallyTimeSpent" value="518831000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.09060403" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.19127516" />
       <window_info id="Structure" order="1" sideWeight="0.5021097" side_tool="true" weight="0.21073826" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -420,7 +376,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="0" weight="0.3286119" />
       <window_info anchor="bottom" id="Message" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49932885" visible="true" weight="0.063739374" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49932885" visible="true" weight="0.34135976" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39943343" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.3286119" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
@@ -786,12 +742,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="84" column="50" lean-forward="true" selection-start-line="84" selection-start-column="50" selection-end-line="84" selection-end-column="50" />
+        <state relative-caret-position="234">
+          <caret line="20" column="32" lean-forward="true" selection-start-line="20" selection-start-column="32" selection-end-line="20" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3997#3998#0" expanded="true" />
-            <element signature="e#4068#4069#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -804,12 +758,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/deploy/RightHatch.csv">
-      <provider editor-type-id="csv-text-editor">
-        <state relative-caret-position="16">
-          <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+      <provider selected="true" editor-type-id="csv-text-editor">
+        <state relative-caret-position="48">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
         </state>
       </provider>
-      <provider selected="true" editor-type-id="csv-table-editor">
+      <provider editor-type-id="csv-table-editor">
         <state showInfoPanel="false" fixedHeaders="false" rowLines="3">
           <column index="0" width="35" />
           <column index="1" width="35" />
@@ -836,12 +790,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-512">
-          <caret line="16" column="61" lean-forward="true" selection-start-line="16" selection-start-column="61" selection-end-line="16" selection-end-column="61" />
+        <state relative-caret-position="109">
+          <caret line="117" column="23" selection-start-line="117" selection-start-column="23" selection-end-line="117" selection-end-column="23" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3927#3928#0" expanded="true" />
-            <element signature="e#3966#3967#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -872,35 +824,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="276" column="30" selection-start-line="276" selection-start-column="30" selection-end-line="276" selection-end-column="30" />
+        <state relative-caret-position="797">
+          <caret line="359" column="35" selection-start-line="359" selection-start-column="35" selection-end-line="359" selection-end-column="35" />
           <folding>
-            <element signature="e#14347#14348#0" expanded="true" />
-            <element signature="e#14406#14407#0" expanded="true" />
-            <element signature="e#14510#14511#0" expanded="true" />
-            <element signature="e#14612#14613#0" expanded="true" />
-            <element signature="e#14720#14721#0" expanded="true" />
-            <element signature="e#14816#14817#0" expanded="true" />
-            <element signature="e#15442#15443#0" expanded="true" />
-            <element signature="e#15516#15517#0" expanded="true" />
-            <element signature="e#15575#15576#0" expanded="true" />
-            <element signature="e#15663#15664#0" expanded="true" />
-            <element signature="e#16297#16298#0" expanded="true" />
-            <element signature="e#16367#16368#0" expanded="true" />
-            <element signature="e#16444#16445#0" expanded="true" />
-            <element signature="e#16510#16511#0" expanded="true" />
-            <element signature="e#16580#16581#0" expanded="true" />
+            <element signature="e#16834#16835#0" expanded="true" />
+            <element signature="e#16865#16866#0" expanded="true" />
+            <element signature="e#16900#16901#0" expanded="true" />
+            <element signature="e#16935#16936#0" expanded="true" />
+            <element signature="e#16971#16972#0" expanded="true" />
+            <element signature="e#17012#17013#0" expanded="true" />
+            <element signature="e#17047#17048#0" expanded="true" />
+            <element signature="e#17078#17079#0" expanded="true" />
+            <element signature="e#17115#17116#0" expanded="true" />
+            <element signature="e#17148#17149#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="1176" column="47" lean-forward="true" selection-start-line="1176" selection-start-column="47" selection-end-line="1176" selection-end-column="47" />
+        <state relative-caret-position="250">
+          <caret line="1017" column="9" lean-forward="true" selection-start-line="1017" selection-start-column="9" selection-end-line="1017" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
-            <marker date="1553460827560" expanded="true" signature="46153:46639" ph="..." />
           </folding>
         </state>
       </provider>

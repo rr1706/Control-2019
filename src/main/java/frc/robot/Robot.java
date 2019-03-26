@@ -1013,8 +1013,8 @@ public class Robot extends TimedRobot {
             FWD = -xbox1.LStickY();
             STR = xbox1.LStickX();
         } else {
-            FWD = -xbox1.LStickY() * 0.5;
-            STR = xbox1.LStickX() * 0.5;
+            FWD = -xbox1.LStickY() * 2.0;
+            STR = xbox1.LStickX() * 2.0;
         }
         // Increase the time it takes for the robot to accelerate
 
