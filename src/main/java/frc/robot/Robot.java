@@ -6,6 +6,7 @@ import java.io.IOException;
 //import java.nio.channels.CancelledKeyException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,8 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-    private  double ACCEL_SPEED= 0.026/*0.031*/;
-    private  double DECEL_SPEED= 0.035;
+    private final double ACCEL_SPEED= 0.12/*0.031*/;
+    private final double DECEL_SPEED= 0.2; //0.035
 
     private SendableChooser<Integer> autoChooser;
 
@@ -50,8 +51,12 @@ public class Robot extends TimedRobot {
     private double robotOffset;
 
     private int disabled = 0;
+    private int wheelStopCase = 0;
+
 
     private double[][] commands;
+    private boolean prevBackButton = false;
+    private boolean compensateToggle = true;
     private int arrayIndex = -1;
     private int autoMove = 0;
 //    private int translateType;
@@ -160,7 +165,67 @@ public class Robot extends TimedRobot {
     private int alignCase = 0;
     private int cargoCase = 0;
 
+    private void acceleration() {
+        if (FWD + STR != 0.0) {
+            if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
+                if (Math.abs(RCW - prevRCW[cmdCounter]) > ACCEL_SPEED) {
+                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+                        RCW = prevRCW[cmdCounter] + ACCEL_SPEED;
+                    } else {
+                        RCW = prevRCW[cmdCounter] - ACCEL_SPEED;
+                    }
+                }
+            } else {
+                if (Math.abs(RCW - prevRCW[cmdCounter]) > DECEL_SPEED) {
+                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+                        RCW = prevRCW[cmdCounter] + DECEL_SPEED;
+                    } else {
+                        RCW = prevRCW[cmdCounter] - DECEL_SPEED;
+                    }
+                }
+            }
+        }
 
+        if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
+                        if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
+                            if (FWD - prevFWD[cmdCounter] > 0.0) {
+                                FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
+                            } else {
+                                FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
+                            }
+                        }
+                    } else {
+                        if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
+                            if (FWD - prevFWD[cmdCounter] > 0.0) {
+                                FWD = prevFWD[cmdCounter] + DECEL_SPEED;
+                            } else {
+                                FWD = prevFWD[cmdCounter] - DECEL_SPEED;
+                            }
+                        }
+                    }
+
+                    if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
+                        if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
+                            if (STR - prevSTR[cmdCounter] > 0.0) {
+                                STR = prevSTR[cmdCounter] + ACCEL_SPEED;
+                            } else {
+                                STR = prevSTR[cmdCounter] - ACCEL_SPEED;
+                            }
+                        }
+                    } else {
+                        if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
+                            if (STR - prevSTR[cmdCounter] > 0.0) {
+                                STR = prevSTR[cmdCounter] + DECEL_SPEED;
+                            } else {
+                                STR = prevSTR[cmdCounter] - DECEL_SPEED;
+                            }
+                        }
+                    }
+
+        prevFWD[cmdCounter] = FWD;
+        prevSTR[cmdCounter] = STR;
+        prevRCW[cmdCounter] = RCW;
+    }
     private boolean wallAlign(double angle,  double moveAngle, double sideDistance, double frontDistance) {
         double robotAngle = imu.getAngle();
         int done = 0;
@@ -192,11 +257,12 @@ public class Robot extends TimedRobot {
                 STR = 0.0;
 
                 if (Math.abs(MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0)) >= 5.0) {
-                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *2.0e-3; //0.016
-                    if (Math.abs(RCW) > 0.5) { //0.3
-                        RCW = 0.5 * Math.signum(RCW); //0.3
-                    } else if (Math.abs(RCW) < 0.2) {
-                        RCW = 0.2 * Math.signum(RCW);
+                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *3e-3; //0.016
+                    System.out.println(RCW);
+                    if (Math.abs(RCW) > 1.8) { //0.3
+                        RCW = 1.8 * Math.signum(RCW); //0.3
+                    } else if (Math.abs(RCW) < 0.3) {
+                        RCW = 0.3 * Math.signum(RCW);
                     }
 //                    System.out.println(RCW);
 
@@ -210,35 +276,47 @@ public class Robot extends TimedRobot {
 
                 if (Math.abs(MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0)) >= 2.8) {
                     RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *1.0e-3;
-                    if (Math.abs(RCW) > 0.2) {
-                        RCW = 0.2 * Math.signum(RCW);
-                    } else if (Math.abs(RCW) < 0.05) {
-                        RCW = 0.05 * Math.signum(RCW);
+                    if (Math.abs(RCW) > 0.4) {
+                        RCW = 0.4 * Math.signum(RCW);
+                    } else if (Math.abs(RCW) < 0.1) {
+                        RCW = 0.1 * Math.signum(RCW);
                     }
                 } else {
-//                    keepAngle = angle;
-//                    useKeepAngle = true;
+                    keepAngle = angle;
+                    useKeepAngle = true;
                     RCW = 0.0;
+                    System.out.println("RCW Done");
+
                     done++;
                 }
 
-                if (angle < robotAngle-10.0 || angle > robotAngle + 10.0) {
+                if (robotAngle < angle-15.0 || robotAngle > angle + 15.0) {
                     side = (front < side) ? front: side;
                     front = MathUtils.instertionSort(distances)[2];
-//                    System.out.println("Here!");
                 }
 
                 //        min dist to wall        max dist to wall
+                System.out.println(side + "| |" + sideDistance);
                 if ((side <= sideDistance-1.1 || side >= sideDistance+1.1)) { //Decrease allowed error as much as possible. Log lidar values in comp. to get experimental mean and standard deviation
                     //                                                                                     setpoint                     P
                     STR = Math.sin(Math.toRadians(moveAngle)) * (side - sideDistance) * 0.0325;
 //            System.out.println("STR BAD");
                 } else {
+                    System.out.println("STR Done");
+                    STR = 0.0;
                     done++;
                 }
                 // max speed
                 if (Math.abs(STR) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
-                    STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side - sideDistance) * (0.3 + sideDistance/60.0); //100 //Scale speed to distance from wall
+                    STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side-sideDistance) * (0.2 + sideDistance/50.0); //Scale speed to distance from wall
+                }
+
+                if (side < 40.0 && side < 15.0) {
+                    STR *= 0.5;
+                }
+
+                if  (Math.abs(STR) < 0.05) {
+                    STR = Math.signum(STR)*0.05;
                 }
 
                 //  min dist to wall                            max dist to wall
@@ -250,13 +328,19 @@ public class Robot extends TimedRobot {
 //            System.out.println("FWD BAD");
                     // max speed
                     if (Math.abs(FWD) > Math.abs(Math.sin(Math.toRadians(moveAngle))  * 0.4)) {
-                        FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front - frontDistance) * (0.5 + frontDistance/25.0);
-                    };
+                        FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front-frontDistance) * (0.7 + frontDistance/15.0);
+                    }
+                    if (front < 40.0 && front < 15.0) {
+                        FWD *= 0.5;
+                    }
+
                     // Min speed
-                    if  (Math.abs(FWD) < 0.04) {
-                        FWD = Math.signum(FWD)*0.04;
+                    if  (Math.abs(FWD) < 0.1) {
+                        FWD = Math.signum(FWD)*0.1;
                     }
                 } else {
+                    System.out.println("FWD Done");
+                    FWD = 0.0;
                     done++;
                 }
 
@@ -282,9 +366,9 @@ public class Robot extends TimedRobot {
         switch (cargoCase) {
             case 0:
                 if (Math.abs(MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0)) >= 2.8) {
-                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *0.011;
-                    if (RCW > 0.16) {
-                        RCW = 0.16;
+                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *0.02;
+                    if (RCW > 0.2) {
+                        RCW = 0.2;
                     }
                     keepAngle = angle;
                 } else {
@@ -296,7 +380,7 @@ public class Robot extends TimedRobot {
                 if (frontLeft < 10.0 || frontRight < 10.0) {
                     cargoCase = 2;
                 } else {
-                    FWD = -0.2; //Scale to distance from
+                    FWD = -0.4; //Scale to distance from
                 }
                 break;
             case 2:
@@ -314,28 +398,18 @@ public class Robot extends TimedRobot {
                 if (frontLeft < 11.0 && frontRight < 11.0) {
                     done++;
                 } else if (frontLeft >= 11.0) { //If only BL edge is off cargo, move robot right
-                    STR = 0.04 + (frontLeft-frontRight) * 0.004;
+                    STR = 0.08 + (frontLeft-frontRight) * 0.004;
                 } else if (frontRight >= 11.0) {
-                    STR = -0.04 - (frontRight-frontLeft) * 0.004;
+                    STR = -0.08 - (frontRight-frontLeft) * 0.004;
                 }
 
                 if (frontLeft > 10.0 && frontRight > 10.0) {
-                    FWD = -0.2;
+                    FWD = -0.4;
                 }
         }
 
         SmartDashboard.putBoolean("Cargo Aligned", (done == 2));
         return (done == 2);
-    }
-
-    private void rotateWhileMoving() { //This will change the STR and FWD commands when the driver is commanding translation and RCW
-        if (Math.abs(xbox1.RStickX()) > 0.05 && Math.abs(xbox1.LStickY()) > 0.05) {
-            STR = -RCW * 1.2; //Scale later
-            RCW *= 0.5;
-        } else if (Math.abs(xbox1.RStickX()) > 0.05 && Math.abs(xbox1.LStickX()) > 0.05) {
-            FWD = RCW *1.2; //Scale later
-            RCW *= 0.5;
-        }
     }
 
     private void keepAngle() { //FIXME! Ian wants this to change. It doesn't drive straight
@@ -564,6 +638,11 @@ public class Robot extends TimedRobot {
         // LABEL autonomous init
 //		jet.setAuto(); // this line is important because it does clock synchronization
 
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).disableSpeed(2);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).disableSpeed(2);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).disableSpeed(2);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).disableSpeed(2);
+
         timeCheck = true;
         imu.reset(0);
         setpoint = 1;
@@ -612,13 +691,6 @@ public class Robot extends TimedRobot {
         if (!autoOverride) {
             // LABEL autonomous periodic
 
-        /*
-        0.07,0.1,0.0,0.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,999.0,5.0
-0.0,0.0,0.0,0.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0
-0.6,0.2,127.0,180,192.93,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
-0.6,0,0,180,47.23,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
-0.1,0.1,135.0,180.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,180.0,0.0,0.0,0.0,1.0,12.0,4.9
-         */
             SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
             if (timeCheck) {
@@ -675,16 +747,14 @@ public class Robot extends TimedRobot {
 //				System.out.println(Hatch.get());
 
                     //Place hatch
-                    if (commands[arrayIndex][15] == 1.0 && elevatorCase == 1/* && Hatch.get()*/) { //If we want to put the hatch and the elevator is in position and still has the hatch
-                    Hatch.set(false, true, false, true); //Move on to next command once finished with intaking. Cargo will have a sensor
-                    hatchDone = false;
-                } else if (commands[arrayIndex][15] == 2.0 && elevatorCase == 1/* && !Hatch.get()*/) { //If we want to get the hatch and we don't have one
-                    Hatch.set(true, false, false, true);
-                    hatchDone = false;
-                }
-                    if (!Hatch.isRunning()){
-                    Hatch.set(false, false, false, true);
-                    hatchDone = true;
+//                    if (commands[arrayIndex][15] != 0.0) {
+                        if (commands[arrayIndex][15] == 1.0 && elevatorCase == 1 && Hatch.hasHatch() && Hatch.set(false, true, false, true)) { //If we want to put the hatch and the elevator is in position and still has the hatch
+                            hatchDone = false;
+                        } else if (commands[arrayIndex][15] == 2.0 && elevatorCase == 1 && !Hatch.hasHatch() && Hatch.set(true, false, false, true)) { //If we want to get the hatch and we don't have one
+                            hatchDone = false;
+                        } else {
+                        Hatch.set(false, false, false, true);
+                        hatchDone = true;
                 }
 
 
@@ -713,13 +783,13 @@ public class Robot extends TimedRobot {
                                     elevatorCase = 1;
                                 }
                                 break;
-                            case 1: //Placing
+                            case 1: //Done placing
                                 if (hatchDone && cargoDone) {
-                                    Elevator.setPosition(0.0, 1.0, 0.0, false, false, 1, false);
+                                    Elevator.setPosition(0.0, 0.0, 0.0, false, false, 1, false);
                                     elevatorCase = 2;
                                 }
                                 break;
-                            case 2: //Going down
+                            case 2: //Done going down
                                 if (Elevator.atPosition()) {
                                     override = true;
                                     elevatorCase = 0;
@@ -823,12 +893,17 @@ public class Robot extends TimedRobot {
                         if (alignCase == 0) {
                             alignCase = 1;
                         }
+
                         if (wallAlign(commands[arrayIndex][3], commands[arrayIndex][2], commands[arrayIndex][18], commands[arrayIndex][19])) {
                             override = true;
                         }
+
+                        FWD *= commands[arrayIndex][0];
+                        STR *= commands[arrayIndex][0];
+                        RCW *= commands[arrayIndex][1];
                     }
 
-                    if (Math.abs(xbox1.LStickX()) > 0.2 || Math.abs(xbox1.LStickY()) > 0.2) { //FIXME, auto 3rd X = 312 to shorten arc to drivers
+                    if (Math.abs(xbox1.LStickX()) > 0.2 || Math.abs(xbox1.LStickY()) > 0.2) {
                         autoOverride = true;
                         FWD = 0.0;
                         STR = 0.0;
@@ -839,44 +914,45 @@ public class Robot extends TimedRobot {
                         teleopInit();
                     }
 
-                    if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
-                        if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
-                            if (FWD - prevFWD[cmdCounter] > 0.0) {
-                                FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
-                            } else {
-                                FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
-                            }
-                        }
-                    } else {
-                        if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
-                            if (FWD - prevFWD[cmdCounter] > 0.0) {
-                                FWD = prevFWD[cmdCounter] + DECEL_SPEED;
-                            } else {
-                                FWD = prevFWD[cmdCounter] - DECEL_SPEED;
-                            }
-                        }
-                    }
+//                    if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
+//                        if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
+//                            if (FWD - prevFWD[cmdCounter] > 0.0) {
+//                                FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
+//                            } else {
+//                                FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
+//                            }
+//                        }
+//                    } else {
+//                        if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
+//                            if (FWD - prevFWD[cmdCounter] > 0.0) {
+//                                FWD = prevFWD[cmdCounter] + DECEL_SPEED;
+//                            } else {
+//                                FWD = prevFWD[cmdCounter] - DECEL_SPEED;
+//                            }
+//                        }
+//                    }
+//
+//                    if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
+//                        if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
+//                            if (STR - prevSTR[cmdCounter] > 0.0) {
+//                                STR = prevSTR[cmdCounter] + ACCEL_SPEED;
+//                            } else {
+//                                STR = prevSTR[cmdCounter] - ACCEL_SPEED;
+//                            }
+//                        }
+//                    } else {
+//                        if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
+//                            if (STR - prevSTR[cmdCounter] > 0.0) {
+//                                STR = prevSTR[cmdCounter] + DECEL_SPEED;
+//                            } else {
+//                                STR = prevSTR[cmdCounter] - DECEL_SPEED;
+//                            }
+//                        }
+//                    }
 
-                    if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
-                        if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
-                            if (STR - prevSTR[cmdCounter] > 0.0) {
-                                STR = prevSTR[cmdCounter] + ACCEL_SPEED;
-                            } else {
-                                STR = prevSTR[cmdCounter] - ACCEL_SPEED;
-                            }
-                        }
-                    } else {
-                        if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
-                            if (STR - prevSTR[cmdCounter] > 0.0) {
-                                STR = prevSTR[cmdCounter] + DECEL_SPEED;
-                            } else {
-                                STR = prevSTR[cmdCounter] - DECEL_SPEED;
-                            }
-                        }
-                    }
-
-                    prevFWD[cmdCounter] = FWD;
-                    prevSTR[cmdCounter] = STR;
+//                    prevFWD[cmdCounter] = FWD;
+//                    prevSTR[cmdCounter] = STR;
+                    acceleration();
 
                     Vector driveCommands;
                     driveCommands = MathUtils.convertOrientation(Math.toRadians(imu.getAngle()), FWD, STR);
@@ -884,7 +960,8 @@ public class Robot extends TimedRobot {
                     STR = driveCommands.getX();
                     RCW *= rSpeed;
 
-//                System.out.println(FWD + "| |" + STR);
+//                    System.out.println(driveDone + "  " + autoOverride + "  " + FWD + "  " + STR);
+
                     driveTrain.drive(new Vector(-STR, FWD), RCW);
 
                     if (override) {
@@ -902,7 +979,7 @@ public class Robot extends TimedRobot {
 
                     SmartDashboard.putNumber("Array", arrayIndex);
 
-//				System.out.println(driveDone + "||" + arcCalculated + "||" + commands[arrayIndex][4] + "||" + (SmartDashboard.getNumber("Distance", 0) - previousDistance));
+				System.out.println(driveDone + "||" + hatchDone + "||" + cargoDone);
 
                     if (driveDone && hatchDone && cargoDone) {
 //                    robotAligned = false;
@@ -937,7 +1014,13 @@ public class Robot extends TimedRobot {
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setID(4);
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setID(3);
 
-		RRLogger.start();
+        //Reset wheel acceleration and movement to zero
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).resetWheel();
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).resetWheel();
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).resetWheel();
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).resetWheel();
+
+//		RRLogger.start();
         Elevator.init();
         Elevator.setPosition(1.0, 0, 0, false, false, 0, false);
     }
@@ -1013,25 +1096,14 @@ public class Robot extends TimedRobot {
             FWD = -xbox1.LStickY();
             STR = xbox1.LStickX();
         } else {
-            FWD = -xbox1.LStickY() * 2.0;
-            STR = xbox1.LStickX() * 2.0;
+            FWD = -xbox1.LStickY() * 1.9;
+            STR = xbox1.LStickX() * 1.9;
         }
-        // Increase the time it takes for the robot to accelerate
 
-        //Get pressure sensor to disable once above 100 psi
-        //Base it off actuations
-
-
-//		System.out.println(FWD + "| |" + prevFWD[cmdCounter] + "| |" + STR + "| |" + prevSTR[cmdCounter] + "| |" + Math.toDegrees(Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter])) + "| |" + Math.toDegrees(Math.abs(Math.atan2(FWD, STR) - Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter]))));
-//				Math.toDegrees(Math.atan2(FWD, STR)) + "| |"  + Math.toDegrees(Math.atan2(prevFWD[cmdCounter], prevSTR[cmdCounter])) + "| |"  + prevSTR[cmdCounter] + "| |"  + prevFWD[cmdCounter]); //Change cmdCounter to actually get old values
-//		if (Math.abs(FWD- prevFWD[cmdCounter]) > 1.0) {
-//			decelFWD.set(prevFWD[cmdCounter], 0.0, 0.5);
-//			FWD = decelFWD.calculate();
-//		}
-
-
-
-
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).turbo(xbox1.LStickButton());
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).turbo(xbox1.LStickButton());
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).turbo(xbox1.LStickButton());
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).turbo(xbox1.LStickButton());
 
         SmartDashboard.putNumber("PrevFWD", prevFWD[cmdCounter]);
         SmartDashboard.putNumber("Counter", cmdCounter);
@@ -1098,13 +1170,13 @@ public class Robot extends TimedRobot {
         }
 
         if (xbox1.buttonPad() == 45) {
-            wallAlign(25.0, 25.0, 14.5, 5.2);
-//            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(25.0, 45.0, 13.5, 5.4);
+            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 152.0, 14.5, 4.8);
-//            STR += xbox1.LStickX() * placeholderName;
+            wallAlign(152.0, 132.0, 13.5, 5.4);
+            STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
@@ -1148,109 +1220,111 @@ public class Robot extends TimedRobot {
 //            ACCEL_SPEED = 0.026;
 //        }
 
-        System.out.println((SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
-                SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
-                SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
-                SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff()));
+//        System.out.println((SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
+//                SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
+//                SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
+//                SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff()));
 
-        if (!xbox1.LB() && prevFWD[cmdCounter] + prevSTR[cmdCounter] == 0.0 && prevRCW[cmdCounter] == 0.0 &&  //If we're coming from 0 and wheels aren't aligned yet, stop wheels till they're aligned
-                (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff())) {
-            wheelsGood = false;
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).disableSpeed(!wheelsGood);
-//            prevSTR[cmdCounter] = 0.0;
-//            prevFWD[cmdCounter] = 0.0;
-//            prevRCW[cmdCounter] = 0.0;
-            FWD = 0.0;
-            STR = 0.0;
-            RCW = 0.0;
-        } else if (prevFWD[cmdCounter] + prevSTR[cmdCounter] != 0.0 || prevRCW[cmdCounter] != 0.0 && //If the robot is moving and it can't get there, decelerate to stop
-                (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff())) {
-            System.out.println("Decelerating");
-            wheelsGood = true;
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).disableSpeed(!wheelsGood);
-            DECEL_SPEED = 0.025;
-            ACCEL_SPEED = 0.015;
-            FWD = 0.0;
-            STR = 0.0;
-            RCW = 0.0;
-        } else {
-            DECEL_SPEED= 0.035;
-            ACCEL_SPEED = 0.026;
-            wheelsGood = true;
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).disableSpeed(!wheelsGood);
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).disableSpeed(!wheelsGood);
-        }
+        //Optimize later, this should give wheels time to get to the right angle before commanding speed
+//        if (compensateToggle && (Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getSpeedCommand()) < 0.1) &&  //If we're coming from 0 and wheels aren't aligned yet, stop wheels till they're aligned
+//                (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff())) {
+//            wheelStopCase = 0;
+            //FIXME, current auto: add once lidar works
+            //0.4,0.0,85.0,0.0,55.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0
+            //0.9,0.1,14.8,25.0,125.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+            //0.8,0.5,30.0,25.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,1.0,14.0,5.4
+            // 0.0,0.0,0.0,25.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0
+//1.2,1.0,135.0,180.0,999.0,0,999,0,0,0,0,0,0.0,180.0,0,0,0,1.0,11.0,4.8
+//0.0,0.0,0.0,180.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,180.0,1.0,2.0,0.0,0.0,0.0,0.0
+//0.7,0.2,358,25.0,25.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+//0.8,0.4,13.0,25.0,120.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+//1.1,1.0,35.0,25.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,1.0,14.0,5.4
+//0.0,0.0,0.0,25.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,1.0,0.0,0.0,0.0,0.0
+//0,0,0,0,999,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+//        } else if (compensateToggle && ((Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getSpeedCommand()) +
+//                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getSpeedCommand()) > 0.1) ||
+//                (Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getRotationCommand()) +
+//                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getRotationCommand()) +
+//                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getRotationCommand()) +
+//                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getRotationCommand()) > 0.05)) &&  //If the robot is moving and it can't get there, decelerate to stop
+//                (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
+//                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff())) {
+//            wheelStopCase = 0;
+//        } else {
+//            wheelStopCase = 1;
+//        }
 
+        SmartDashboard.putBoolean("Toggle Disable Wheels", compensateToggle);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).disableSpeed(wheelStopCase);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).disableSpeed(wheelStopCase);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).disableSpeed(wheelStopCase);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).disableSpeed(wheelStopCase);
 
-        if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
-            if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
-                if (FWD - prevFWD[cmdCounter] > 0.0) {
-                    FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
-                } else {
-                    FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
-                }
-            }
-        } else {
-            if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
-                if (FWD - prevFWD[cmdCounter] > 0.0) {
-                    FWD = prevFWD[cmdCounter] + DECEL_SPEED;
-                } else {
-                    FWD = prevFWD[cmdCounter] - DECEL_SPEED;
-                }
-            }
-        }
+//        if (Math.abs(FWD) > Math.abs(prevFWD[cmdCounter])) {
+//            if (Math.abs(FWD - prevFWD[cmdCounter]) > ACCEL_SPEED) {
+//                if (FWD - prevFWD[cmdCounter] > 0.0) {
+//                    FWD = prevFWD[cmdCounter] + ACCEL_SPEED;
+//                } else {
+//                    FWD = prevFWD[cmdCounter] - ACCEL_SPEED;
+//                }
+//            }
+//        } else {
+//            if (Math.abs(FWD - prevFWD[cmdCounter]) > DECEL_SPEED) {
+//                if (FWD - prevFWD[cmdCounter] > 0.0) {
+//                    FWD = prevFWD[cmdCounter] + DECEL_SPEED;
+//                } else {
+//                    FWD = prevFWD[cmdCounter] - DECEL_SPEED;
+//                }
+//            }
+//        }
 
-        if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
-            if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
-                if (STR - prevSTR[cmdCounter] > 0.0) {
-                    STR = prevSTR[cmdCounter] + ACCEL_SPEED;
-                } else {
-                    STR = prevSTR[cmdCounter] - ACCEL_SPEED;
-                }
-            }
-        } else {
-            if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
-                if (STR - prevSTR[cmdCounter] > 0.0) {
-                    STR = prevSTR[cmdCounter] + DECEL_SPEED;
-                } else {
-                    STR = prevSTR[cmdCounter] - DECEL_SPEED;
-                }
-            }
-        }
+//        if (Math.abs(STR) > Math.abs(prevSTR[cmdCounter])) {
+//            if (Math.abs(STR - prevSTR[cmdCounter]) > ACCEL_SPEED) {
+//                if (STR - prevSTR[cmdCounter] > 0.0) {
+//                    STR = prevSTR[cmdCounter] + ACCEL_SPEED;
+//                } else {
+//                    STR = prevSTR[cmdCounter] - ACCEL_SPEED;
+//                }
+//            }
+//        } else {
+//            if (Math.abs(STR - prevSTR[cmdCounter]) > DECEL_SPEED) {
+//                if (STR - prevSTR[cmdCounter] > 0.0) {
+//                    STR = prevSTR[cmdCounter] + DECEL_SPEED;
+//                } else {
+//                    STR = prevSTR[cmdCounter] - DECEL_SPEED;
+//                }
+//            }
+//        }
 
-        if (FWD + STR != 0.0) {
-            if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
-                if (Math.abs(RCW - prevRCW[cmdCounter]) > ACCEL_SPEED) {
-                    if (RCW - prevRCW[cmdCounter] > 0.0) {
-                        RCW = prevRCW[cmdCounter] + ACCEL_SPEED;
-                    } else {
-                        RCW = prevRCW[cmdCounter] - ACCEL_SPEED;
-                    }
-                }
-            } else {
-                if (Math.abs(RCW - prevRCW[cmdCounter]) > DECEL_SPEED) {
-                    if (RCW - prevRCW[cmdCounter] > 0.0) {
-                        RCW = prevRCW[cmdCounter] + DECEL_SPEED;
-                    } else {
-                        RCW = prevRCW[cmdCounter] - DECEL_SPEED;
-                    }
-                }
-            }
-        }
+//        if (FWD + STR != 0.0) {
+//            if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
+//                if (Math.abs(RCW - prevRCW[cmdCounter]) > ACCEL_SPEED) {
+//                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+//                        RCW = prevRCW[cmdCounter] + ACCEL_SPEED;
+//                    } else {
+//                        RCW = prevRCW[cmdCounter] - ACCEL_SPEED;
+//                    }
+//                }
+//            } else {
+//                if (Math.abs(RCW - prevRCW[cmdCounter]) > DECEL_SPEED) {
+//                    if (RCW - prevRCW[cmdCounter] > 0.0) {
+//                        RCW = prevRCW[cmdCounter] + DECEL_SPEED;
+//                    } else {
+//                        RCW = prevRCW[cmdCounter] - DECEL_SPEED;
+//                    }
+//                }
+//            }
+//        }
 
         if (Math.abs(RCW) > 0.5) {
             RCW = Math.signum(RCW)*0.5;
@@ -1259,9 +1333,11 @@ public class Robot extends TimedRobot {
 
         //System.out.println(FWD + "|     |"  + STR + "|     |"  + prevFWD[cmdCounter] + "|     |"  +prevSTR[cmdCounter]);
 
-        prevRCW[cmdCounter] = RCW;
-        prevFWD[cmdCounter] = FWD;
-        prevSTR[cmdCounter] = STR;
+        acceleration();
+
+//        prevRCW[cmdCounter] = RCW;
+//        prevFWD[cmdCounter] = FWD;
+//        prevSTR[cmdCounter] = STR;
 
 
 
@@ -1314,22 +1390,17 @@ public class Robot extends TimedRobot {
 
 //        if (xbox1.Back()) {
             driveTrain.resetAngle(xbox1.Back());
-        if (!xbox1.Back()) {
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setFoundFlag();
-            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setFoundFlag();
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setFoundFlag();
-            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setFoundFlag();
-        }
-//        } else {
-//            driveTrain.drive(new Vector(-STR, FWD), -RCW); // x = str, y = fwd, rotation = rcw
+//        if (!xbox1.Back() && prevBackButton) {
+//            compensateToggle = !compensateToggle;
+//            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setFoundFlag();
+//            SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setFoundFlag();
+//            SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setFoundFlag();
+//            SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setFoundFlag();
 //        }
-
-
-//        driveTrain.drive(new Vector(STR, xbox1.RStickY()), RCW);
+//        prevBackButton = xbox1.Back();
 
 //        System.out.println(speed);
 
-        //Fixme!!! Check offsets and this before running robot
 //        rotateWhileMoving();
 
 //        System.out.println(buttonTimeIncrease + "| |" + prevButtonTime + "| |" + (xbox1.buttonPad() == 90.0));
@@ -1368,19 +1439,23 @@ public class Robot extends TimedRobot {
 
 
 
-        RRLogger.addData("Angle of  FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngle());
-        RRLogger.addData("Angle Command of  FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleCommand());
-
-        RRLogger.addData("Angle of FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngle());
-        RRLogger.addData("Angle Command of FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleCommand());
-
-        RRLogger.addData("Angle of  BL:  ", 	 SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngle());
-        RRLogger.addData("Angle Command of  BL:  ", 	 SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleCommand());
-
-        RRLogger.addData("Angle of BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngle());
-        RRLogger.addData("Angle Command of BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleCommand());
-
-        RRLogger.newLine();
+//        RRLogger.addData("Counter Encoder FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getCounterEncoder());
+//        RRLogger.addData("Clockwise Encoder FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getClockwiseEncoder());
+//        RRLogger.addData("Angle Command of  FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleCommand());
+//
+//        RRLogger.addData("Counter Encoder FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getCounterEncoder());
+//        RRLogger.addData("Clockwise Encoder FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getClockwiseEncoder());
+//        RRLogger.addData("Angle Command of FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleCommand());
+//
+//        RRLogger.addData("Counter Encoder BL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getCounterEncoder());
+//        RRLogger.addData("Clockwise Encoder BL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getClockwiseEncoder());
+//        RRLogger.addData("Angle Command of  BL:  ", 	 SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleCommand());
+//
+//        RRLogger.addData("Counter Encoder BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getCounterEncoder());
+//        RRLogger.addData("Clockwise Encoder BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getClockwiseEncoder());
+//        RRLogger.addData("Angle Command of BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleCommand());
+//
+//        RRLogger.newLine();
 //        RRLogger.writeFromQueue();
     }
 
@@ -1406,6 +1481,13 @@ public class Robot extends TimedRobot {
     public void disabledInit() {
 //		jet.setDisabled();
 
+        FWD = 0.0;
+        STR = 0.0;
+        RCW = 0.0;
+        prevFWD[cmdCounter] = 0.0;
+        prevSTR[cmdCounter] = 0.0;
+        prevRCW[cmdCounter] = 0.0;
+
         autoMove = 0;
         Elevator.setPower(0.0);
         driveTrain.drive(new Vector(0.0,0.0),  0.0);
@@ -1419,7 +1501,7 @@ public class Robot extends TimedRobot {
             }
             disabled++;
         } else {
-            RRLogger.writeFromQueue();
+//            RRLogger.writeFromQueue();
         }
     }
 

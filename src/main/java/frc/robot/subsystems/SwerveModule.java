@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.utilities.Acceleration;
 import frc.robot.utilities.MathUtils;
 import frc.robot.utilities.PIDController;
 import frc.robot.utilities.Vector;
@@ -12,9 +13,17 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class SwerveModule {
     private static final double TICKS_PER_REVOLUTION = 360.0;
     private static final double DISTANCE_PER_PULSE = 1.0;//0.91;
+    private  static final double SPEED_RATIO = 0.47;
 
     private Vector position;
-    private boolean disableSpeed = false;
+    private boolean prevReversed = false;
+    private double prevRotationCommand = 0.0;
+    private final double ACCEL_SPEED= 0.08;
+    private final double DECEL_SPEED= 0.1;
+    private boolean turbo = false;
+    private int speedCase = 0;
+    private double decelSpeed = 0.035;
+    private double prevSpeedCommand = 0.0;
     private double speedCommand;
     private double angleCommand;
     private double distance;
@@ -54,13 +63,13 @@ public class SwerveModule {
 //    private double kI = 1.6e-6;
 //    private double kD = 8.0e-5;
 
-    private double kP = 1.5e-3;//8.0e-4; //1.8, 1.3e-3
+    private double kP = 5.0e-4;//8.0e-4; //1.8, 1.3e-3
     private double kI = 0.0;
-    private double kD = 5.7e-5/*6.4e-5*/; //5.9e-5
+    private double kD = 0.0;//5.7e-5/*6.4e-5*/; //5.9e-5
 
     private double maxRPM = 5676;
 
-//    private double omega_dRPM = 138.4615/400.0;
+    //    private double omega_dRPM = 138.4615/400.0;
     private double Max_dRPM = 400.0;
 //    private double max_omega = omega_dRPM * Max_dRPM;
 //    private double alpha_er = 0.0;
@@ -226,7 +235,7 @@ public class SwerveModule {
         }
 
         // if (wheelReversed) {
-            delta = previousDistance - distance;
+        delta = previousDistance - distance;
         // } else {
         //     delta = distance - previousDistance;
         // }
@@ -238,13 +247,13 @@ public class SwerveModule {
 
         //FIXME, the angleCommand will flip 180 even without this logic at times
 
-//            if (Math.abs(trueError) > TICKS_PER_REVOLUTION / 4.0) {
-//                angleCommand = MathUtils.reverseWheelDirection(angleCommand);
-//                speedCommand *= -1;
-//                wheelReversed = true;
-//            } else {
-//                wheelReversed = false;
-//            }
+        if (Math.abs(trueError) > TICKS_PER_REVOLUTION / 4.0) {
+            angleCommand = MathUtils.reverseWheelDirection(angleCommand);
+            speedCommand *= -1;
+            wheelReversed = true;
+        } else {
+            wheelReversed = false;
+        }
 
         anglePID.setPID(SmartDashboard.getNumber("kP", kP/*0.9e-3, 1e-3*/), SmartDashboard.getNumber("kI", kI/*6.8e-6, 1e-5*/), SmartDashboard.getNumber("kD", kD/*1.9e-4, 2e-4*/));
 
@@ -271,10 +280,10 @@ back_right_drift=0.0059,0.0027
 
 //        alpha_er = trueError;
 
-        if (Math.abs(speedCommand) > 0.01) { //KeepAngle for modules
+        if (Math.abs(speedCommand) > 0.01) {
             anglePID.setSetpoint(angleCommand);
         } else {
-            speedCommand = 0.1;
+            speedCommand = 0.0;
         }
 
         /*
@@ -302,7 +311,29 @@ back_right_drift=0.0059,0.0027
 //            rotationCommand = 0.0;
 //        }
 
+        //FIXME Limited because of hardware flaw
 
+        speedCommand *= SPEED_RATIO;
+        if (turbo) {
+            speedCommand *= 1.6;
+            if (Math.abs(speedCommand) > Math.abs(prevSpeedCommand)) {
+                if (Math.abs(speedCommand - prevSpeedCommand) > ACCEL_SPEED) {
+                    if (speedCommand - prevSpeedCommand > 0.0) {
+                        speedCommand = prevSpeedCommand + ACCEL_SPEED;
+                    } else {
+                        speedCommand = prevSpeedCommand - ACCEL_SPEED;
+                    }
+                }
+            } else {
+                if (Math.abs(speedCommand - prevSpeedCommand) > DECEL_SPEED) {
+                    if (speedCommand - prevSpeedCommand > 0.0) {
+                        speedCommand = prevSpeedCommand + DECEL_SPEED;
+                    } else {
+                        speedCommand = prevSpeedCommand - DECEL_SPEED;
+                    }
+                }
+            }
+        }
         if (resettingAngle && wheelSensor.get()) {
             rotationCommand = 0.03;
             speedCommand = 0.0;
@@ -354,10 +385,34 @@ back_right_drift=0.0059,0.0027
 //        System.out.println(testing);
 //            System.out.println(speedCommand + "||" + testing);
 
-        if (disableSpeed) { //FIXME, use this to cut speedCommand when a wheel is not at the right angle
-            speedCommand = 0.0;
-        }
+//        if (speedCase == 0) { //FIXME, use this to cut speedCommand when a wheel is not at the right angle
+//            speedCommand *= 0.1;
+//
+//            if (Math.abs(speedCommand) > Math.abs(prevSpeedCommand)) {
+//                if (Math.abs(speedCommand - prevSpeedCommand) > ACCEL_SPEED) {
+//                    if (speedCommand - prevSpeedCommand > 0.0) {
+//                        speedCommand = prevSpeedCommand + ACCEL_SPEED;
+//                    } else {
+//                        speedCommand = prevSpeedCommand - ACCEL_SPEED;
+//                    }
+//                }
+//            } else {
+//                if (Math.abs(speedCommand - prevSpeedCommand) > DECEL_SPEED) {
+//                    if (speedCommand - prevSpeedCommand > 0.0) {
+//                        speedCommand = prevSpeedCommand + DECEL_SPEED;
+//                    } else {
+//                        speedCommand = prevSpeedCommand - DECEL_SPEED;
+//                    }
+//                }
+//            }
+//        }
+
+
         swerveMotor.set(speedCommand,  rotationCommand);
+        prevRotationCommand = rotationCommand;
+        prevSpeedCommand = speedCommand;
+        prevReversed = wheelReversed;
+
 //            System.out.println(speedCommand);
 //        } else {
 //            swerveMotor.set(0.0, 0.0);
@@ -408,8 +463,11 @@ back_right_drift=0.0028,0.0028
         this.speedCommand = speedCommand;
     }
 
-    public void disableSpeed(boolean disableSpeed) {
-        this.disableSpeed = disableSpeed;
+    public double getRotationCommand() {
+        return rotationCommand;
+    }
+    public void disableSpeed(int speedCase) {
+        this.speedCase = speedCase;
     }
 
     public void setRotationCommand(double rotationCommand) {
@@ -437,7 +495,7 @@ back_right_drift=0.0028,0.0028
 //        buttonDown = startButton;
     }
 
-    double getSpeedCommand() {
+    public double getSpeedCommand() {
         return speedCommand;
     }
 
@@ -452,7 +510,12 @@ back_right_drift=0.0028,0.0028
     public void setPosition(Vector position) {
         this.position = position;
     }
-
+    public double getCounterEncoder() {
+        return swerveMotor.getCounterEncoder();
+    }
+    public double getClockwiseEncoder() {
+        return swerveMotor.getClockwiseEncoder();
+    }
     public boolean getAngleOff() {
 //        if (wheelReversed) {
 //            angle = MathUtils.resolveDeg(angle + 180);
@@ -462,21 +525,27 @@ back_right_drift=0.0028,0.0028
             angleError = Math.abs(MathUtils.getAngleError(angle, Math.abs(MathUtils.reverseWheelDirection(angleCommand))));
         }
 
-        return (angleError > 25.0);
+        return (angleError > 20.0);
     }
 
     public double getDistance() {
         return distance;
     }
 
-    public void resetDistance() {
+    void resetDistance() {
         swerveMotor.reset();
     }
-
+    public void resetWheel() {
+        this.prevSpeedCommand = 0.0;
+        this.speedCommand = 0.0;
+    }
     public boolean getReversed() {
         return this.wheelReversed;
     }
 
+    public void turbo(boolean turboCase) {
+        this.turbo = turboCase;
+    }
     public double getRightSum() {
         return rightSum;
     }
@@ -485,17 +554,17 @@ back_right_drift=0.0028,0.0028
         return forwardSum;
     }
 
-	public void resetDelta() {
-		rightSum = 0.0;
-		forwardSum = 0.0;
-	}
+    public void resetDelta() {
+        rightSum = 0.0;
+        forwardSum = 0.0;
+    }
 
-	public double[] getXYDist() {
-		if (wheelReversed) {
-			forwardSum *= -1.0;
-			rightSum *= -1.0;
-		}
-		double[] i = {rightDelta, forwardDelta};
-		return i;
-	}
+    public double[] getXYDist() {
+        if (wheelReversed) {
+            forwardSum *= -1.0;
+            rightSum *= -1.0;
+        }
+        double[] i = {rightDelta, forwardDelta};
+        return i;
+    }
 }
