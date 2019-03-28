@@ -21,9 +21,6 @@ public class RRLogger {
 
     public static void start() {
         startTime = System.nanoTime();
-
-        File f = new File("a.csv");
-
 //        f = new File(directory + logFileName + ".csv");
 //        if (f.exists()) { // check if file exists
 //
@@ -48,15 +45,13 @@ public class RRLogger {
 //                e.printStackTrace();
 //            }
 //        }
-
-		f = new File(directory + dataDumpFileName + ".csv");
+		File f = new File(directory + dataDumpFileName + ".csv");
 		if (f.exists()) { // check if file exists
 			System.out.println("1");
 			System.out.println(f);
 			int i = 1;
 			File test = null;
 			do {
-
 				test = new File(directory + dataDumpFileName + "_" + i + ".csv");
 				i++;
 			} while (test.exists());
@@ -84,8 +79,8 @@ public class RRLogger {
 //        }
 
 		try {
-			m_DataLogFile = new PrintWriter(new BufferedWriter(new FileWriter(directory + dataDumpFileName + ".csv", true)));
-            System.out.println(directory + dataDumpFileName + ".csv");
+			m_DataLogFile = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+			System.out.println(f);
         } catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -120,9 +115,9 @@ public class RRLogger {
         m_dataAdder.append("\n");
     }
 
-    public static void newPowerLine() {
-        m_PowerBuffer.add("\n");
-    }
+//    public static void newPowerLine() {
+//        m_PowerBuffer.add("\n");
+//    }
 
     public static void writeFromQueue() {
 
@@ -152,11 +147,11 @@ public class RRLogger {
 //            }
 
             if (m_dataAdder.length() > 0) {
-                System.out.println("Adding");
+//                System.out.println("Adding");
                 m_DataLogFile.write(m_dataAdder.toString());
-                System.out.println("Deletng");
-                m_dataAdder.delete(0, m_dataAdder.length() - 1);
-                System.out.println("Closing");
+//                System.out.println("Deletng");
+//                m_dataAdder.delete(0, m_dataAdder.length() - 1);
+//                System.out.println("Closing");
                 m_DataLogFile.close();
             }
         } catch (NullPointerException e) {

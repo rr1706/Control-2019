@@ -70,8 +70,6 @@ public class Elevator {
         pid.setI(0.0);
         pid.setD(0.0);
         pid.setFF(0.0);
-        pid.setSmartMotionMaxAccel(30.0, 0);
-        pid.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
         SmartDashboard.putNumber("Elevator Position", encoder.getPosition());
         SmartDashboard.putNumber("Elevator Setpoint", pos);
         SmartDashboard.putNumber("Motor Temp", motor.getMotorTemperature());

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 public class Hatch {
     private static DoubleSolenoid beak = new DoubleSolenoid(7, 2);
     private static DoubleSolenoid push = new DoubleSolenoid(3,1);
-    private static DoubleSolenoid ground = new DoubleSolenoid(5,4);
+//    private static DoubleSolenoid ground = new DoubleSolenoid(50,40);
 
     private static double prevTime = 0.0;
     private static boolean startingHatch = false;
@@ -109,9 +109,9 @@ public class Hatch {
 
     public static void ground(boolean lift) {
         if (lift) {
-            ground.set(Value.kForward);
+//            ground.set(Value.kForward);
         } else {
-            ground.set(Value.kReverse);
+//            ground.set(Value.kReverse);
         }
 
     }

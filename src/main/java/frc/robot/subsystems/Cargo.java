@@ -22,51 +22,50 @@ public class Cargo {
     public static void set(boolean autoIntake, boolean in, boolean out, double distanceToCargo, double leftDistance, double rightDistance){
 
 //        System.out.println(step + "| |" + distanceToCargo);
-        if (autoIntake) {
-            switch (step) { //Look for cargo
-                case 0:
-                    motor.set(ControlMode.PercentOutput, 0.0);
-                    piston1.set(Value.kReverse);
-                    if (leftDistance > 20.0 && rightDistance > 20.0 && distanceToCargo < 30.0) {
-                        step = 1;
-                    }
-                    break;
-                case 1:
-                        motor.set(ControlMode.PercentOutput, 0.75);
-                        piston1.set(Value.kForward);
-                        if (distanceToCargo < 10.0) { //If cargo is in the intake,
-                            counter++;
-                        }
-                        if (counter >= 5) {
-                            step = 2;
-                            counter = 0;
-                        }
-                        if (distanceToCargo > 30.0) {
-                            step = 0;
-                        }
-                    break;
-                case 2: //Pull the intake up and wait for cargo to be fully intaken
-                    piston1.set(Value.kReverse);
-                    motor.set(ControlMode.PercentOutput, 0.5);
-                    if (distanceToCargo > 30.0) {
-                        step = 0;
-                    }
-                    if (distanceToCargo < 5.0) { //If cargo is in the intake,
-//                        System.out.println("Here");
-                        motor.set(ControlMode.PercentOutput, 0.0);
-                    }
-                    break;
-            }
-        }
+//        if (autoIntake) {
+//            switch (step) { //Look for cargo
+//                case 0:
+//                    motor.set(ControlMode.PercentOutput, 0.0);
+//                    piston1.set(Value.kReverse);
+//                    if (leftDistance > 20.0 && rightDistance > 20.0 && distanceToCargo < 30.0) {
+//                        step = 1;
+//                    }
+//                    break;
+//                case 1:
+//                        motor.set(ControlMode.PercentOutput, 0.75);
+//                        piston1.set(Value.kForward);
+//                        if (distanceToCargo < 10.0) { //If cargo is in the intake,
+//                            counter++;
+//                        }
+//                        if (counter >= 5) {
+//                            step = 2;
+//                            counter = 0;
+//                        }
+//                        if (distanceToCargo > 30.0) {
+//                            step = 0;
+//                        }
+//                    break;
+//                case 2: //Pull the intake up and wait for cargo to be fully intaken
+//                    piston1.set(Value.kReverse);
+//                    motor.set(ControlMode.PercentOutput, 0.5);
+//                    if (distanceToCargo > 30.0) {
+//                        step = 0;
+//                    }
+//                    if (distanceToCargo < 5.0) { //If cargo is in the intake,
+////                        System.out.println("Here");
+//                        motor.set(ControlMode.PercentOutput, 0.0);
+//                    }
+//                    break;
+//            }
+//        }
 
-        if (distanceToCargo < 5.0) {
+        if (distanceToCargo > 0.1 && distanceToCargo < 5.0) {
             counter2++;
         } else {
             counter2 = 0;
         }
 
-        SmartDashboard.putNumber("Counter 2", counter2);
-        if (in && counter2 < 10) {
+        if (in/* && counter2 < 10*/) {
             motor.set(ControlMode.PercentOutput, 0.6);
             piston1.set(Value.kForward);
         } else if (out) {
