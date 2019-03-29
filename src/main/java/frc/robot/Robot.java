@@ -31,8 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-    private final double ACCEL_SPEED= 0.05/*0.031*/;
-    private final double DECEL_SPEED= 0.08; //0.035
+    private double ACCEL_SPEED= 0.05/*0.031*/;
+    private double DECEL_SPEED= 0.08; //0.035
 
     private SendableChooser<Integer> autoChooser;
 
@@ -50,6 +50,9 @@ public class Robot extends TimedRobot {
 
     private double robotOffset;
 
+    private boolean habDistanceGood = false;
+    private double[] rotationValues;
+    private double accelTimeChanger = 0.0;
     private int disabled = 0;
     private double prevTrigTime = 0.0;
     private boolean trigTimeIncrease = false;
@@ -116,7 +119,7 @@ public class Robot extends TimedRobot {
 
     private double lead;
 
-    private boolean autonomousRunning = false;
+    private boolean useCushionDistance = false;
     private double robotRotation;
 
     private double imuOffset = 0;
@@ -172,6 +175,15 @@ public class Robot extends TimedRobot {
     private int alignCase = 0;
     private int cargoCase = 0;
 
+    private void/*int*/ frictionCompensate() {
+        int idOfBadWheel = 0;
+        double[] id1 = {1, SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleError()};
+        double[] id2 = {2, SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleError()};
+        double[] id3 = {3, SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleError()};
+        double[] id4 = {4, SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleError()};
+        double[][] namePlaceholder = MathUtils.layeredInsertionSort(new double[][] {id1, id2, id3, id4}, 1);
+        
+    }
     private void acceleration() {
         if (FWD + STR != 0.0) {
             if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
@@ -349,7 +361,7 @@ public class Robot extends TimedRobot {
 //                    STR *= 0.8;
 //                }
 
-                if (autonomousRunning && side < 20.0) {
+                if (useCushionDistance && side < 20.0) {
                     STR *= 0.6;
                 }
 
@@ -372,7 +384,7 @@ public class Robot extends TimedRobot {
 //                        FWD *= 0.8;
 //                    }
 
-                    if (autonomousRunning && front < 20.0) {
+                    if (useCushionDistance && front < 20.0) {
                         FWD *= 0.6;
                     }
                     // Min speed
@@ -399,41 +411,44 @@ public class Robot extends TimedRobot {
     }
 
     private boolean HABAlign(){
+
         boolean rotateDone = false;
         boolean fwdDone = false;
         double robotAngle = imu.getAngle();
         double front = (Lidar.getFRFrontSensor() < Lidar.getFLFrontSensor() ? Lidar.getFRFrontSensor(): Lidar.getFLFrontSensor());
 
-        if(Math.abs(MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0)) >= 2.8){
-            RCW = MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0) * 0.011;
+//        if(Math.abs(MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0)) >= 7.0){
+//            RCW = MathUtils.calculateContinuousError(180.0, robotAngle, 360.0, 0.0) * 0.011;
+//
+//            if(Math.abs(RCW) > 0.1){
+//                RCW = Math.signum(RCW) * 0.1;
+//            }
+//
+//            keepAngle = 180.0;
+//            habLidarTimeout = Time.get();
+//
+//        } else{
+//            RCW = 0.0;
 
-            if(Math.abs(RCW) > 0.16){
-                RCW = Math.signum(RCW) * 0.16;
+            if (Time.get() - habLidarTimeout > 1.75) {
+                fwdDone = true;
             }
 
-            keepAngle = 180.0;
+            if (front > 8.5){
+                FWD = 0.05;
+            } else if(front < 7.75){
+                FWD = -0.05;
+            } else {
+                habDistanceGood = true;
+                fwdDone = true;
+//            }
 
-        } else{
-            RCW = 0.0;
-            rotateDone = true;
         }
 
-        if (rotateDone && Time.get() - habLidarTimeout > 3.0) {
-            fwdDone = true;
-        } else {
-            habLidarTimeout = Time.get();
-        }
 
-        if (front > 7.75){
-            FWD = -0.15;
-        } else if(front < 7.25){
-            FWD = 0.15;
-        } else {
-            fwdDone = true;
-        }
 //        System.out.println(fwdDone + " " + rotateDone);
 
-        return  (fwdDone && rotateDone);
+        return  (fwdDone);
     }
 
     private boolean sideRocketAlign (double angle) {
@@ -650,6 +665,7 @@ public class Robot extends TimedRobot {
      * This function is run when the robot is first started up and should be used for any initialization code.
      */
     public void robotInit() {
+        RRLogger.start();
         // LABEL robot init
         // Load the wheel offset file from the roborio
 
@@ -714,7 +730,7 @@ public class Robot extends TimedRobot {
     }
 
     public void autonomousInit() {
-//        autonomousRunning = true;
+//        useCushionDistance = true;
         compensateToggle = true;
         // LABEL autonomous init
 //		jet.setAuto(); // this line is important because it does clock synchronization
@@ -769,9 +785,6 @@ public class Robot extends TimedRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        if (!Lidar.valid()) {
-            autoOverride = true;
-        }
         if (!autoOverride) {
             // LABEL autonomous periodic
 
@@ -921,25 +934,26 @@ public class Robot extends TimedRobot {
                         turnDone = false;
                     }
 
-                    if (commands[arrayIndex][5] == 1.0) {
-                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex + 1][0], SmartDashboard.getNumber("Distance", 0)));
-                        smoothAccelerate = smoothAccelerateNum;
-                        FWD *= smoothAccelerate;
-                        STR *= smoothAccelerate;
-                    } else if (commands[arrayIndex][5] == 2.0) {
-                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], minSpeed, commands[arrayIndex][0], SmartDashboard.getNumber("Distance", 0)));
-                        smoothAccelerate = smoothAccelerateNum;
-                        FWD *= smoothAccelerate;
-                        STR *= smoothAccelerate;
-                    } else if (commands[arrayIndex][5] == 3.0) {
-                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], minSpeed, SmartDashboard.getNumber("Distance", 0)));
-                        smoothAccelerate = smoothAccelerateNum;
-                        FWD *= smoothAccelerate;
-                        STR *= smoothAccelerate;
-                    } else {
-                        FWD *= tSpeed;
-                        STR *= tSpeed;
-                    }
+
+//                    if (commands[arrayIndex][5] == 1.0) {
+//                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], commands[arrayIndex + 1][0], SmartDashboard.getNumber("Distance", 0)));
+//                        smoothAccelerate = smoothAccelerateNum;
+//                        FWD *= smoothAccelerate;
+//                        STR *= smoothAccelerate;
+//                    } else if (commands[arrayIndex][5] == 2.0) {
+//                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], minSpeed, commands[arrayIndex][0], SmartDashboard.getNumber("Distance", 0)));
+//                        smoothAccelerate = smoothAccelerateNum;
+//                        FWD *= smoothAccelerate;
+//                        STR *= smoothAccelerate;
+//                    } else if (commands[arrayIndex][5] == 3.0) {
+//                        smoothAccelerateNum = (MathUtils.convertRange(previousDistance, previousDistance + commands[arrayIndex][4], commands[arrayIndex][0], minSpeed, SmartDashboard.getNumber("Distance", 0)));
+//                        smoothAccelerate = smoothAccelerateNum;
+//                        FWD *= smoothAccelerate;
+//                        STR *= smoothAccelerate;
+//                    } else {
+//                        FWD *= tSpeed;
+//                        STR *= tSpeed;
+//                    }
 
 
                     SmartDashboard.putNumber("Previous Distance", previousDistance);
@@ -973,12 +987,21 @@ public class Robot extends TimedRobot {
 //					driveTrain.drive(new Vector(-STR, FWD), RCW);
 //				} else {
 
-                    if (commands[arrayIndex][17] != 0.0) {
-                        if (commands[arrayIndex][17] == 2.0 && alignCase == 0) {
-                            autonomousRunning = true;
-                            alignCase = 1;
+                    if (Lidar.valid() && commands[arrayIndex][17] != 0.0) {
+                        RRLogger.addData("FRR", Lidar.getFRRightSensor());
+                        RRLogger.addData("FRF", Lidar.getFRFrontSensor());
+                        RRLogger.addData("FLF", Lidar.getFLFrontSensor());
+                        RRLogger.addData("FLL", Lidar.getFLLeftSensor());
+                        RRLogger.newLine();
+                        RRLogger.writeFromQueue();
+
+                        if (commands[arrayIndex][17] == 2.0) {
+                            useCushionDistance = true;
+                            if (alignCase == 0) {
+                                alignCase = 1;
+                            }
                         } else {
-                            autonomousRunning = false;
+                            useCushionDistance = false;
                         }
 
                         if (wallAlign(commands[arrayIndex][3], commands[arrayIndex][2], commands[arrayIndex][18], commands[arrayIndex][19])) {
@@ -988,6 +1011,11 @@ public class Robot extends TimedRobot {
                         FWD *= commands[arrayIndex][0];
                         STR *= commands[arrayIndex][0];
                         RCW *= commands[arrayIndex][1];
+                    } else if (!Lidar.valid()) {
+                        RRLogger.addData("LidarBroke", 0.0);
+                        FWD = 0.0;
+                        STR = 0.0;
+                        RCW = 0.0;
                     }
 
                     if (Math.abs(xbox1.LStickX()) > 0.2 || Math.abs(xbox1.LStickY()) > 0.2) {
@@ -1054,7 +1082,7 @@ public class Robot extends TimedRobot {
     }
 
     public void teleopInit() {
-        autonomousRunning = false;
+        useCushionDistance = false;
         compensateToggle = false;
 //		jet.startTeleop();
 
@@ -1072,7 +1100,6 @@ public class Robot extends TimedRobot {
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).resetWheel();
         SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).resetWheel();
 
-		RRLogger.start();
         Elevator.init();
         Elevator.setPosition(1.0, 0, 0, false, false, 0, false);
     }
@@ -1081,32 +1108,13 @@ public class Robot extends TimedRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+        SmartDashboard.putBoolean("Hab Distance Good", habDistanceGood);
 //        System.out.println(FWD + "| |" + STR + "| |" + RCW);
         // LABEL teleop periodic
         autonomous = false;
 
 //        System.out.println(xbox2.RStickY());
-        habStart = xbox2.Start();
 
-        SmartDashboard.putNumber("Lift Encoder", Lift.getDistance());
-        if (habStart) {
-//            System.out.println("1");
-            if (HABAlign()) {
-                if (Time.get()-habTime > 1.0) {
-                    doClimb = true;
-//                    System.out.println("2");
-                }
-            } else {
-                habTime = Time.get();
-            }
-        }
-        if (doClimb) {
-//            System.out.println("3");
-            Lift.climb(xbox2.RStickY());
-            if (xbox2.Back()) {
-                Lift.setManual();
-            }
-        }
 
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
         SmartDashboard.putNumber("Elevator Setpoint", position);
@@ -1163,12 +1171,12 @@ public class Robot extends TimedRobot {
         if (!xbox1.RStickButton()) {
             RCW =  xbox1.RStickX() * 0.5;
         } else {
-            RCW = xbox1.RStickX() * 0.2;
+            RCW = xbox1.RStickX() * 1.9;
         }
 
         if (!xbox1.LStickButton()) {
-            FWD = -xbox1.LStickY();
-            STR = xbox1.LStickX();
+            FWD = -xbox1.LStickY() * 0.8;
+            STR = xbox1.LStickX() * 0.8;
         } else {
             FWD = -xbox1.LStickY() * 1.9;
             STR = xbox1.LStickX() * 1.9;
@@ -1249,7 +1257,7 @@ public class Robot extends TimedRobot {
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 132.0, 13.5, 5.8); //TN
+            wallAlign(152.0, 132.0, 13.0, 5.8); //TN, 13.5
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
@@ -1303,35 +1311,7 @@ public class Robot extends TimedRobot {
         if (compensateToggle && (Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getSpeedCommand()) +
                 Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getSpeedCommand()) +
                 Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getSpeedCommand()) +
-                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getSpeedCommand()) < 0.1) &&  //If we're coming from 0 and wheels aren't aligned yet, stop wheels till they're aligned
-                (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
-                        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleOff())) {
-            wheelStopCase = 0;
-            //FIXME, current auto: add once lidar works
-            //0.0,0.0,0.0,0.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-            //0.4,0.0,87.0,0.0,50.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0
-            //0.8,0.1,8.0,25.0,105.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
-            //1.1,0.8,30.0,25.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,1.0,13.2,5.2
-            //0.0,0.0,0.0,25.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0
-            //0.8,0.0,180.0,180.0,140.0,0,999,0,0,0,0,0,0,0.0,0,0,0,0,0,0
-            //0.0,0.3,180.0,180.0,0.0,0,999,0,0,0,0,0,0,0.0,0,0,0,0,0,0
-            //1.1,0.9,135.0,180.0,999.0,0,999,0,0,0,0,0,0.0,180.0,0,0,0,1.0,11.0,2.5
-            //0.0,0.0,0.0,180.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,180.0,1.0,2.0,0.0,0.0,0.0,0.0
-            //0.6,0.2,358,25.0,25.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
-            //0.6,0.25,20.0,25.0,120.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
-            //0.6,0.6,35.0,25.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,1.0,14.0,5.4
-            //0.0,0.0,0.0,25.0,999.0,0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,1.0,0.0,0.0,0.0,0.0
-            //0,0,0,0,999,0,999,0,0,0,0,0,0,0.0,0,0,0,0,0,0
-        } else if (compensateToggle && ((Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getSpeedCommand()) +
-                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getSpeedCommand()) +
-                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getSpeedCommand()) +
-                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getSpeedCommand()) > 0.1) ||
-                (Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getRotationCommand()) +
-                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getRotationCommand()) +
-                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getRotationCommand()) +
-                        Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getRotationCommand()) > 0.05)) &&  //If the robot is moving and it can't get there, decelerate to stop
+                Math.abs(SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getSpeedCommand()) < 1.0) &&  //If we're coming from 0 and wheels aren't aligned yet, stop wheels till they're aligned
                 (SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleOff() ||
                         SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleOff() ||
                         SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleOff() ||
@@ -1410,6 +1390,18 @@ public class Robot extends TimedRobot {
 
         //System.out.println(FWD + "|     |"  + STR + "|     |"  + prevFWD[cmdCounter] + "|     |"  +prevSTR[cmdCounter]);
 
+        if (Math.abs(RCW) > 0.3 || Math.abs(FWD) + Math.abs(STR) > 0.2) {
+            if (Time.get() - accelTimeChanger < 0.6) {
+                ACCEL_SPEED = 0.03;
+                DECEL_SPEED = 0.05;
+            } else {
+//                System.out.println("Here");
+                ACCEL_SPEED= 0.05/*0.031*/;
+                DECEL_SPEED= 0.08; //0.035
+            }
+        } else {
+            accelTimeChanger = Time.get();
+        }
         acceleration();
 
 //        prevRCW[cmdCounter] = RCW;
@@ -1428,6 +1420,8 @@ public class Robot extends TimedRobot {
             RRLogger.addData("Placing FLF", Lidar.getFLFrontSensor());
             RRLogger.addData("Placing FLL", Lidar.getFLLeftSensor());
             RRLogger.newLine();
+            RRLogger.writeFromQueue();
+
         }
 
         if (xbox2.A()) {
@@ -1436,48 +1430,48 @@ public class Robot extends TimedRobot {
             RRLogger.addData("Grabbing FLF", Lidar.getFLFrontSensor());
             RRLogger.addData("Grabbing FLL", Lidar.getFLLeftSensor());
             RRLogger.newLine();
+            RRLogger.writeFromQueue();
+
         }
 
         if (xbox2.Y()) {
             RRLogger.addData("Cargo Distance 1", Lidar.getBLLeftSensor());
             RRLogger.addData("Cargo Distance 2", Lidar.getBRRightSensor());
             RRLogger.newLine();
+            RRLogger.writeFromQueue();
         }
-        if (Elevator.atPosition()) {
-            Cargo.set(false, xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
+//        RRLogger.writeFromQueue();
+        Cargo.set(false, xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
 
-//            System.out.println(xbox2.B());
+        if (!Hatch.isRunning() && Elevator.getPosition() < 102.0 && Elevator.getPosition() > 1.0) {
+            Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(), xbox2.X(), 0, false);
+        }
+//        else {
+//            Elevator.setPower(-Math.signum(Elevator.getPosition() - 13.5) * 0.4);
+//        }
+
+        if (Elevator.atPosition()) {
             if (Hatch.set(xbox2.A(), xbox2.B(), false, safeToPutHatch) || xbox2.Y()) {
 
                 FWD = 0.0;
                 STR = 0.0;
                 RCW = 0.0;
-                Elevator.setPosition(0, 0, 0, true, false, 0, false);
-
+                Elevator.setPosition(0, 0, 0, true, false, 0, false); //Maybe add a keepPosition boolean
             }
+        }
 //            else {
 //                if (xbox2.LB()) {
 //                    Elevator.setPosition(0.0, 0.0, 0.0, false, false, 0, true);
-//                } else {
-                    if (Elevator.getPosition() < 105.0 && Elevator.getPosition() > 1.0) {
-                        if (xbox2.X()) {
-                            Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(), true, 0, false);
-                        } else {
-                            Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(), false, 0, false);
-                        }
-                    } else {
-                        Elevator.setPower(-Math.signum(Elevator.getPosition() - 13.5) * 0.4);
-                    }
+//                } else
 //                }
 //            }
-        } else {
+//        } else {
 //            System.out.println("Not here");
 
 //            Hatch.set(false, false, false, false);
 //            Hatch.set(xbox2.A(), xbox2.B(), xbox2.LB(), true);
 //            Cargo.set(xbox2.Start(), xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
-          Cargo.set(false, false, false, 0.0, 0.0, 0.0);
-        }
+//        }
 
 //        if (xbox1.Back()) {
             driveTrain.resetAngle(xbox1.Back());
@@ -1569,6 +1563,52 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("RCW", RCW);
         SmartDashboard.putNumber("IMU Angle", imu.getAngle());
 
+        habStart = xbox2.Start();
+
+        SmartDashboard.putNumber("Lift Encoder", Lift.getDistance());
+        if (!doClimb) {
+            if (habStart) {
+//            System.out.println("1");
+                if (HABAlign()) {
+                    if (Time.get() - habTime > 0.2) {
+                        doClimb = true;
+//                    System.out.println("2");
+                    }
+                } else {
+                    habTime = Time.get();
+                }
+            } else {
+                habTime = Time.get();
+                habLidarTimeout = Time.get();
+            }
+        }
+
+        if (doClimb) {
+//            System.out.println("3");
+            System.out.println("Climbing");
+            Lift.climb(xbox2.RStickY());
+
+            if (xbox2.Back()) {
+                Lift.setManual();
+            }
+        }
+
+
+        rotationValues = MathUtils.instertionSort(new double[] {SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getRotationCommand(),
+                SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getRotationCommand(),
+                SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getRotationCommand(),
+                SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getRotationCommand()});
+
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).scaleSpeedCommand(rotationValues[3]);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).scaleSpeedCommand(rotationValues[3]);
+        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).scaleSpeedCommand(rotationValues[3]);
+        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).scaleSpeedCommand(rotationValues[3]);
+
+        /*
+        Compensation Code:
+        frictionCompensate();
+         */
+
         driveTrain.drive(new Vector(-STR, FWD), RCW);
 
 
@@ -1637,7 +1677,7 @@ public class Robot extends TimedRobot {
             }
             disabled++;
         } else {
-            RRLogger.writeFromQueue();
+            RRLogger.close();
         }
     }
 

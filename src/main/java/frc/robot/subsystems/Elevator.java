@@ -37,6 +37,9 @@ public class Elevator {
             pos = 56.0 + tune;
         } else if (stickY <= -0.5) {
             pos = 95.5 + tune;
+            if (pos > 100.0) {
+                pos = 100.0;
+            }
         } else if (lastPos == 4.0){
             pos = 13.0;
             lastPos = 13.0;

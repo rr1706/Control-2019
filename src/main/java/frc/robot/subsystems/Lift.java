@@ -26,39 +26,41 @@ public class Lift {
         release.set(Value.kReverse);
     }
 
-    public static void reset() {
+    public static void reset() { //Currently the code CANNOT RUN lift code multiple times without redeploying
         release.set(Value.kReverse);
     }
 
     public static void climb(double joystick){ //At -65, go to 20% pwr, at 124, stop, 133 is max
         release.set(Value.kForward);
-
+//   manualMode = true;//FIXME, comment out before competition!!!
         if (!manualMode) {
             switch (climbCase) {
                 case 0:
-                    motor1.set(ControlMode.PercentOutput, -0.05);
+                    motor1.set(ControlMode.PercentOutput, -0.05); //Motors might be reversed, so test slow and in manual mode
                     if (Time.get() - prevTime > 0.1) {
                         climbCase = 1;
                     }
                     break;
                 case 1:
                     motor1.set(ControlMode.PercentOutput, 1.0);
-//                motor2.set(ControlMode.PercentOutput, 1.0);
-                    if (getDistance() >= 65.0) { //65
+                    if (getDistance() >= 72.0) { //65
                         motor1.configOpenloopRamp(0.0);
                         motor2.configOpenloopRamp(0.0);
-                        climbCase = 2;
+                        climbCase = 4;
                     }
                     break;
                 case 2:
                     motor1.set(ControlMode.PercentOutput, 0.2);
 //                    motor2.set(ControlMode.PercentOutput, 0.2);
-                    if (getDistance() >= 115.0) { //124
+                    if (getDistance() >= 115.0) {
                         climbCase = 3;
                     }
                     break;
                 case 3:
                     motor1.set(ControlMode.PercentOutput, 0.0);
+                    break;
+                case 4:
+                    manualMode = true;
                     break;
             }
         } else {
@@ -74,6 +76,6 @@ public class Lift {
     }
 
     public static double getDistance() {
-        return -liftEncoder.getDistance();
+        return Math.abs(liftEncoder.getDistance());
     }
 }

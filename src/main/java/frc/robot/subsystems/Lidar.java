@@ -32,7 +32,7 @@ public  class Lidar {
         compBuffer.order(ByteOrder.BIG_ENDIAN);
 
         if (transactionFailure) {
-            System.out.println("Transaction failure. Closing I2C Bus now");
+//            System.out.println("Transaction failure. Reopening I2C Bus now");
             I2CBus.close();
             I2CBus = new I2C(I2C.Port.kOnboard, 0x08);
         }

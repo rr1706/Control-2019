@@ -9,68 +9,41 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RRLogger {
 
-    private static ConcurrentLinkedQueue<String> m_PowerBuffer = new ConcurrentLinkedQueue<String>();
-    private static ConcurrentLinkedQueue<String> m_DataBuffer = new ConcurrentLinkedQueue<String>();
+//    private static ConcurrentLinkedQueue<String> m_PowerBuffer = new ConcurrentLinkedQueue<String>();
+//    private static ConcurrentLinkedQueue<String> m_DataBuffer = new ConcurrentLinkedQueue<String>();
     private static StringBuilder  m_dataAdder = new StringBuilder();
-    private static PrintWriter m_LogFile;
+//    private static PrintWriter m_LogFile;
     private static PrintWriter m_DataLogFile;
     private static String directory = "/home/lvuser/logger/";
-    private static String logFileName = "power";
+//    private static String logFileName = "power";
     private static String dataDumpFileName = "data";
     private static long startTime;
 
     public static void start() {
         startTime = System.nanoTime();
-//        f = new File(directory + logFileName + ".csv");
-//        if (f.exists()) { // check if file exists
-//
-//            int i = 1;
-//            File test = null;
-//            do {
-//
-//                test = new File(directory + logFileName + "_" + i + ".csv");
-//                i++;
-//            } while (test.exists());
-//            f.renameTo(test); // Renames log file if exists instead of rewriting
-//            try {
-//                f = new File(directory + logFileName + ".csv");
-//                f.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        } else { {
-//            try {
-//                f.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
+
 		File f = new File(directory + dataDumpFileName + ".csv");
-		if (f.exists()) { // check if file exists
-			System.out.println("1");
-			System.out.println(f);
-			int i = 1;
-			File test = null;
-			do {
-				test = new File(directory + dataDumpFileName + "_" + i + ".csv");
-				i++;
-			} while (test.exists());
-			f.renameTo(test); // Renames log file if it exists instead of rewriting
-			try {
-//				f = new File(directory + dataDumpFileName + ".csv");
-				f.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("2");
-			System.out.println(f);
+        int i = 1;
+        while (f.exists()) { // check if file exists
+            f = new File(directory + dataDumpFileName + "_" + i + ".csv");
+            i++;
+        }
 			try {
 				f.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
+            System.out.println(f);
+
+//		} else {
+//			try {
+//				f.createNewFile();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//            System.out.println("2");
+//            System.out.println(f);
+//		}
 
 //        try {
 //            m_LogFile = new PrintWriter(new BufferedWriter(new FileWriter(directory + logFileName + ".csv", false)));
@@ -85,77 +58,34 @@ public class RRLogger {
 			e.printStackTrace();
 		}
         System.out.println("Done constructing logger");
+		m_dataAdder.append("Better Log File");
+		m_dataAdder.append("\n");
     }
-
-//	public void addMessage(String message) {
-//
-//		// String str = "Time: " + DriverStation.getInstance().getMatchTime() + ";Message: " + message;
-//		String str = "Time(s): " + ((System.nanoTime() - startTime) / 1000000000.0) + " Message:" + message;
-//		m_MessageBuffer.add(str);
-//	}
 
     public static void addData(String dataType, double value) {
 
         String sep = ",";
         String str = dataType + sep + value + sep + ((double) (System.nanoTime() - startTime) / 1000000000.0) + sep;
-//        m_DataBuffer.add(str);
         m_dataAdder.append(str);
     }
 
-//    public static void addPower(String dataType, double value) {
-//
-//        String sep = ",";
-//        String str = dataType + sep + value + sep + ((double) (System.nanoTime() - startTime) / 1000000000.0);
-//        m_PowerBuffer.add(str);
-//
-//    }
-
     public static void newLine() {
-//        m_DataBuffer.add("\n");
         m_dataAdder.append("\n");
     }
-
-//    public static void newPowerLine() {
-//        m_PowerBuffer.add("\n");
-//    }
 
     public static void writeFromQueue() {
 
         try {
-
-//            if (m_LogFile == null) {
-//                System.out.println("logfile null");
-//                return;
-//            }
-
-//            if (!m_PowerBuffer.isEmpty()) {
-//
-//                String s = m_PowerBuffer.toString();
-//                System.out.println("messagebuffer");
-//
-//                m_LogFile.println(s);
-//
-//            }
-//            if (!m_DataBuffer.isEmpty()) {
-//
-//                String s = m_DataBuffer.toString();
-//                m_DataBuffer.clear();
-////                System.out.println("databuffer");
-//
-//                m_DataLogFile.println(s);
-//
-//            }
-
             if (m_dataAdder.length() > 0) {
-//                System.out.println("Adding");
                 m_DataLogFile.write(m_dataAdder.toString());
-//                System.out.println("Deletng");
-//                m_dataAdder.delete(0, m_dataAdder.length() - 1);
-//                System.out.println("Closing");
-                m_DataLogFile.close();
+                m_dataAdder.delete(0, m_dataAdder.length() - 1);
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
+    public static void close() {
+        m_DataLogFile.flush();
+        m_DataLogFile.close();
     }
 }

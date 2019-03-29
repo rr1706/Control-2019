@@ -120,7 +120,7 @@ public class Hatch {
         return hasHatch;
     }
 
-//    public static boolean startHatch() {
-//        return startingHatch;
-//    }
+    public static boolean isRunning() {
+        return running;
+    }
 }

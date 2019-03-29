@@ -37,6 +37,19 @@ public class MathUtils {
 		}
 		return array;
 	}
+	public static double[][] layeredInsertionSort(double[][] array, int indexToCheck) { //FIXME, use to solve angleError issue
+		for (int i=1; i<array.length; ++i)  {
+			double key = array[i][indexToCheck];
+			int j = i-1;
+
+			while (j >=0 && array[j][1] > key) {
+				array[j+1][indexToCheck] = array[j][indexToCheck];
+				j = j-1;
+			}
+			array[j+1][indexToCheck] = key;
+		}
+		return array;
+	}
 
 	/**
 	 * Reverses the direction of a wheel
