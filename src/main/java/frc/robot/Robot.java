@@ -175,15 +175,14 @@ public class Robot extends TimedRobot {
     private int alignCase = 0;
     private int cargoCase = 0;
 
-    private void/*int*/ frictionCompensate() {
-        int idOfBadWheel = 0;
-        double[] id1 = {1, SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleError()};
-        double[] id2 = {2, SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleError()};
-        double[] id3 = {3, SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleError()};
-        double[] id4 = {4, SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleError()};
-        double[][] namePlaceholder = MathUtils.layeredInsertionSort(new double[][] {id1, id2, id3, id4}, 1);
-        
-    }
+//    private void frictionCompensate() {
+//        double averageError = 0.25*(SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleError() + SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleError() + SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleError() + SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleError());
+//        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).checkFrictionCompensation(averageError);
+//        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).checkFrictionCompensation(averageError);
+//        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).checkFrictionCompensation(averageError);
+//        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).checkFrictionCompensation(averageError);
+//    }
+
     private void acceleration() {
         if (FWD + STR != 0.0) {
             if (Math.abs(RCW) > Math.abs(prevRCW[cmdCounter])) {
@@ -435,9 +434,9 @@ public class Robot extends TimedRobot {
             }
 
             if (front > 8.5){
-                FWD = 0.05;
+                FWD = 0.04;
             } else if(front < 7.75){
-                FWD = -0.05;
+                FWD = -0.04;
             } else {
                 habDistanceGood = true;
                 fwdDone = true;
@@ -1251,13 +1250,17 @@ public class Robot extends TimedRobot {
             RCW = 0.0;
         }
 
+        //Old auto lineup
+        //0.4,0.0,87.0,0.0,50.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0
+        //0.8,0.1,13.0,25.0,105.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
+
         if (xbox1.buttonPad() == 45) {
             wallAlign(25.0, 45.0, 13.0, 5.8); //TN Comp Values
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 132.0, 13.0, 5.8); //TN, 13.5
+            wallAlign(152.0, 132.0, 13.3, 5.8); //TN, 13.5
             STR += xbox1.LStickX() * placeholderName;
             FWD -= xbox1.LStickY() * placeholderName;
 

@@ -16,6 +16,9 @@ public class SwerveModule {
     private  static double SPEED_RATIO = 0.47;
 
     private Vector position;
+    private  double maxP = 1.0e-3;
+    private double frictionCompensationRatio = 0.0;
+    private boolean useFrictionCompensate = false;
     private double speedScale = 0.0;
     private boolean prevReversed = false;
     private double prevRotationCommand = 0.0;
@@ -255,6 +258,11 @@ public class SwerveModule {
         } else {
             wheelReversed = false;
         }
+
+//        if (useFrictionCompensate) {
+//            kP = maxP;
+//        }
+//        kP += frictionCompensationRatio;
 
         anglePID.setPID(SmartDashboard.getNumber("kP", kP/*0.9e-3, 1e-3*/), SmartDashboard.getNumber("kI", kI/*6.8e-6, 1e-5*/), SmartDashboard.getNumber("kD", kD/*1.9e-4, 2e-4*/));
 
@@ -524,7 +532,18 @@ back_right_drift=0.0028,0.0028
     }
 
     public double getAngleError() {
-        return trueError;
+        return Math.abs(trueError);
+    }
+
+    public void checkFrictionCompensation(double averageError) {
+//        useFrictionCompensate = (getAngleError() > averageError);
+        if (getAngleError() > averageError) {
+            frictionCompensationRatio = maxP * (getAngleError() - averageError) / 180.0;
+        } else {
+            frictionCompensationRatio = 0.0;
+        }
+        //Angle Error should only reasonably reach 180, so increase P to 1.0e-3 when at 180, but start at 5.0e-3 normally
+        //If a wheel is 90 off more than the rest, its P will double
     }
 
     public boolean getAngleOff() {
