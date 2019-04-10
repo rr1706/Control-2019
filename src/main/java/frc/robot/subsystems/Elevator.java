@@ -25,16 +25,16 @@ public class Elevator {
     }
 //Add safeguards. Set upper and lower limits where the elevator cannot be commanded past
     //Use button to set position to current
-    public static void setPosition(double stickY, double tune, double stickX, boolean override, boolean buttonX, int auto, boolean groundHatch) {
+    public static boolean setPosition(double stickY, double tune, double stickX, boolean override, boolean buttonX, boolean hatch) {
         tune *= 10.0; //This changes between hatch setpoints and cargo setpoints
         //When pressed, tune will add 5 to each setpoint
 
         if (buttonX) {
             pos = 4.0 + tune;
         } else if (stickY >= 0.5) {
-            pos = 13.0 + tune;
-        } else if (stickX >= 0.5) {
-            pos = 56.0 + tune;
+            pos = 9.0 + tune;
+        } else if (Math.abs(stickX) >= 0.5) {
+            pos = 54.0 + tune;
         } else if (stickY <= -0.5) {
             pos = 95.5 + tune;
             if (pos > 100.0) {
@@ -46,18 +46,6 @@ public class Elevator {
         } else {
             pos = lastPos;
     }
-//        System.out.println(auto);
-        if (auto == 1) {
-            pos = 13.0 + tune;
-        } else if (auto == 2) {
-            pos = 56.0 + tune;
-        } else if (auto ==3) {
-            pos  = 95.5 + tune;
-        }
-
-        if (groundHatch) {
-            pos = 1.3;
-        }
 
         if (override) {
             pos = lastPos;
@@ -77,6 +65,8 @@ public class Elevator {
         SmartDashboard.putNumber("Elevator Setpoint", pos);
         SmartDashboard.putNumber("Motor Temp", motor.getMotorTemperature());
         SmartDashboard.putNumber("Motor Off Time", motorOffTime);
+
+//        System.out.println(pos + " || " + encoder.getPosition());
 
         switch (motorSafety) {
             case 0:
@@ -100,6 +90,8 @@ public class Elevator {
         } else {
             SmartDashboard.putBoolean("Motor Warning", false);
         }
+
+       return atPosition();
     }
 
     public static double getPosition() {
@@ -107,10 +99,6 @@ public class Elevator {
     }
 
     public static boolean atPosition() {
-        if (Math.abs(encoder.getPosition()-pos) < 2.0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (Math.abs(encoder.getPosition()-pos) < 2.0);
     }
 }

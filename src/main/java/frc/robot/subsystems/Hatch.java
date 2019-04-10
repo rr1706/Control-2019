@@ -85,18 +85,41 @@ public class Hatch {
 //                System.out.println("Going Back");
                 if (Time.get() - prevTime > 0.2) {
                     prevTime = Time.get();
-                    step = 0;
+                    step = 9;
                     hasHatch = false;
 //                    running = false; //FIXME Do the same for the intake
                 }
                 break;
 
+            case 9:
+                running = false;
+                push.set(Value.kReverse);
+                beak.set(Value.kReverse);
+
+                if (Time.get() - prevTime > 2.0) {
+                    step = 0;
+                }
+
+                if (grab) {
+                    running = true;
+                    prevTime = Time.get();
+                    step = 1;
+                    hasHatch = false;
+                } else if (place && safe) {
+                    running = true;
+                    step = 4;
+                    hasHatch = true;
+                } else if (receive) {
+                    step = 8;
+                }
+
+                break;
             case 8:
                 beak.set(Value.kReverse);
                 if (!receive) {
                     if (Time.get() - prevTime > 1.5) {
                         step = 0;
-                        Elevator.setPosition(1.0, 0.0, 0.0,  false, false,  0, false);
+                        Elevator.setPosition(1.0, 0.0, 0.0,  false, false, false);
                         hasHatch = true;
                     }
                 } else {

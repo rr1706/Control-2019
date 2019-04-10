@@ -31,11 +31,23 @@ public  class Lidar {
         SmartDashboard.putBoolean("Lidar Good", !transactionFailure);
         compBuffer.order(ByteOrder.BIG_ENDIAN);
 
-        if (transactionFailure) {
+        if (transactionFailure || SensorFailure()) {
 //            System.out.println("Transaction failure. Reopening I2C Bus now");
             I2CBus.close();
             I2CBus = new I2C(I2C.Port.kOnboard, 0x08);
         }
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0
+//        1.3,1.3,140.0,180.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,2.0,9.5,3.5,50.0,0.1
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,2,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,0.0,180.0,0.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0,0.0,0.0
+//        1.4,1.4,50.0,25.0,999.0,0,999.0,0,0,0,0,0.0,0,0,0,0,0.0,2.0,12.5,5.8,25.0,0.1
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
+//        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0
+//        0,0,999,0,999,0,999,0.0,0,0,0,0,0,0,0.0,0,0,0,0,0,0.0,0.0
         try {
             sensor1 = compBuffer.getShort() * 0.0394; //Front Right Wheel, Right Sensor
             sensor2 = compBuffer.getShort() * 0.0394; //Front Right Wheel, Front Sensor
@@ -93,31 +105,55 @@ public  class Lidar {
     3 = 9.0
      */
     public static double getFRRightSensor(){
+        if (sensor1 <= 0.0) {
+            sensor1 = 999.0;
+        }
         return sensor1;
     }
 
     public static double getFRFrontSensor(){
+        if (sensor2 <= 0.0) {
+            sensor2 = 999.0;
+        }
         return sensor2;
     }
 
     public static double getFLFrontSensor(){
+        if (sensor3 <= 0.0) {
+            sensor3 = 999.0;
+        }
         return sensor3;
     }
 
     public static double getFLLeftSensor(){
+        if (sensor4 <= 0.0) {
+            sensor4 = 999.0;
+        }
         return sensor4;
     }
 
     public static double getBLLeftSensor(){
+        if (sensor5 <= 0.0) {
+            sensor5 = 999.0;
+        }
         return sensor5;
     }
 
     public static double getBRRightSensor(){
+        if (sensor6 <= 0.0) {
+            sensor6 = 999.0;
+        }
         return sensor6;
     }
 
     public static double hasCargo(){
+        if (sensor7 <= 0.0) {
+            sensor7 = 999.0;
+        }
         return sensor7;
     }
 
+    private static boolean SensorFailure() {
+        return (sensor1 <= 0.0 || sensor2 <= 0.0 || sensor3 <= 0.0 || sensor4 <= 0.0 || sensor5 <= 0.0 || sensor6 <= 0.0);
+    }
 }

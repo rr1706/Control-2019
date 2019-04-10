@@ -62,6 +62,7 @@ public class RRLogger {
 		m_dataAdder.append("\n");
     }
 
+    //Create name of file based off of Real Time
     public static void addData(String dataType, double value) {
 
         String sep = ",";
