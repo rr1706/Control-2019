@@ -18,11 +18,11 @@ public class RRLogger {
 //    private static String logFileName = "power";
     private static String dataDumpFileName = "data";
     private static long startTime;
+    private static File f = new File(directory + dataDumpFileName + ".csv");
 
     public static void start() {
         startTime = System.nanoTime();
 
-		File f = new File(directory + dataDumpFileName + ".csv");
         int i = 1;
         while (f.exists()) { // check if file exists
             f = new File(directory + dataDumpFileName + "_" + i + ".csv");
@@ -88,5 +88,9 @@ public class RRLogger {
     public static void close() {
         m_DataLogFile.flush();
         m_DataLogFile.close();
+    }
+
+    public static String getFileName() {
+        return f.getAbsolutePath();
     }
 }

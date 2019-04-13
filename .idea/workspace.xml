@@ -2,18 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bc92e98-4b98-41f0-a155-aaa0fa3e3eb0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/deploy/LeftHatch.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/deploy/LeftCargoShip.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/Forward.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/BackToOtherSide.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/LeftHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/LeftFrontHatch.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/OldTest.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightCargo.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightFrontHatch.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightRocket.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/deploy/SpeedTest(4,6).csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -31,110 +36,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="1438" lean-forward="true" selection-start-line="1438" selection-end-line="1438" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="24" column="65" selection-start-line="24" selection-start-column="65" selection-end-line="24" selection-end-column="65" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftHatch.csv">
-          <provider editor-type-id="csv-text-editor" />
-          <provider selected="true" editor-type-id="csv-table-editor">
-            <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-              <column index="0" width="46" />
-              <column index="1" width="45" />
-              <column index="2" width="56" />
-              <column index="3" width="50" />
-              <column index="4" width="49" />
-              <column index="5" width="33" />
-              <column index="6" width="67" />
-              <column index="7" width="47" />
-              <column index="8" width="48" />
-              <column index="9" width="41" />
-              <column index="10" width="45" />
-              <column index="11" width="56" />
-              <column index="12" width="49" />
-              <column index="13" width="55" />
-              <column index="14" width="52" />
-              <column index="15" width="62" />
-              <column index="16" width="61" />
-              <column index="17" width="52" />
-              <column index="18" width="56" />
-              <column index="19" width="48" />
-              <column index="20" width="53" />
-              <column index="21" width="52" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/deploy/RightHatch.csv">
-          <provider editor-type-id="csv-text-editor">
-            <state relative-caret-position="96">
-              <caret line="6" column="64" lean-forward="true" selection-start-line="6" selection-start-column="64" selection-end-line="6" selection-end-column="64" />
-            </state>
-          </provider>
-          <provider selected="true" editor-type-id="csv-table-editor">
-            <state showInfoPanel="false" fixedHeaders="false" rowLines="3">
-              <column index="0" width="51" />
-              <column index="1" width="46" />
-              <column index="2" width="60" />
-              <column index="3" width="55" />
-              <column index="4" width="66" />
-              <column index="5" width="45" />
-              <column index="6" width="64" />
-              <column index="7" width="50" />
-              <column index="8" width="45" />
-              <column index="9" width="58" />
-              <column index="10" width="48" />
-              <column index="11" width="53" />
-              <column index="12" width="56" />
-              <column index="13" width="49" />
-              <column index="14" width="50" />
-              <column index="15" width="54" />
-              <column index="16" width="57" />
-              <column index="17" width="62" />
-              <column index="18" width="62" />
-              <column index="19" width="62" />
-              <column index="20" width="61" />
-              <column index="21" width="76" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16">
-              <caret line="1" column="28" lean-forward="true" selection-start-line="1" selection-start-column="28" selection-end-line="1" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="38" column="10" selection-start-line="38" selection-start-column="10" selection-end-line="49" selection-end-column="67" />
+            <state relative-caret-position="166">
+              <caret line="1376" column="21" selection-start-line="1376" selection-start-column="12" selection-end-line="1376" selection-end-column="21" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -145,71 +51,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="194" column="30" selection-start-line="194" selection-start-column="30" selection-end-line="194" selection-end-column="30" />
+            <state relative-caret-position="303">
+              <caret line="366" selection-start-line="366" selection-end-line="366" />
               <folding>
-                <element signature="e#14773#14774#0" expanded="true" />
-                <element signature="e#14853#14854#0" expanded="true" />
-                <element signature="e#14912#14913#0" expanded="true" />
-                <element signature="e#15016#15017#0" expanded="true" />
-                <element signature="e#15108#15109#0" expanded="true" />
-                <element signature="e#15187#15188#0" expanded="true" />
-                <element signature="e#15275#15276#0" expanded="true" />
-                <element signature="e#15734#15735#0" expanded="true" />
-                <element signature="e#16367#16368#0" expanded="true" />
-                <element signature="e#16441#16442#0" expanded="true" />
-                <element signature="e#16500#16501#0" expanded="true" />
-                <element signature="e#16588#16589#0" expanded="true" />
-                <element signature="e#16667#16668#0" expanded="true" />
-                <element signature="e#17292#17293#0" expanded="true" />
-                <element signature="e#17358#17359#0" expanded="true" />
-                <element signature="e#17606#17607#0" expanded="true" />
-                <element signature="e#17688#17689#0" expanded="true" />
-                <element signature="e#17753#17754#0" expanded="true" />
-                <element signature="e#17823#17824#0" expanded="true" />
-                <element signature="e#17912#17913#0" expanded="true" />
-                <element signature="e#18120#18121#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
-              <caret line="84" column="36" selection-start-line="84" selection-start-column="29" selection-end-line="84" selection-end-column="36" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#4699#4700#0" expanded="true" />
-                <element signature="e#4730#4731#0" expanded="true" />
-                <element signature="e#4771#4772#0" expanded="true" />
-                <element signature="e#4801#4802#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="495">
-              <caret line="142" column="18" selection-start-line="142" selection-start-column="18" selection-end-line="142" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="174">
-              <caret line="70" column="8" lean-forward="true" selection-start-line="70" selection-start-column="8" selection-end-line="70" selection-end-column="8" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#3413#3414#0" expanded="true" />
-                <element signature="e#3457#3458#0" expanded="true" />
-                <element signature="e#3431#3432#0" expanded="true" />
-                <element signature="e#3497#3498#0" expanded="true" />
+                <element signature="e#17572#17573#0" expanded="true" />
+                <element signature="e#17646#17647#0" expanded="true" />
+                <element signature="e#17705#17706#0" expanded="true" />
+                <element signature="e#17793#17794#0" expanded="true" />
+                <element signature="e#17872#17873#0" expanded="true" />
+                <element signature="e#18497#18498#0" expanded="true" />
+                <element signature="e#18563#18564#0" expanded="true" />
+                <element signature="e#18811#18812#0" expanded="true" />
+                <element signature="e#18893#18894#0" expanded="true" />
+                <element signature="e#18958#18959#0" expanded="true" />
+                <element signature="e#19028#19029#0" expanded="true" />
+                <element signature="e#19117#19118#0" expanded="true" />
+                <element signature="e#19325#19326#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -226,36 +83,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>id == 1</find>
-      <find>id == 2</find>
-      <find>2</find>
-      <find>translationmoto</find>
-      <find>translationpid.setre</find>
-      <find>cushionmaxsp</find>
-      <find>usecushiondist</find>
-      <find>cargoshipalign</find>
-      <find>smartdashboard.putnum</find>
-      <find>smartdashboard.putnumber(&quot;FWD</find>
-      <find>useCushionDistance</find>
-      <find>usecushiondis</find>
-      <find>cushion</find>
-      <find>cushiondistance</find>
-      <find>usecushiondista</find>
-      <find>cushionMaxSpeed</find>
-      <find>teleopperio</find>
-      <find>teleopinit</find>
-      <find>println</find>
-      <find>autonomousinit</find>
-      <find>aligncase</find>
-      <find>prevWallAlignTime</find>
-      <find>[17]</find>
-      <find>prevwallali</find>
+      <find>fr calc</find>
+      <find>getangle</find>
+      <find>roboti</find>
+      <find>f</find>
+      <find>disabledinit</find>
+      <find>rrlogger</find>
+      <find>rrlogger.sta</find>
+      <find>newline</find>
+      <find>drivetrain.dri</find>
+      <find>setrotationcomma</find>
+      <find>rotationcommand</find>
+      <find>setrotationcommand</find>
+      <find>fr angle</find>
+      <find>translationpid</find>
+      <find>rotation</find>
+      <find>translationpid.setrefere</find>
+      <find>rotationpid.setreger</find>
+      <find>calculated</find>
+      <find>angle</find>
+      <find>rotationpid.setref</find>
+      <find>rotationencoder</find>
+      <find>rotationdistan</find>
+      <find>rotationpid.set</find>
+      <find>set()</find>
+      <find>angle comman</find>
+      <find>anglecommand</find>
+      <find>ROTATION_DISTANCE_PER_PULSE</find>
+      <find>angleCommand</find>
+      <find>translationpid.setref</find>
       <find>wallalign</find>
-      <find>prevwa</find>
-      <find>prevwallalign</find>
-      <find>prevwallaligntime</find>
-      <find>righthat</find>
-      <find>linesens</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -265,8 +122,6 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/utilities/Acceleration.java" />
-        <option value="$PROJECT_DIR$/src/main/deploy/Forward.csv" />
-        <option value="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" />
         <option value="$PROJECT_DIR$/src/main/deploy/OldTest.csv" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/Ds.java" />
@@ -275,36 +130,48 @@
         <option value="$PROJECT_DIR$/src/main/deploy/Test.csv" />
         <option value="$PROJECT_DIR$/Gradle Deploy - Offline.bat" />
         <option value="$PROJECT_DIR$/build.gradle" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Cargo.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lift.java" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/utilities/MathUtils.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/IMU.java" />
         <option value="$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java" />
         <option value="$PROJECT_DIR$/src/main/deploy/RightHatch.csv" />
         <option value="$PROJECT_DIR$/src/main/deploy/LeftHatch.csv" />
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java" />
+        <option value="$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/RightBack.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/LeftBack.csv" />
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java" />
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java" />
+        <option value="$PROJECT_DIR$/src/main/deploy/Forward.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/BackToOtherSide.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/RightFrontHatch.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/LeftFrontHatch.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/RightCargoShip.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/LeftCargoShip.csv" />
+        <option value="$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv" />
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java" />
+        <option value="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" />
         <option value="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="1937" />
-    <option name="height" value="1000" />
+    <option name="x" value="57" />
+    <option name="y" value="67" />
+    <option name="width" value="1938" />
+    <option name="height" value="998" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -377,13 +244,12 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554857524181" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1555176871208" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../Public/frc2019/maven/com/ctre/phoenix/wpiapi-java/5.14.1/wpiapi-java-5.14.1.jar!/" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -394,12 +260,12 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Driver Station\Documents\GitHub\Control-2019\src\main\deploy" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Driver Station\Documents\GitHub\Control-2019\src\main\deploy" />
       <recent name="C:\Users\Driver Station\Documents\GitHub\Control-2019\vendordeps" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Driver Station\Documents\GitHub\Control-2019\src\main\deploy" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -462,28 +328,29 @@
       <workItem from="1551741852900" duration="164929000" />
       <workItem from="1552675108545" duration="22485000" />
       <workItem from="1552762639990" duration="116062000" />
+      <workItem from="1554929204438" duration="57976000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="697310000" />
+    <option name="totallyTimeSpent" value="755286000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.1590604" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.16107382" />
       <window_info id="Structure" order="1" sideWeight="0.5021097" side_tool="true" weight="0.21073826" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
       <window_info id="Capture Tool" order="4" />
       <window_info id="UI Designer" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="0" weight="0.32784432" />
+      <window_info anchor="bottom" id="Messages" order="0" weight="0.32719547" />
       <window_info anchor="bottom" id="Message" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49932885" visible="true" weight="0.4164306" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49932885" visible="true" weight="0.18696883" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39943343" />
-      <window_info anchor="bottom" id="Find" order="4" weight="0.32784432" />
+      <window_info anchor="bottom" id="Find" order="4" weight="0.32719547" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
@@ -579,27 +446,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/Forward.csv">
-      <provider editor-type-id="csv-text-editor" />
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-          <column index="0" width="100" />
-          <column index="1" width="100" />
-          <column index="2" width="100" />
-          <column index="3" width="100" />
-          <column index="4" width="100" />
-          <column index="5" width="100" />
-          <column index="6" width="100" />
-          <column index="7" width="100" />
-          <column index="8" width="100" />
-          <column index="9" width="100" />
-          <column index="10" width="100" />
-          <column index="11" width="100" />
-          <column index="12" width="100" />
-          <column index="13" width="100" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/../../../../Public/frc2019/maven/edu/wpi/first/wpilibj/wpilibj-java/2019.3.1/wpilibj-java-2019.3.1-sources.jar!/edu/wpi/first/wpilibj/IterativeRobotBase.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="213">
@@ -614,54 +460,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/OldTest.csv">
-      <provider editor-type-id="csv-text-editor">
-        <state relative-caret-position="32">
-          <caret line="2" column="4" lean-forward="true" selection-start-line="2" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
-        </state>
-      </provider>
-      <provider editor-type-id="text-editor" />
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-          <column index="0" width="32" />
-          <column index="1" width="40" />
-          <column index="2" width="37" />
-          <column index="3" width="32" />
-          <column index="4" width="34" />
-          <column index="5" width="30" />
-          <column index="6" width="34" />
-          <column index="7" width="34" />
-          <column index="8" width="36" />
-          <column index="9" width="28" />
-          <column index="10" width="35" />
-          <column index="11" width="33" />
-          <column index="12" width="31" />
-          <column index="13" width="28" />
-          <column index="14" width="35" />
-          <column index="15" width="41" />
-          <column index="16" width="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="889">
-          <caret line="136" column="26" lean-forward="true" selection-start-line="136" selection-start-column="26" selection-end-line="136" selection-end-column="26" />
-          <folding>
-            <element signature="e#2068#2069#0" expanded="true" />
-            <element signature="e#2095#2096#0" expanded="true" />
-            <element signature="e#2135#2136#0" expanded="true" />
-            <element signature="e#2187#2188#0" expanded="true" />
-            <element signature="e#2226#2227#0" expanded="true" />
-            <element signature="e#2277#2278#0" expanded="true" />
-            <element signature="e#2310#2311#0" expanded="true" />
-            <element signature="e#2359#2360#0" expanded="true" />
-            <element signature="e#2440#2441#0" expanded="true" />
-            <element signature="e#2490#2491#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Ds.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="112">
@@ -673,93 +471,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightCargo.csv">
-      <provider editor-type-id="csv-text-editor">
-        <state relative-caret-position="32">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-          <column index="0" width="46" />
-          <column index="1" width="28" />
-          <column index="2" width="59" />
-          <column index="3" width="40" />
-          <column index="4" width="56" />
-          <column index="5" width="35" />
-          <column index="6" width="53" />
-          <column index="7" width="43" />
-          <column index="8" width="47" />
-          <column index="9" width="42" />
-          <column index="10" width="33" />
-          <column index="11" width="37" />
-          <column index="12" width="32" />
-          <column index="13" width="47" />
-          <column index="14" width="42" />
-          <column index="15" width="45" />
-          <column index="16" width="41" />
-          <column index="17" width="38" />
-          <column index="18" width="48" />
-          <column index="19" width="56" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gradlew.bat">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="304">
           <caret line="19" column="17" lean-forward="true" selection-start-line="19" selection-start-column="17" selection-end-line="19" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv">
-      <provider editor-type-id="csv-text-editor" />
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-          <column index="0" width="42" />
-          <column index="1" width="41" />
-          <column index="2" width="38" />
-          <column index="3" width="44" />
-          <column index="4" width="62" />
-          <column index="5" width="48" />
-          <column index="6" width="48" />
-          <column index="7" width="56" />
-          <column index="8" width="49" />
-          <column index="9" width="58" />
-          <column index="10" width="50" />
-          <column index="11" width="40" />
-          <column index="12" width="51" />
-          <column index="13" width="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightRocket.csv">
-      <provider selected="true" editor-type-id="csv-text-editor">
-        <state>
-          <caret column="28" selection-end-line="1" />
-        </state>
-      </provider>
-      <provider editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
-          <column index="0" width="39" />
-          <column index="1" width="36" />
-          <column index="2" width="62" />
-          <column index="3" width="45" />
-          <column index="4" width="56" />
-          <column index="5" width="38" />
-          <column index="6" width="63" />
-          <column index="7" width="68" />
-          <column index="8" width="56" />
-          <column index="9" width="61" />
-          <column index="10" width="60" />
-          <column index="11" width="56" />
-          <column index="12" width="42" />
-          <column index="13" width="48" />
-          <column index="14" width="40" />
-          <column index="15" width="42" />
-          <column index="16" width="26" />
-          <column index="17" width="46" />
-          <column index="18" width="100" />
-          <column index="19" width="100" />
         </state>
       </provider>
     </entry>
@@ -777,13 +492,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
           <caret line="14" column="28" lean-forward="true" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/utilities/PIDController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="18" column="13" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
         </state>
       </provider>
     </entry>
@@ -828,24 +536,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/IMU.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="39" column="58" lean-forward="true" selection-start-line="39" selection-start-column="58" selection-end-line="39" selection-end-column="58" />
-          <folding>
-            <element signature="e#925#926#0" expanded="true" />
-            <element signature="e#988#989#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-318">
-          <caret line="147" column="11" lean-forward="true" selection-start-line="147" selection-start-column="11" selection-end-line="147" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/utilities/MathUtils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
@@ -853,137 +543,270 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#3697#3698#0" expanded="true" />
-            <element signature="e#3737#3738#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/deploy/SWERVE_OFFSET.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="16">
-          <caret line="1" column="28" lean-forward="true" selection-start-line="1" selection-start-column="28" selection-end-line="1" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="142" column="18" selection-start-line="142" selection-start-column="18" selection-end-line="142" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="70" column="8" lean-forward="true" selection-start-line="70" selection-start-column="8" selection-end-line="70" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#3413#3414#0" expanded="true" />
-            <element signature="e#3457#3458#0" expanded="true" />
-            <element signature="e#3431#3432#0" expanded="true" />
-            <element signature="e#3497#3498#0" expanded="true" />
-          </folding>
+          <caret line="1" column="28" selection-start-line="1" selection-start-column="28" selection-end-line="1" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Hatch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
+        <state relative-caret-position="1328">
           <caret line="84" column="36" selection-start-line="84" selection-start-column="29" selection-end-line="84" selection-end-column="36" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#4699#4700#0" expanded="true" />
-            <element signature="e#4730#4731#0" expanded="true" />
-            <element signature="e#4771#4772#0" expanded="true" />
-            <element signature="e#4801#4802#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightCargo.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="32">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
+          <column index="0" width="46" />
+          <column index="1" width="28" />
+          <column index="2" width="59" />
+          <column index="3" width="40" />
+          <column index="4" width="56" />
+          <column index="5" width="35" />
+          <column index="6" width="53" />
+          <column index="7" width="43" />
+          <column index="8" width="47" />
+          <column index="9" width="42" />
+          <column index="10" width="33" />
+          <column index="11" width="37" />
+          <column index="12" width="32" />
+          <column index="13" width="47" />
+          <column index="14" width="42" />
+          <column index="15" width="45" />
+          <column index="16" width="41" />
+          <column index="17" width="38" />
+          <column index="18" width="48" />
+          <column index="19" width="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightStartToRightRocket.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="240">
+          <caret line="15" column="64" selection-start-line="15" selection-start-column="64" selection-end-line="15" selection-end-column="64" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
+          <column index="0" width="42" />
+          <column index="1" width="41" />
+          <column index="2" width="38" />
+          <column index="3" width="44" />
+          <column index="4" width="62" />
+          <column index="5" width="48" />
+          <column index="6" width="48" />
+          <column index="7" width="56" />
+          <column index="8" width="49" />
+          <column index="9" width="58" />
+          <column index="10" width="50" />
+          <column index="11" width="40" />
+          <column index="12" width="51" />
+          <column index="13" width="53" />
+          <column index="14" width="100" />
+          <column index="15" width="100" />
+          <column index="16" width="100" />
+          <column index="17" width="100" />
+          <column index="18" width="100" />
+          <column index="19" width="100" />
+          <column index="20" width="100" />
+          <column index="21" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/OldTest.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="32">
+          <caret line="2" column="4" lean-forward="true" selection-start-line="2" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
+          <column index="0" width="32" />
+          <column index="1" width="40" />
+          <column index="2" width="37" />
+          <column index="3" width="32" />
+          <column index="4" width="34" />
+          <column index="5" width="30" />
+          <column index="6" width="34" />
+          <column index="7" width="34" />
+          <column index="8" width="36" />
+          <column index="9" width="28" />
+          <column index="10" width="35" />
+          <column index="11" width="33" />
+          <column index="12" width="31" />
+          <column index="13" width="28" />
+          <column index="14" width="35" />
+          <column index="15" width="41" />
+          <column index="16" width="39" />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Elevator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="194" column="30" selection-start-line="194" selection-start-column="30" selection-end-line="194" selection-end-column="30" />
+        <state relative-caret-position="1136">
+          <caret line="73" column="55" selection-start-line="73" selection-start-column="55" selection-end-line="73" selection-end-column="55" />
           <folding>
-            <element signature="e#14773#14774#0" expanded="true" />
-            <element signature="e#14853#14854#0" expanded="true" />
-            <element signature="e#14912#14913#0" expanded="true" />
-            <element signature="e#15016#15017#0" expanded="true" />
-            <element signature="e#15108#15109#0" expanded="true" />
-            <element signature="e#15187#15188#0" expanded="true" />
-            <element signature="e#15275#15276#0" expanded="true" />
-            <element signature="e#15734#15735#0" expanded="true" />
-            <element signature="e#16367#16368#0" expanded="true" />
-            <element signature="e#16441#16442#0" expanded="true" />
-            <element signature="e#16500#16501#0" expanded="true" />
-            <element signature="e#16588#16589#0" expanded="true" />
-            <element signature="e#16667#16668#0" expanded="true" />
-            <element signature="e#17292#17293#0" expanded="true" />
-            <element signature="e#17358#17359#0" expanded="true" />
-            <element signature="e#17606#17607#0" expanded="true" />
-            <element signature="e#17688#17689#0" expanded="true" />
-            <element signature="e#17753#17754#0" expanded="true" />
-            <element signature="e#17823#17824#0" expanded="true" />
-            <element signature="e#17912#17913#0" expanded="true" />
-            <element signature="e#18120#18121#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/JetsonServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3032">
+          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/utilities/PIDController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="18" column="13" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/IMU.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="39" column="58" selection-start-line="39" selection-start-column="58" selection-end-line="39" selection-end-column="58" />
+          <folding>
+            <element signature="e#925#926#0" expanded="true" />
+            <element signature="e#983#984#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveMotor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="152" column="27" selection-start-line="152" selection-start-column="27" selection-end-line="152" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/XboxController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="321">
+          <caret line="80" lean-forward="true" selection-start-line="80" selection-end-line="80" />
+          <folding>
+            <element signature="e#2068#2069#0" expanded="true" />
+            <element signature="e#2095#2096#0" expanded="true" />
+            <element signature="e#2135#2136#0" expanded="true" />
+            <element signature="e#2187#2188#0" expanded="true" />
+            <element signature="e#2226#2227#0" expanded="true" />
+            <element signature="e#2277#2278#0" expanded="true" />
+            <element signature="e#2310#2311#0" expanded="true" />
+            <element signature="e#2359#2360#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/Lidar.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="38" column="10" selection-start-line="38" selection-start-column="10" selection-end-line="49" selection-end-column="67" />
+        <state relative-caret-position="288">
+          <caret line="18" column="40" lean-forward="true" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightHatch.csv">
-      <provider editor-type-id="csv-text-editor">
-        <state relative-caret-position="96">
-          <caret line="6" column="64" lean-forward="true" selection-start-line="6" selection-start-column="64" selection-end-line="6" selection-end-column="64" />
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/BackToOtherSide.csv">
+      <provider selected="true" editor-type-id="csv-text-editor">
+        <state relative-caret-position="128">
+          <caret line="8" column="63" selection-start-line="8" selection-end-line="9" />
         </state>
       </provider>
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="false" fixedHeaders="false" rowLines="3">
-          <column index="0" width="51" />
-          <column index="1" width="46" />
-          <column index="2" width="60" />
-          <column index="3" width="55" />
-          <column index="4" width="66" />
-          <column index="5" width="45" />
-          <column index="6" width="64" />
-          <column index="7" width="50" />
-          <column index="8" width="45" />
-          <column index="9" width="58" />
-          <column index="10" width="48" />
-          <column index="11" width="53" />
-          <column index="12" width="56" />
-          <column index="13" width="49" />
-          <column index="14" width="50" />
-          <column index="15" width="54" />
-          <column index="16" width="57" />
-          <column index="17" width="62" />
-          <column index="18" width="62" />
-          <column index="19" width="62" />
-          <column index="20" width="61" />
-          <column index="21" width="76" />
+      <provider editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
+          <column index="0" width="100" />
+          <column index="1" width="100" />
+          <column index="2" width="100" />
+          <column index="3" width="100" />
+          <column index="4" width="100" />
+          <column index="5" width="100" />
+          <column index="6" width="100" />
+          <column index="7" width="100" />
+          <column index="8" width="100" />
+          <column index="9" width="100" />
+          <column index="10" width="100" />
+          <column index="11" width="100" />
+          <column index="12" width="100" />
+          <column index="13" width="100" />
+          <column index="14" width="100" />
+          <column index="15" width="100" />
+          <column index="16" width="100" />
+          <column index="17" width="100" />
+          <column index="18" width="100" />
+          <column index="19" width="100" />
+          <column index="20" width="100" />
+          <column index="21" width="100" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftHatch.csv">
-      <provider editor-type-id="csv-text-editor" />
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv">
+      <provider selected="true" editor-type-id="csv-text-editor">
+        <state relative-caret-position="160">
+          <caret line="11" column="99" selection-start-line="11" selection-start-column="99" selection-end-line="11" selection-end-column="99" />
+          <caret column="98" selection-start-column="98" selection-end-column="98" />
+          <caret line="1" column="95" selection-start-line="1" selection-start-column="95" selection-end-line="1" selection-end-column="95" />
+          <caret line="2" column="103" selection-start-line="2" selection-start-column="103" selection-end-line="2" selection-end-column="103" />
+          <caret line="3" column="98" selection-start-line="3" selection-start-column="98" selection-end-line="3" selection-end-column="98" />
+          <caret line="5" column="72" selection-start-line="5" selection-start-column="72" selection-end-line="5" selection-end-column="72" />
+          <caret line="4" column="82" selection-start-line="4" selection-start-column="82" selection-end-line="4" selection-end-column="82" />
+          <caret line="6" column="72" selection-start-line="6" selection-start-column="72" selection-end-line="6" selection-end-column="72" />
+          <caret line="7" column="72" selection-start-line="7" selection-start-column="72" selection-end-line="7" selection-end-column="72" />
+          <caret line="8" column="72" selection-start-line="8" selection-start-column="72" selection-end-line="8" selection-end-column="72" />
+          <caret line="9" column="97" selection-start-line="9" selection-start-column="97" selection-end-line="9" selection-end-column="97" />
+          <caret line="10" column="102" selection-start-line="10" selection-start-column="102" selection-end-line="10" selection-end-column="102" />
+        </state>
+      </provider>
+      <provider editor-type-id="csv-table-editor">
+        <state showInfoPanel="false" fixedHeaders="false" rowLines="2">
+          <column index="0" width="39" />
+          <column index="1" width="36" />
+          <column index="2" width="62" />
+          <column index="3" width="45" />
+          <column index="4" width="56" />
+          <column index="5" width="38" />
+          <column index="6" width="63" />
+          <column index="7" width="68" />
+          <column index="8" width="56" />
+          <column index="9" width="61" />
+          <column index="10" width="60" />
+          <column index="11" width="56" />
+          <column index="12" width="42" />
+          <column index="13" width="48" />
+          <column index="14" width="40" />
+          <column index="15" width="42" />
+          <column index="16" width="26" />
+          <column index="17" width="46" />
+          <column index="18" width="37" />
+          <column index="19" width="100" />
+          <column index="20" width="100" />
+          <column index="21" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftFrontHatch.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="224">
+          <caret line="14" column="51" selection-start-line="14" selection-start-column="51" selection-end-line="14" selection-end-column="51" />
+        </state>
+      </provider>
       <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="2">
           <column index="0" width="46" />
           <column index="1" width="45" />
           <column index="2" width="56" />
@@ -1006,23 +829,201 @@
           <column index="19" width="48" />
           <column index="20" width="53" />
           <column index="21" width="52" />
+          <column index="22" width="100" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightFrontHatch.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="96">
+          <caret line="6" column="54" selection-start-line="6" selection-start-column="54" selection-end-line="6" selection-end-column="54" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="false" fixedHeaders="false" rowLines="2">
+          <column index="0" width="51" />
+          <column index="1" width="46" />
+          <column index="2" width="60" />
+          <column index="3" width="55" />
+          <column index="4" width="66" />
+          <column index="5" width="45" />
+          <column index="6" width="64" />
+          <column index="7" width="50" />
+          <column index="8" width="45" />
+          <column index="9" width="58" />
+          <column index="10" width="48" />
+          <column index="11" width="53" />
+          <column index="12" width="56" />
+          <column index="13" width="49" />
+          <column index="14" width="50" />
+          <column index="15" width="54" />
+          <column index="16" width="57" />
+          <column index="17" width="62" />
+          <column index="18" width="62" />
+          <column index="19" width="62" />
+          <column index="20" width="61" />
+          <column index="21" width="76" />
+          <column index="22" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveDrivetrain.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="1438" lean-forward="true" selection-start-line="1438" selection-end-line="1438" />
+        <state relative-caret-position="128">
+          <caret line="8" column="27" lean-forward="true" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftCargoShip.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="96">
+          <caret line="6" column="60" selection-start-line="6" selection-start-column="60" selection-end-line="6" selection-end-column="60" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="2">
+          <column index="0" width="100" />
+          <column index="1" width="100" />
+          <column index="2" width="100" />
+          <column index="3" width="100" />
+          <column index="4" width="100" />
+          <column index="5" width="100" />
+          <column index="6" width="100" />
+          <column index="7" width="100" />
+          <column index="8" width="100" />
+          <column index="9" width="100" />
+          <column index="10" width="100" />
+          <column index="11" width="100" />
+          <column index="12" width="100" />
+          <column index="13" width="100" />
+          <column index="14" width="100" />
+          <column index="15" width="100" />
+          <column index="16" width="100" />
+          <column index="17" width="100" />
+          <column index="18" width="100" />
+          <column index="19" width="100" />
+          <column index="20" width="100" />
+          <column index="21" width="100" />
+          <column index="22" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="64">
+          <caret line="4" column="82" lean-forward="true" selection-start-line="4" selection-start-column="82" selection-end-line="4" selection-end-column="82" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="false" fixedHeaders="false" rowLines="2">
+          <column index="0" width="59" />
+          <column index="1" width="52" />
+          <column index="2" width="51" />
+          <column index="3" width="65" />
+          <column index="4" width="69" />
+          <column index="5" width="73" />
+          <column index="6" width="75" />
+          <column index="7" width="69" />
+          <column index="8" width="69" />
+          <column index="9" width="65" />
+          <column index="10" width="62" />
+          <column index="11" width="64" />
+          <column index="12" width="64" />
+          <column index="13" width="62" />
+          <column index="14" width="53" />
+          <column index="15" width="51" />
+          <column index="16" width="61" />
+          <column index="17" width="47" />
+          <column index="18" width="46" />
+          <column index="19" width="39" />
+          <column index="20" width="38" />
+          <column index="21" width="32" />
+          <column index="22" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/RightCargoShip.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="128">
+          <caret line="8" column="69" lean-forward="true" selection-start-line="8" selection-start-column="69" selection-end-line="8" selection-end-column="69" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="2">
+          <column index="0" width="54" />
+          <column index="1" width="47" />
+          <column index="2" width="54" />
+          <column index="3" width="69" />
+          <column index="4" width="59" />
+          <column index="5" width="58" />
+          <column index="6" width="62" />
+          <column index="7" width="59" />
+          <column index="8" width="59" />
+          <column index="9" width="53" />
+          <column index="10" width="59" />
+          <column index="11" width="69" />
+          <column index="12" width="52" />
+          <column index="13" width="68" />
+          <column index="14" width="61" />
+          <column index="15" width="58" />
+          <column index="16" width="56" />
+          <column index="17" width="51" />
+          <column index="18" width="60" />
+          <column index="19" width="52" />
+          <column index="20" width="32" />
+          <column index="21" width="32" />
+          <column index="22" width="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="82">
+          <caret line="18" column="62" selection-start-line="18" selection-start-column="62" selection-end-line="18" selection-end-column="62" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/LineSensor.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/RRLogger.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="24" column="65" selection-start-line="24" selection-start-column="65" selection-end-line="24" selection-end-column="65" />
+        <state relative-caret-position="179">
+          <caret line="72" column="31" lean-forward="true" selection-start-line="72" selection-start-column="31" selection-end-line="72" selection-end-column="31" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2828#2829#0" expanded="true" />
+            <element signature="e#2853#2854#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="303">
+          <caret line="366" selection-start-line="366" selection-end-line="366" />
+          <folding>
+            <element signature="e#17572#17573#0" expanded="true" />
+            <element signature="e#17646#17647#0" expanded="true" />
+            <element signature="e#17705#17706#0" expanded="true" />
+            <element signature="e#17793#17794#0" expanded="true" />
+            <element signature="e#17872#17873#0" expanded="true" />
+            <element signature="e#18497#18498#0" expanded="true" />
+            <element signature="e#18563#18564#0" expanded="true" />
+            <element signature="e#18811#18812#0" expanded="true" />
+            <element signature="e#18893#18894#0" expanded="true" />
+            <element signature="e#18958#18959#0" expanded="true" />
+            <element signature="e#19028#19029#0" expanded="true" />
+            <element signature="e#19117#19118#0" expanded="true" />
+            <element signature="e#19325#19326#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="166">
+          <caret line="1376" column="21" selection-start-line="1376" selection-start-column="12" selection-end-line="1376" selection-end-column="21" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

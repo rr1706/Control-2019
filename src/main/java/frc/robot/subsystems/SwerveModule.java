@@ -7,7 +7,6 @@ import frc.robot.utilities.Acceleration;
 import frc.robot.utilities.MathUtils;
 import frc.robot.utilities.PIDController;
 import frc.robot.utilities.Vector;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 import javax.naming.ldap.Control;
 import java.awt.geom.Rectangle2D;
@@ -19,7 +18,8 @@ import java.awt.geom.RoundRectangle2D;
 public class SwerveModule {
     private static final double TICKS_PER_REVOLUTION = 360.0;
     private static final double TRANSLATION_DISTANCE_PER_PULSE = 1.0; //Multiply by 1.7 later
-    private static final double ROTATION_DISTANCE_PER_PULSE = 6.0;
+    private static  double ROTATION_DISTANCE_PER_PULSE = 6.011; //Degrees per encoder.get()
+    private static double ENCODER_TICKS_PER_REV = 360.0/ROTATION_DISTANCE_PER_PULSE;
     private  static double SPEED_RATIO = 0.47;
 
     private static final int CAN_TIMEOUT = 20;
@@ -99,7 +99,7 @@ public class SwerveModule {
 //    private double translationI = 1.6e-6;
 //    private double translationD = 8.0e-5;
 
-    private double translationP = 1.5e-4;//8.0e-4; //1.8, 1.3e-3
+    private double translationP = 1.8e-4;//8.0e-4; //1.8, 1.3e-3
     private double translationI = 0.0;
     private double translationD = 0.0;
 
@@ -127,6 +127,9 @@ public class SwerveModule {
      */
     SwerveModule(int canPortT, int canPortR, int sensorPort) {
         super();
+
+        SmartDashboard.putNumber("Angle Command", 0.0);
+        SmartDashboard.putNumber("Angle Scale Factor", 6.0);
 
 
         translationMotor = new CANSparkMax(canPortT, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -191,6 +194,7 @@ public class SwerveModule {
     }
 
     void drive() {
+
         //This allows us to reset the wheels with the pulleys on the inside
         if (id == 1 || id == 4) { //id 4 was inverted with wires
             translationMotor.setInverted(true);
@@ -288,51 +292,55 @@ public class SwerveModule {
 
 
             SmartDashboard.putNumber("FR Speed Command", speedCommand);
-            SmartDashboard.putNumber("FR Angle Command", angleCommand);//MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));
+            SmartDashboard.putNumber("FR Angle Command", MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));//MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));
 
 //            SmartDashboard.putNumber("FR Speed", translationEncoder.getVelocity());
 //            SmartDashboard.putNumber("FR Scalar", tempScalar);
 
 //            SmartDashboard.putNumber("FR Angular Speed", rotationEncoder.getVelocity());
 
-            SmartDashboard.putNumber("FR Offset", wheelOffset);
-            SmartDashboard.putNumber("FR Dist", distance);
-            SmartDashboard.putNumber("Error", Math.abs(MathUtils.getDelta(-angleCommand, angle)));
+//            SmartDashboard.putNumber("FR Offset", wheelOffset);
+//            SmartDashboard.putNumber("FR Dist", distance);
+//            SmartDashboard.putNumber("Error", Math.abs(MathUtils.getDelta(-angleCommand, angle)));
 
-            SmartDashboard.putNumber("FR Angle", rotationEncoder.getPosition());
+//            SmartDashboard.putNumber("FR Angle", rotationEncoder.getPosition());
 
-            SmartDashboard.putNumber("FR Calculated Angle", angle);//MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));
+            SmartDashboard.putNumber("FR Calculated Angle", MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));//MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));
+            SmartDashboard.putNumber("FR Enc Ticks", rotationEncoder.getPosition());
 
         } else if (id == 2) {
-            SmartDashboard.putNumber("FL Angle Command", angleCommand*ROTATION_DISTANCE_PER_PULSE);
+            SmartDashboard.putNumber("FL Angle Command", MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));
             SmartDashboard.putNumber("FL Speed Command", speedCommand);
-            SmartDashboard.putNumber("FL Calculated Angle", angle);
+            SmartDashboard.putNumber("FL Calculated Angle", MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));
+            SmartDashboard.putNumber("FL Enc Ticks", rotationEncoder.getPosition());
 
 //            SmartDashboard.putBoolean("FL Sensor", !wheelSensor.get());
-            SmartDashboard.putNumber("FL Offset", wheelOffset);
-            SmartDashboard.putNumber("FL Dist", distance);
+//            SmartDashboard.putNumber("FL Offset", wheelOffset);
+//            SmartDashboard.putNumber("FL Dist", distance);
 //            if (!wheelSensor.get()) {
 //                SmartDashboard.putNumber("FL Sensor Angle ",  angle);
 //            }
 
         } else if (id == 3) {
-            SmartDashboard.putNumber("BR Angle Command", angleCommand*ROTATION_DISTANCE_PER_PULSE);
+            SmartDashboard.putNumber("BR Angle Command", MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));
             SmartDashboard.putNumber("BR Speed Command", speedCommand);
 //            SmartDashboard.putBoolean("BR Sensor", !wheelSensor.get());
-            SmartDashboard.putNumber("BR Offset", wheelOffset);
-            SmartDashboard.putNumber("BR Calculated Angle", angle);
-            SmartDashboard.putNumber("BR Dist", distance);
+//            SmartDashboard.putNumber("BR Offset", wheelOffset);
+            SmartDashboard.putNumber("BR Calculated Angle", MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));
+//            SmartDashboard.putNumber("BR Dist", distance);
 //            if (!wheelSensor.get()) {
 //                SmartDashboard.putNumber("BL Sensor Angle ",  angle);
 //            }
+            SmartDashboard.putNumber("BR Enc Ticks", rotationEncoder.getPosition());
 
         } else {
-            SmartDashboard.putNumber("BL Angle Command", angleCommand*ROTATION_DISTANCE_PER_PULSE);
+            SmartDashboard.putNumber("BL Angle Command", MathUtils.resolveDeg(angleCommand*ROTATION_DISTANCE_PER_PULSE));
             SmartDashboard.putNumber("BL Speed Command", speedCommand);
 //            SmartDashboard.putBoolean("BL Sensor", !wheelSensor.get());
-            SmartDashboard.putNumber("BL Offset", wheelOffset);
-            SmartDashboard.putNumber("BL Dist", distance);
-            SmartDashboard.putNumber("FL Calculated Angle", angle);
+//            SmartDashboard.putNumber("BL Offset", wheelOffset);
+//            SmartDashboard.putNumber("BL Dist", distance);
+            SmartDashboard.putNumber("BL Calculated Angle", MathUtils.resolveDeg(angle*ROTATION_DISTANCE_PER_PULSE));
+            SmartDashboard.putNumber("BL Enc Ticks", rotationEncoder.getPosition());
 
 //            if (!wheelSensor.get()) {
 //                SmartDashboard.putNumber("BR Sensor Angle ",  angle);
@@ -340,9 +348,9 @@ public class SwerveModule {
         }
 
         //Keepangle for the wheels
-        if (Math.abs(speedCommand ) < 0.04) {
-            angleCommand = prevAngleCommand;
-        }
+//        if (Math.abs(speedCommand ) < 0.04) {
+//            angleCommand = prevAngleCommand;
+//        }
 
 
         if (translationMotor.getMotorTemperature() > 90.0 || rotationMotor.getMotorTemperature() > 90.0) {
@@ -354,13 +362,16 @@ public class SwerveModule {
 //        if (id == 2) {
 //            translationMotor.set(speedCommand);
 //            rotationMotor.set(rotationCommand);
-        if (!wheelOverheat) {
+        if (/*id == 1 && */!wheelOverheat) {
             translationPID.setReference(speedCommand * THEORETICAL_MAX, ControlType.kVelocity);
-//            translationMotor.set(2*speedCommand);
 //            SmartDashboard.putNumber("Rotation Command", rotationCommand);
 
 //            System.out.println(speedCommand + "||" + angleCommand);
 //            SmartDashboard.putNumber("Angle Command", MathUtils.resolveDeg(tempScalar));
+            //FIXME, to debug, use rotationCommand
+//            ROTATION_DISTANCE_PER_PULSE = SmartDashboard.getNumber("Angle Scale Factor", 6.0);
+//            ENCODER_TICKS_PER_REV = 360.0/ROTATION_DISTANCE_PER_PULSE;
+//            angleCommand = SmartDashboard.getNumber("Angle Command", 0.0) * ENCODER_TICKS_PER_REV;
             rotationPID.setReference(-angleCommand, ControlType.kPosition);
         }
 //        }
@@ -398,7 +409,7 @@ public class SwerveModule {
         wheelOffsetFirst = set;
     }
     public double getAngle() {
-        return angle;
+        return angle*ROTATION_DISTANCE_PER_PULSE;
     }
 
     public void setSpeedCommand(double speedCommand) {
@@ -418,7 +429,7 @@ public class SwerveModule {
     public void setRotationCommand(double rotationCommand) {
         this.rotationCommand = rotationCommand;
         if (Math.signum(prevRotationCommand) == Math.signum(this.rotationCommand)) {
-            tempScalar += 5*Math.signum(this.rotationCommand);
+            tempScalar += 1*Math.signum(this.rotationCommand);
         }
 //        else {
 //            tempScalar = 0.0;
@@ -428,18 +439,18 @@ public class SwerveModule {
         this.angleCommand = angleCommand/ROTATION_DISTANCE_PER_PULSE;
     }
 
-    void resetAngle (boolean set) {
-        resettingAngle = set;
-
-        if (!foundFlag) {
-            foundSensor = false;
-            foundFlag = true;
-            SmartDashboard.putBoolean("Wheel 1 Aligned", false);
-            SmartDashboard.putBoolean("Wheel 2 Aligned", false);
-            SmartDashboard.putBoolean("Wheel 3 Aligned", false);
-            SmartDashboard.putBoolean("Wheel 4 Aligned", false);
-        }
-    }
+//    void resetAngle (boolean set) {
+//        resettingAngle = set;
+//
+//        if (!foundFlag) {
+//            foundSensor = false;
+//            foundFlag = true;
+//            SmartDashboard.putBoolean("Wheel 1 Aligned", false);
+//            SmartDashboard.putBoolean("Wheel 2 Aligned", false);
+//            SmartDashboard.putBoolean("Wheel 3 Aligned", false);
+//            SmartDashboard.putBoolean("Wheel 4 Aligned", false);
+//        }
+//    }
 
     public void setFoundFlag (/*boolean startButton*/) {
         foundFlag= false;
