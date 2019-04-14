@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
 
     private double ACCEL_SPEED= 0.1/*0.031*/;
-    private double DECEL_SPEED= 0.06; //0.035, 0.05
+    private double DECEL_SPEED= 0.1; //0.035, 0.05
 
     private SendableChooser<Integer> startingSide = new SendableChooser<>();
     private SendableChooser<Integer> autoChooser = new SendableChooser<>();
@@ -51,20 +51,28 @@ public class Robot extends TimedRobot {
 
     private double robotOffset;
     private boolean seenSensor = false;
+    private double lastTargetSideDistance = 0.0;
+    private double lastTargetFrontDistance = 0.0;
+    private double lastTargetAngle = 0.0;
 
     private boolean habDistanceGood = false;
     private double cargoAlignTime = 0.0;
-    private double rotationMax = 0.0;
+    private double prevRumbleTimer = 0.0;
+    private double rotationMax = 1.0;
     private double[] rotationValues;
     private double accelTimeChanger = 0.0;
     private int disabled = 0;
     private double prevTrigTime = 0.0;
     private boolean trigTimeIncrease = true;
     private int wheelStopCase = 0;
+    private double wallAlignDecelDistance = 90.0;
     private double habTime = 0.0;
-    private double sideAlignP = 0.0;
-    private double frontAlignP = 0.0;
+    private double sideAlignP = 1.6e-2;
+    private double frontAlignP = 1.6e-2;
 
+    private double sideAlignI = 0.0;
+    private double frontAlignI = 0.0;
+    private double wallAlignError = 1.1;
 
     private boolean habStart = false;
     private double[][] commands;
@@ -81,7 +89,7 @@ public class Robot extends TimedRobot {
     private double previousDistance = 0.0;
     private double currentDistance = 0.0;
     private double habLidarTimeout = 0.0;
-    private double rotationAlignP;
+    private double rotationAlignP = 0.004;
     private boolean override;
     private boolean driveDone;
     private boolean turnDone;
@@ -125,6 +133,10 @@ public class Robot extends TimedRobot {
     private boolean wheelsGood = false;
 
     private PIDController SwerveCompensate;
+    private PIDController wallAlignSTR = new PIDController(sideAlignP, 0.0, 0.0);
+    private PIDController wallAlignFWD = new PIDController(frontAlignP, 0.0, 0.0);
+    private PIDController wallAlignRCW = new PIDController(rotationAlignP, 0.0, 0.0);
+
 
     private double lead;
 
@@ -176,8 +188,10 @@ public class Robot extends TimedRobot {
     private boolean prevRB = false;
     private int elevatorCase = 0;
     private boolean safeToPutHatch = false;
+    private boolean wallAlignClose = false;
 
     private boolean autoOverride = false;
+    private double wallAlignI = 0.0;
     private boolean wallAlignDone = false;
     private boolean cargoShipDone = false;
 
@@ -187,6 +201,7 @@ public class Robot extends TimedRobot {
     //	private int arcResolution = 100;
 //	private int[] arcLengths = new int[arcResolution+1];
     private double[][] arcPoints = new double[3][101];
+
     private int alignCase = 0;
     private int cargoCase = 0;
 
@@ -197,6 +212,10 @@ public class Robot extends TimedRobot {
 //        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).checkFrictionCompensation(averageError);
 //        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).checkFrictionCompensation(averageError);
 //    }
+
+    private boolean atGoodDistance (double currentDistance, double targetDistance, double allowedError) {
+        return !(currentDistance <= targetDistance - allowedError || currentDistance>= targetDistance + allowedError);
+    }
 
     private void acceleration() {
 //        if (FWD + STR != 0.0) {
@@ -275,7 +294,7 @@ public class Robot extends TimedRobot {
         double frontDistance = 11.0;
 
         if (Math.abs(MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0)) >= 3.0) {
-            RCW = MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0) * 3.0e-2;
+            RCW = MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0) * 1.0e-2;
             if (Math.abs(RCW) > 0.3) {
                 RCW = 0.3 * Math.signum(RCW);
             } else if (Math.abs(RCW) < 0.03) {
@@ -335,6 +354,13 @@ public class Robot extends TimedRobot {
     }
 
     private boolean wallAlign(double angle,  double moveAngle, double sideDistance, double frontDistance) {
+        lastTargetFrontDistance = frontDistance;
+        lastTargetSideDistance = sideDistance;
+        lastTargetAngle = angle;
+        double tempAngle = 0.0;
+        wallAlignRCW.setInput(imu.getAngle());
+
+        double minSpeed =0.045;
         double robotAngle = imu.getAngle();
         int done = 0;
         double[] distances = {Lidar.getFRRightSensor(), Lidar.getFRFrontSensor(), Lidar.getFLFrontSensor(), Lidar.getFLLeftSensor()};
@@ -346,14 +372,32 @@ public class Robot extends TimedRobot {
 
 //        System.out.println(alignCase);
 
+        if (atGoodDistance(front, frontDistance, 3.1)) {
+            sideAlignI = 2.5e-4; //sideAlignP/100.0;
+            frontAlignI = 2.5e-4; //frontAlignP/100.0;
+            wallAlignFWD.setMaximumI(0.0);
+            wallAlignSTR.setMaximumI(0.0);
+        } else {
+            wallAlignFWD.resetI();
+            wallAlignSTR.resetI();
+
+            sideAlignI = 0.0;
+            frontAlignI = 0.0;
+            wallAlignFWD.setMaximumI(0.0);
+            wallAlignSTR.setMaximumI(0.0);
+        }
+
+        wallAlignFWD.setPID(frontAlignP, frontAlignI, 0.0);
+        wallAlignSTR.setPID(sideAlignP, sideAlignI, 0.0);
+
         switch (alignCase) {
             case 0:
                 if (!xbox1.LB() && Time.get() - prevWallAlignTime < 1.0 && (front < 13.0 || side < 13.0)) { //Back away from walls
                     if (front < 14.0) {
-                        FWD = -0.5/Math.cos(Math.toRadians(robotAngle));
+                        FWD = -0.3/Math.cos(Math.toRadians(robotAngle));
                     }
                     if (side < 14.0) {
-                        STR = -0.2*Math.signum(Lidar.getFLLeftSensor() - Lidar.getFRRightSensor()) / Math.cos(Math.toRadians(robotAngle)); //Should be robot oriented and based off side that is closer
+                        STR = -0.1*Math.signum(Lidar.getFLLeftSensor() - Lidar.getFRRightSensor()) / Math.cos(Math.toRadians(robotAngle)); //Should be robot oriented and based off side that is closer
                     }
                     RCW = 0.0;
                 } else {
@@ -361,32 +405,67 @@ public class Robot extends TimedRobot {
                 }
                 break;
             case 1: //Rotate fast to about right angle
-
+//                rotationAlignP = 0.01;
+                wallAlignRCW.setOutputRange(-1.0, 1.0);
                 useKeepAngle = false;
                 FWD = 0.0;
                 STR = 0.0;
 
-//                System.out.println(angle + " | | " + robotAngle);
-                if (Math.abs(MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0)) >= 5.0) {
-                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) *(rotationAlignP + 5.5e-3); //0.016
-//                    System.out.println(RCW);
-                    if (Math.abs(RCW) > 1.0) { //0.3
-                        RCW = 1.0 * Math.signum(RCW); //0.3
-                    } else if (Math.abs(RCW) < 0.2) {
-                        RCW = 0.2 * Math.signum(RCW);
-                    }
-//                    System.out.println(RCW);
 
-//                    keepAngle = angle;
+                System.out.println(wallAlignRCW.getError() + "|" + wallAlignRCW.performPID());
+//                System.out.println(angle + " | | " + robotAngle);
+                if (angle < 90.0 || angle > 270.0) {
+                    tempAngle = 0.0;
+                    System.out.println("Here");
+                } else {
+                    tempAngle = 180.0;
+                }
+
+                wallAlignRCW.setSetpoint(tempAngle);
+
+                if (Math.abs(MathUtils.calculateContinuousError(tempAngle, robotAngle, 360.0, 0.0)) >= 5.0) {
+                    RCW = wallAlignRCW.performPID(); //0.016
+//                    System.out.println(RCW);
+//                    if (Math.abs(RCW) > 1.0) { //0.3
+//                        RCW = 1.0 * Math.signum(RCW); //0.3
+//                    } else if (Math.abs(RCW) < 0.2) {
+//                        RCW = 0.2 * Math.signum(RCW);
+//                    }
+
                 } else {
                     alignCase = 2;
                 }
 
                 break;
             case 2: //Slowly rotate to better angle and translate to position
+                //Don't look while angle isn't at the right angle
+                if (angle < 90.0 || angle > 270.0) {
+                    tempAngle = 0.0;
+                } else {
+                    tempAngle = 180.0;
+                }
 
-                if (Math.abs(MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0)) >= 2.8) {
-                    RCW = MathUtils.calculateContinuousError(angle, robotAngle, 360.0, 0.0) * rotationAlignP;
+                if (!wallAlignClose && Math.abs(MathUtils.calculateContinuousError(tempAngle, imu.getAngle(), 360.0, 0.0)) > 3.5 || front > 30.0) {
+                    angle = tempAngle;
+                    sideDistance = sideDistance * Math.abs(Math.sin(Math.toRadians(90.0-angle)));
+                } else {
+                    wallAlignClose = true;
+                }
+
+                System.out.println(wallAlignClose + "|" + angle + "|" + front);
+
+                wallAlignSTR.setSetpoint(sideDistance);
+                wallAlignFWD.setSetpoint(frontDistance);
+                wallAlignSTR.setInput(side);
+                wallAlignFWD.setInput(front);
+                wallAlignFWD.setOutputRange(-0.6, 0.6);
+                wallAlignSTR.setOutputRange(-0.6, 0.6);
+                wallAlignRCW.setOutputRange(-0.3, 0.3);
+                wallAlignRCW.setSetpoint(angle);
+
+//                System.out.println(angle);
+                if (Math.abs(MathUtils.calculateContinuousError(angle, imu.getAngle(), 360.0, 0.0)) >= 2.8) {
+                    RCW = wallAlignRCW.performPID();
 //                    System.out.println(RCW);
                     if (Math.abs(RCW) > rotationMax) {
                         RCW = rotationMax * Math.signum(RCW);
@@ -404,62 +483,60 @@ public class Robot extends TimedRobot {
                     done++;
                 }
 
-                if (robotAngle < angle-10.0 || robotAngle > angle + 10.0) { //Might need to adjust distances w/ bumper
-//                    side = (front < side) ? front: side;
-                    front = farSide;
-                }
+//                if (robotAngle < angle-10.0 || robotAngle > angle + 10.0) { //Might need to adjust distances w/ bumper
+////                    side = (front < side) ? front: side;
+//                    front = farSide;
+//                }
 
                 //        min dist to wall        max dist to wall
 //                System.out.println(side + "| |" + sideDistance);
-                if ((side <= sideDistance-1.1 || side >= sideDistance+1.1)) { //Decrease allowed error as much as possible. Log lidar values in comp. to get experimental mean and standard deviation
-                    //                                                                                     setpoint                     P
-                    STR = Math.sin(Math.toRadians(moveAngle)) * (side - sideDistance) * sideAlignP; // 0.0325
-//            System.out.println("STR BAD");
+                if (!atGoodDistance(side, sideDistance, wallAlignError)) { //Decrease allowed error as much as possible. Log lidar values in comp. to get experimental mean and standard deviation
+
+                    STR = Math.sin(Math.toRadians(moveAngle)) * -wallAlignSTR.performPID();
+
+
+//                    if (Math.abs(STR) < minSpeed) {
+//                        STR = Math.signum(STR)*minSpeed;
+//                    }
                 } else {
 //                    System.out.println("STR Done");
                     STR = 0.0;
                     done++;
                 }
                 // max speed
-                if (Math.abs(STR) > Math.sin(Math.toRadians(moveAngle)) * Math.signum(side-sideDistance) * (side/65.0)) {
-                    STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side-sideDistance) * (side/65.0); //Scale speed to distance from wall
-                }
+//                if (Math.abs(STR) > Math.sin(Math.toRadians(moveAngle)) * Math.signum(side-sideDistance) * (side/wallAlignDecelDistance)) {
+//                    STR = Math.sin(Math.toRadians(moveAngle)) * Math.signum(side-sideDistance) * (side/wallAlignDecelDistance); //Scale speed to distance from wall
+//                }
 
 
-                if (farSide < useCushionDistance) { //Farside allows robot to speed up during front cycle
-                    STR *= cushionMaxSpeed;
-                    sideAlignP = 1.657e-2;
-                } else {
-                    sideAlignP = 1.657e-2;
-                }
-
-//                if  (Math.abs(STR) < 0.05) {
-//                    STR = Math.signum(STR)*0.05;
+//                if (side < useCushionDistance) { //Farside allows robot to speed up during front cycle
+//                    STR *= cushionMaxSpeed;
+//                    sideAlignP = 1.45e-2;
+//                } else {
+//                    sideAlignP = 1.45e-2;
 //                }
 
                 //  min dist to wall                            max dist to wall
-                if ((front <= frontDistance-1.5 || front >= frontDistance+2.2)) {
+                if (!atGoodDistance(front, frontDistance, wallAlignError)) {
                     //                                                                                              setpoint                  P
-                    FWD = Math.cos(Math.toRadians(moveAngle)) * (front - frontDistance) * frontAlignP; //0.025
+                    FWD = Math.cos(Math.toRadians(moveAngle)) * -wallAlignFWD.performPID(); //0.025
+//                    if (Math.abs(FWD) < minSpeed) {
+//                        FWD = Math.signum(FWD)*minSpeed;
+//                    }
 //                    System.out.println("FWD: " + FWD);
 
 //            System.out.println("FWD BAD");
                     // max speed
-                    if (Math.abs(FWD) > Math.cos(Math.toRadians(moveAngle)) * Math.signum(front-frontDistance) * (front/65.0)) {
-                        FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front-frontDistance) * (front/65.0);
-                    }
+//                    if (Math.abs(FWD) > Math.cos(Math.toRadians(moveAngle)) * Math.signum(front-frontDistance) * (front/wallAlignDecelDistance)) {
+//                        FWD = Math.cos(Math.toRadians(moveAngle)) * Math.signum(front-frontDistance) * (front/wallAlignDecelDistance);
+//                    }
 
-                    if (farSide < useCushionDistance) {
-                        FWD *= cushionMaxSpeed;
-                        frontAlignP = 1.657e-2;
-                    } else {
-                        frontAlignP = 1.657e-2;
-                    }
-
-                    // Min speed
-                    if  (Math.abs(FWD) < 0.1) {
-                        FWD = Math.signum(FWD)*0.1;
-                    }
+//                    if (front < useCushionDistance) {
+//                        FWD *= cushionMaxSpeed;
+//                        frontAlignP = 1.45e-2;
+//                    } else {
+//                        frontAlignP = 1.45e-2;
+//                    }
 
                 } else {
 //                    System.out.println("FWD Done");
@@ -467,13 +544,9 @@ public class Robot extends TimedRobot {
                     done++;
                 }
 
+                System.out.println(wallAlignSTR.performPID() + " | | " + wallAlignFWD.performPID());
                 break;
         }
-//        if (done == 3) {
-//            xbox2.rumbleLeft(1.0);
-//        } else {
-//            xbox2.stopLeftRumble();
-//        }
 
         wallAlignDone = (done == 3);
         return wallAlignDone;
@@ -731,6 +804,27 @@ public class Robot extends TimedRobot {
      * This function is run when the robot is first started up and should be used for any initialization code.
      */
     public void robotInit() {
+        wallAlignSTR.setPID(sideAlignP, sideAlignI, 0.0);
+        wallAlignSTR.enable();
+        wallAlignSTR.setInputRange(0.0, 30.0);
+        wallAlignSTR.setOutputRange(-1.0, 1.0);
+        wallAlignSTR.setContinuous(false);
+        wallAlignSTR.setMaximumI(0.04);
+
+
+        wallAlignFWD.setPID(frontAlignP, frontAlignI, 0.0);
+        wallAlignFWD.enable();
+        wallAlignFWD.setInputRange(0.0, 30.0);
+        wallAlignFWD.setOutputRange(-1.0, 1.0);
+        wallAlignFWD.setContinuous(false);
+        wallAlignFWD.setMaximumI(0.04);
+
+        rotationAlignP = 0.004;
+        wallAlignRCW.setPID(rotationAlignP, 0.0, 0.0);
+        wallAlignRCW.enable();
+        wallAlignRCW.setInputRange(0.0, 360.0);
+        wallAlignRCW.setOutputRange(-rotationMax, rotationMax);
+        wallAlignRCW.setContinuous(true);
         RRLogger.start();
         SmartDashboard.putString("RRLogger File", RRLogger.getFileName());
 //         LABEL robot init
@@ -1078,14 +1172,14 @@ public class Robot extends TimedRobot {
 //                            rotationMax = 0.5;
 //                            rotationMax = 0.3;
 //                            rotationAlignP = 8.0e-4;
-                        rotationMax = 0.6;
-                        rotationAlignP = 2.3e-3;
+                        rotationMax = 0.5;
+                        rotationAlignP = 0.004;
 //                        }
 
                         useCushionDistance = commands[arrayIndex][20];
                         cushionMaxSpeed = commands[arrayIndex][21];
 
-                        System.out.println((!xbox1.LB() +"| |"  + (Time.get() - prevWallAlignTime < 1.0)));
+//                        System.out.println((!xbox1.LB() +"| |"  + (Time.get() - prevWallAlignTime < 1.0)));
 
                         if (wallAlign(commands[arrayIndex][3], commands[arrayIndex][2], commands[arrayIndex][18], commands[arrayIndex][19])) {
                             override = true;
@@ -1192,8 +1286,8 @@ public class Robot extends TimedRobot {
     }
 
     public void teleopInit() {
-        rotationMax = 0.6;
-        rotationAlignP = 2.3e-3;
+        rotationMax = 0.5;
+        rotationAlignP = 0.004;
         currentDistance = 0.0;
         useCushionDistance = 30.0;
         cushionMaxSpeed = 1.0;
@@ -1369,34 +1463,40 @@ public class Robot extends TimedRobot {
         //0.8,0.1,13.0,25.0,105.0,0,999,0,0,0,0,0,0,0,0,0,0,0,0,0
 
         if (xbox1.buttonPad() == 45) {
-            wallAlign(25.0, 45.0, 13.0, 5.5); //TN Comp Values, tweak for worlds field
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(25.0, 45.0, 12.0, 5.8)) { //TN Comp Values, tweak for worlds field
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
 
         } else if (xbox1.buttonPad() == 135) {
-            wallAlign(152.0, 135.0, 12.0, 5.5); //TN, 13.5
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(155.0, 130.0, 12.0, 5.0)) { //TN, 13.5
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
-            wallAlign(180.0,  225.0, 9.0, 3.5);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(180.0,  180.0, 9.8, 4.0)) {
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
 
         } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
-            wallAlign(180.0, 130.0, 8.0, 3.5);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(180.0, 130.0, 9.0, 4.0)) {
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
 
         } else if (xbox1.buttonPad() == 225) {
-            wallAlign(205.0, 205.0, 13.3, 5.8);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(205.0, 205.0, 13.3, 5.8)) {
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
 
         } else if (xbox1.buttonPad() == 315) {
-            wallAlign(333.0, 333.0, 13.0, 5.8);
-            STR += xbox1.LStickX() * placeholderName;
-            FWD -= xbox1.LStickY() * placeholderName;
+            if (!wallAlign(333.0, 333.0, 13.0, 5.8)) {
+                STR += xbox1.LStickX() * placeholderName;
+                FWD -= xbox1.LStickY() * placeholderName;
+            }
         }
 
         if (xbox1.buttonPad() != -1) {
@@ -1406,10 +1506,10 @@ public class Robot extends TimedRobot {
             STR = commands.getX();
         } else {
             wallAlignDone = false;
+            wallAlignClose = false;
             useKeepAngle = true;
             prevWallAlignTime = Time.get();
             alignCase = 0;
-            xbox2.stopLeftRumble();
         }
 
 //        if (Math.abs(RCW) > 0.05 && (Math.abs(STR) + Math.abs(FWD) > 0.05)) { //Limit the acceleration for translating while rotating so that the wheels have time to get to the right spot
@@ -1647,10 +1747,18 @@ public class Robot extends TimedRobot {
             seenSensor = false;
         }
 
-        if (wallAlignDone || cargoShipDone) {
-            xbox2.rumbleLeft(1.0);
+        if (wallAlignDone || cargoShipDone ||
+                (atGoodDistance((Lidar.getFLFrontSensor() < Lidar.getFRFrontSensor()) ? Lidar.getFLFrontSensor(): Lidar.getFRFrontSensor(), lastTargetFrontDistance, wallAlignError) &&
+                atGoodDistance((Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor(): Lidar.getFLLeftSensor(), lastTargetSideDistance, wallAlignError) &&
+                 Math.abs(MathUtils.calculateContinuousError(lastTargetAngle, imu.getAngle(), 360.0, 0.0)) < 2.8)) {
+            if (Time.get() - prevRumbleTimer > 0.2) {
+                xbox2.rumbleLeft(1.0);
+            } else {
+                xbox2.stopLeftRumble();
+            }
         } else {
             xbox2.stopLeftRumble();
+            prevRumbleTimer = Time.get();
         }
 
 //        System.out.println(xbox1.LTrig() + "|" + xbox1.RTrig() + "|" + xbox1.buttonPad());
@@ -1722,10 +1830,10 @@ public class Robot extends TimedRobot {
         frictionCompensate();
          */
 
-        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setRotationCommand(xbox1.RStickY());
-        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setRotationCommand(xbox1.RStickY());
-        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setRotationCommand(xbox1.RStickY());
-        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setRotationCommand(xbox1.RStickY());
+//        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setRotationCommand(xbox1.RStickY());
+//        SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setRotationCommand(xbox1.RStickY());
+//        SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setRotationCommand(xbox1.RStickY());
+//        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setRotationCommand(xbox1.RStickY());
 //System.out.println("Final: " + RCW);
 
         driveTrain.drive(new Vector(-STR, FWD), RCW);
@@ -1821,6 +1929,7 @@ public class Robot extends TimedRobot {
             disabled++;
         } else {
             xbox2.stopRightRumble();
+            xbox2.stopLeftRumble();
             RRLogger.close();
             SwerveDrivetrain.resetDeltas();
         }

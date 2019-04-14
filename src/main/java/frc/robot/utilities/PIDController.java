@@ -34,6 +34,7 @@ public class PIDController {
 	private double m_setpoint = 0.0;
 	private double m_error = 0.0;
 	private double m_result = 0.0;
+	private double m_IMax = 0.0;
 
 	/**
 	 * Allocate a PID object with the given constants for P, I, D
@@ -80,6 +81,10 @@ public class PIDController {
 			 */
 			if (((m_totalError + m_error) * m_I < m_maximumOutput) && ((m_totalError + m_error) * m_I > m_minimumOutput)) {
 				m_totalError += m_error;
+
+				if (m_IMax != 0.0 && Math.abs(m_totalError) > m_IMax) {
+					m_totalError = Math.signum(m_totalError) * m_IMax;
+				}
 			}
 
 			// Perform the primary PID calculation
@@ -276,6 +281,16 @@ public class PIDController {
 		m_result = 0;
 	}
 
+	public void setMaximumI(double IMax) {
+		this.m_IMax = IMax;
+	}
+
+	public double getIAccumulation() {
+		return m_totalError;
+	}
+	public void resetI() {
+		this.m_totalError = 0.0;
+	}
 	public void setInput(double input) {
 		m_input = input;
 	}

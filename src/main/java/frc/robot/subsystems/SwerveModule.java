@@ -99,7 +99,7 @@ public class SwerveModule {
 //    private double translationI = 1.6e-6;
 //    private double translationD = 8.0e-5;
 
-    private double translationP = 1.8e-4;//8.0e-4; //1.8, 1.3e-3
+    private double translationP = 1.8e-4/*1.0e-3*/;//1.8e-4;//8.0e-4; //1.8, 1.3e-3
     private double translationI = 0.0;
     private double translationD = 0.0;
 
@@ -150,7 +150,7 @@ public class SwerveModule {
 
         translationPID.setOutputRange(kMinOutput, kMaxOutput);
 
-        translationMotor.setSmartCurrentLimit(20, 10);
+        translationMotor.setSmartCurrentLimit(40, 20);
 
         translationMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 5);
         translationMotor.burnFlash();
@@ -348,9 +348,9 @@ public class SwerveModule {
         }
 
         //Keepangle for the wheels
-//        if (Math.abs(speedCommand ) < 0.04) {
-//            angleCommand = prevAngleCommand;
-//        }
+        if (Math.abs(speedCommand ) < 0.04) {
+            angleCommand = prevAngleCommand;
+        }
 
 
         if (translationMotor.getMotorTemperature() > 90.0 || rotationMotor.getMotorTemperature() > 90.0) {
@@ -363,7 +363,7 @@ public class SwerveModule {
 //            translationMotor.set(speedCommand);
 //            rotationMotor.set(rotationCommand);
         if (/*id == 1 && */!wheelOverheat) {
-            translationPID.setReference(speedCommand * THEORETICAL_MAX, ControlType.kVelocity);
+            translationPID.setReference(12.0*speedCommand /* THEORETICAL_MAX*/, ControlType.kVoltage);
 //            SmartDashboard.putNumber("Rotation Command", rotationCommand);
 
 //            System.out.println(speedCommand + "||" + angleCommand);
