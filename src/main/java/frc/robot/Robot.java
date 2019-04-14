@@ -1396,9 +1396,13 @@ public class Robot extends TimedRobot {
             FWD = -xbox1.LStickY();
             STR = xbox1.LStickX();
         } else {
-            FWD = -xbox1.LStickY() * 1.9;
-            STR = xbox1.LStickX() * 1.9;
+            FWD = -xbox1.LStickY() * 0.5;
+            STR = xbox1.LStickX() * 0.5;
         }
+
+        FWD *= 1.04-Elevator.getPosition()/100.0;
+        STR *= 1.04-Elevator.getPosition()/100.0;
+
 
         SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).turbo(xbox1.LStickButton() || xbox1.RStickButton());
         SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).turbo(xbox1.LStickButton() || xbox1.RStickButton());
