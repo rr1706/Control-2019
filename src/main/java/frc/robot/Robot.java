@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
     private double previousDistance = 0.0;
     private double currentDistance = 0.0;
     private double habLidarTimeout = 0.0;
-    private double rotationAlignP = 0.004;
+    private double rotationAlignP = 0.005;
     private boolean override;
     private boolean driveDone;
     private boolean turnDone;
@@ -445,14 +445,22 @@ public class Robot extends TimedRobot {
                     tempAngle = 180.0;
                 }
 
-                if (!wallAlignClose && Math.abs(MathUtils.calculateContinuousError(tempAngle, imu.getAngle(), 360.0, 0.0)) > 3.5 || front > 30.0) {
-                    angle = tempAngle;
-                    sideDistance = sideDistance * Math.abs(Math.sin(Math.toRadians(90.0-angle)));
-                } else {
+                if (Math.abs(MathUtils.calculateContinuousError(tempAngle, imu.getAngle(), 360.0, 0.0)) < 3.5 && front < 30.0) {
                     wallAlignClose = true;
                 }
 
-                System.out.println(wallAlignClose + "|" + angle + "|" + front);
+                if (!wallAlignClose) {
+                    angle = tempAngle;
+                    sideDistance = sideDistance * Math.abs(Math.sin(Math.toRadians(90.0-angle)));
+                }
+//                if (!wallAlignClose && Math.abs(MathUtils.calculateContinuousError(tempAngle, imu.getAngle(), 360.0, 0.0)) > 3.5 || front > 30.0) {
+//                    angle = tempAngle;
+//                    sideDistance = sideDistance * Math.abs(Math.sin(Math.toRadians(90.0-angle)));
+//                } else {
+//                    wallAlignClose = true;
+//                }
+
+                System.out.println(wallAlignClose + "|" + imu.getAngle() + "|" + front);
 
                 wallAlignSTR.setSetpoint(sideDistance);
                 wallAlignFWD.setSetpoint(frontDistance);
@@ -819,7 +827,7 @@ public class Robot extends TimedRobot {
         wallAlignFWD.setContinuous(false);
         wallAlignFWD.setMaximumI(0.04);
 
-        rotationAlignP = 0.004;
+//        rotationAlignP = 0.005;
         wallAlignRCW.setPID(rotationAlignP, 0.0, 0.0);
         wallAlignRCW.enable();
         wallAlignRCW.setInputRange(0.0, 360.0);
@@ -1173,7 +1181,7 @@ public class Robot extends TimedRobot {
 //                            rotationMax = 0.3;
 //                            rotationAlignP = 8.0e-4;
                         rotationMax = 0.5;
-                        rotationAlignP = 0.004;
+//                        rotationAlignP = 0.005;
 //                        }
 
                         useCushionDistance = commands[arrayIndex][20];
@@ -1287,7 +1295,7 @@ public class Robot extends TimedRobot {
 
     public void teleopInit() {
         rotationMax = 0.5;
-        rotationAlignP = 0.004;
+//        rotationAlignP = 0.005;
         currentDistance = 0.0;
         useCushionDistance = 30.0;
         cushionMaxSpeed = 1.0;

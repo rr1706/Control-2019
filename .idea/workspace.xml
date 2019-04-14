@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bc92e98-4b98-41f0-a155-aaa0fa3e3eb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/Robot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/subsystems/SwerveModule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/frc/robot/utilities/PIDController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frc/robot/utilities/PIDController.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -27,8 +23,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="454" lean-forward="true" selection-start-line="454" selection-end-line="454" />
+            <state relative-caret-position="146">
+              <caret line="829" column="24" selection-start-line="829" selection-start-column="10" selection-end-line="829" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -189,8 +185,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>rotation</find>
-      <find>rotationalign</find>
       <find>rotationalignI</find>
       <find>sidealigni</find>
       <find>wallalignfwd</find>
@@ -219,6 +213,8 @@
       <find>cargoShipDone</find>
       <find>wallalignclose</find>
       <find>wallAlignClose</find>
+      <find>rotationalign</find>
+      <find>wallalignrcw.perform</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -355,7 +351,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1555253968726" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1555254473172" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../Public/frc2019/maven/com/ctre/phoenix/wpiapi-java/5.14.1/wpiapi-java-5.14.1.jar!/" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -434,12 +430,12 @@
       <workItem from="1551741852900" duration="164929000" />
       <workItem from="1552675108545" duration="22485000" />
       <workItem from="1552762639990" duration="116062000" />
-      <workItem from="1554929204438" duration="86443000" />
+      <workItem from="1554929204438" duration="87414000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="783753000" />
+    <option name="totallyTimeSpent" value="784724000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
@@ -1076,40 +1072,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv">
-      <provider editor-type-id="csv-text-editor">
-        <state relative-caret-position="64">
-          <caret line="4" column="82" lean-forward="true" selection-start-line="4" selection-start-column="82" selection-end-line="4" selection-end-column="82" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="csv-table-editor">
-        <state showInfoPanel="false" fixedHeaders="false" rowLines="2">
-          <column index="0" width="59" />
-          <column index="1" width="52" />
-          <column index="2" width="51" />
-          <column index="3" width="65" />
-          <column index="4" width="69" />
-          <column index="5" width="73" />
-          <column index="6" width="75" />
-          <column index="7" width="69" />
-          <column index="8" width="69" />
-          <column index="9" width="65" />
-          <column index="10" width="62" />
-          <column index="11" width="64" />
-          <column index="12" width="64" />
-          <column index="13" width="62" />
-          <column index="14" width="53" />
-          <column index="15" width="51" />
-          <column index="16" width="61" />
-          <column index="17" width="47" />
-          <column index="18" width="46" />
-          <column index="19" width="39" />
-          <column index="20" width="38" />
-          <column index="21" width="32" />
-          <column index="22" width="100" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/deploy/RightBackHatch.csv">
       <provider editor-type-id="csv-text-editor">
         <state relative-caret-position="176">
@@ -1144,10 +1106,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/deploy/LeftBackHatch.csv">
+      <provider editor-type-id="csv-text-editor">
+        <state relative-caret-position="64">
+          <caret line="4" column="82" lean-forward="true" selection-start-line="4" selection-start-column="82" selection-end-line="4" selection-end-column="82" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="csv-table-editor">
+        <state showInfoPanel="false" fixedHeaders="false" rowLines="2">
+          <column index="0" width="59" />
+          <column index="1" width="52" />
+          <column index="2" width="51" />
+          <column index="3" width="65" />
+          <column index="4" width="69" />
+          <column index="5" width="73" />
+          <column index="6" width="75" />
+          <column index="7" width="69" />
+          <column index="8" width="69" />
+          <column index="9" width="65" />
+          <column index="10" width="62" />
+          <column index="11" width="64" />
+          <column index="12" width="64" />
+          <column index="13" width="62" />
+          <column index="14" width="53" />
+          <column index="15" width="51" />
+          <column index="16" width="61" />
+          <column index="17" width="47" />
+          <column index="18" width="46" />
+          <column index="19" width="39" />
+          <column index="20" width="38" />
+          <column index="21" width="32" />
+          <column index="22" width="100" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/frc/robot/Robot.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="454" lean-forward="true" selection-start-line="454" selection-end-line="454" />
+        <state relative-caret-position="146">
+          <caret line="829" column="24" selection-start-line="829" selection-start-column="10" selection-end-line="829" selection-end-column="24" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
