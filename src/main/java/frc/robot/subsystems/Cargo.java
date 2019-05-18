@@ -59,11 +59,11 @@ public class Cargo {
 //            }
 //        }
 
-        if (distanceToCargo > 0.1 && distanceToCargo < 5.0) {
-            counter2++;
-        } else {
-            counter2 = 0;
-        }
+//        if (distanceToCargo > 0.1 && distanceToCargo < 5.0) {
+//            counter2++;
+//        } else {
+//            counter2 = 0;
+//        }
 
         if (in/* && counter2 < 10*/) {
             motor.set(ControlMode.PercentOutput, 0.6);
@@ -71,10 +71,14 @@ public class Cargo {
         } else if (out) {
             piston1.set(Value.kReverse);
             motor.set(ControlMode.PercentOutput, -0.75);
-            step = 0;
-        } else if (!autoIntake || counter2 > 10){ //Auto stop the intake if the ball is already in
-            motor.set(ControlMode.PercentOutput, 0.0);
+//            step = 0;
+        } else if (autoIntake){ //Auto stop the intake if the ball is already in
+//            System.out.println("Auto Intaking");
+            motor.set(ControlMode.PercentOutput, 0.2);
             piston1.set(Value.kReverse);
+        } else {
+            piston1.set(Value.kReverse);
+            motor.set(ControlMode.PercentOutput, 0.0);
         }
     }
 }

@@ -98,7 +98,17 @@ public class Elevator {
         return encoder.getPosition();
     }
 
+    public static double getCommand() {
+        return pos;
+    }
+
+
     public static boolean atPosition() {
         return (Math.abs(encoder.getPosition()-pos) < 2.0);
     }
+
+//    public static boolean liftingCargo() {
+//        System.out.println(pos + "  " + lastPos);
+//        return (!atPosition() && lastPos == 4.0);
+//    }
 }

@@ -58,7 +58,7 @@ public class RRLogger {
 			e.printStackTrace();
 		}
         System.out.println("Done constructing logger");
-		m_dataAdder.append("Better Log File");
+		m_dataAdder.append("Autonomous Is Mean");
 		m_dataAdder.append("\n");
     }
 

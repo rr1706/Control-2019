@@ -99,7 +99,7 @@ public class SwerveModule {
 //    private double translationI = 1.6e-6;
 //    private double translationD = 8.0e-5;
 
-    private double translationP = 1.8e-4/*1.0e-3*/;//1.8e-4;//8.0e-4; //1.8, 1.3e-3
+    private double translationP = 2.0e-4/*1.0e-3*/;//1.8e-4;//8.0e-4; //1.8, 1.3e-3
     private double translationI = 0.0;
     private double translationD = 0.0;
 
@@ -372,6 +372,9 @@ public class SwerveModule {
 //            ROTATION_DISTANCE_PER_PULSE = SmartDashboard.getNumber("Angle Scale Factor", 6.0);
 //            ENCODER_TICKS_PER_REV = 360.0/ROTATION_DISTANCE_PER_PULSE;
 //            angleCommand = SmartDashboard.getNumber("Angle Command", 0.0) * ENCODER_TICKS_PER_REV;
+//            if (id == 1) {
+//                System.out.println(angleCommand);
+//            }
             rotationPID.setReference(-angleCommand, ControlType.kPosition);
         }
 //        }

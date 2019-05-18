@@ -24,14 +24,21 @@ public  class Lidar {
     private static double sensor7 = 0.0;
 
     // Reads in mm. Converts to in
+    //FRocket
+    //13.5 side
+    //6.5 front
+
+    //RLoadingStation
+    //12.0 side
+    //4.4 front
     public static void read() {
 
         boolean transactionFailure = I2CBus.transaction(new byte[0], 0, dataBuffer, 14);
         compBuffer.rewind();
-        SmartDashboard.putBoolean("Lidar Good", !transactionFailure);
+        SmartDashboard.putBoolean("Lidar Good", !transactionFailure || SensorFailure());
         compBuffer.order(ByteOrder.BIG_ENDIAN);
 
-        if (transactionFailure || SensorFailure()) {
+        if (transactionFailure) {
 //            System.out.println("Transaction failure. Reopening I2C Bus now");
             I2CBus.close();
             I2CBus = new I2C(I2C.Port.kOnboard, 0x08);
@@ -106,54 +113,54 @@ public  class Lidar {
      */
     public static double getFRRightSensor(){
         if (sensor1 <= 0.0) {
-            sensor1 = 999.0;
+            sensor1 = 9999.0;
         }
         return sensor1;
     }
 
     public static double getFRFrontSensor(){
         if (sensor2 <= 0.0) {
-            sensor2 = 999.0;
+            sensor2 = 9999.0;
         }
         return sensor2;
     }
 
     public static double getFLFrontSensor(){
         if (sensor3 <= 0.0) {
-            sensor3 = 999.0;
+            sensor3 = 9999.0;
         }
         return sensor3;
     }
 
     public static double getFLLeftSensor(){
         if (sensor4 <= 0.0) {
-            sensor4 = 999.0;
+            sensor4 = 9999.0;
         }
         return sensor4;
     }
 
     public static double getBLLeftSensor(){
         if (sensor5 <= 0.0) {
-            sensor5 = 999.0;
+            sensor5 = 9999.0;
         }
         return sensor5;
     }
 
     public static double getBRRightSensor(){
         if (sensor6 <= 0.0) {
-            sensor6 = 999.0;
+            sensor6 = 9999.0;
         }
         return sensor6;
     }
 
     public static double hasCargo(){
         if (sensor7 <= 0.0) {
-            sensor7 = 999.0;
+            sensor7 = 9999.0;
         }
         return sensor7;
     }
 
     private static boolean SensorFailure() {
-        return (sensor1 <= 0.0 || sensor2 <= 0.0 || sensor3 <= 0.0 || sensor4 <= 0.0 || sensor5 <= 0.0 || sensor6 <= 0.0);
+        return (sensor1 <= 0.0 || sensor2 <= 0.0 || sensor3 <= 0.0 || sensor4 <= 0.0 || sensor5 <= 0.0 || sensor6 <= 0.0 || sensor1 == 9999.0 || sensor2 == 9999.0 || sensor3 == 9999.0 || sensor4 == 9999.0 || sensor5 == 9999.0 || sensor6 == 9999.0);
     }
 }

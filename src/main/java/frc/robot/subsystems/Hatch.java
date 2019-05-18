@@ -25,7 +25,7 @@ public class Hatch {
                     prevTime = Time.get();
                     step = 1;
                     hasHatch = false;
-                } else if (place && safe) {
+                } else if (place/* && safe*/) {
 //                    putting = true;
                     running = true;
                     step = 4;
