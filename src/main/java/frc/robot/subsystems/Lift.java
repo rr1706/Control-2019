@@ -33,7 +33,7 @@ public class Lift {
 
     public static void climb(double joystick){ //At -65, go to 20% pwr, at 124, stop, 133 is max
 //        release.set(Value.kForward);
-   manualMode = true;//FIXME, comment out before competition!!!
+//   manualMode = true;//FIXME, comment out before competition!!!
         if (!manualMode) {
             switch (climbCase) {
                 case 0:
@@ -51,8 +51,8 @@ public class Lift {
                     }
                     break;
                 case 2:
-                    motor1.set(ControlMode.PercentOutput, 0.2);
-                    if (getDistance() >= 115.0) {
+                    motor1.set(ControlMode.PercentOutput, 0.1);
+                    if (getDistance() >= 105.0) {
                         climbCase = 3;
                     }
                     break;

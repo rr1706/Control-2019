@@ -41,10 +41,10 @@ public class Limelight {
     }
 
     public void enable() {
-        NetworkTableInstance.getDefault().getTable("limelight-" + id).getEntry("ledMode").setNumber(0);
+        table.getEntry("ledMode").setNumber(0);
     }
 
     public void disable() {
-        NetworkTableInstance.getDefault().getTable("limelight-" + id).getEntry("ledMode").setNumber(1);
+        table.getEntry("ledMode").setNumber(1);
     }
 }

@@ -1,0 +1,24 @@
+
+nsquid:S3008"RRename this field "FRPorts" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(û‘ê£ùÿÿÿÿ
+bsquid:CommentedOutCodeLinew"<This block of commented-out lines of code should be removed.(¹‹úä
+hsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(ËŸæÃýÿÿÿÿ
+bsquid:CommentedOutCodeLine|"<This block of commented-out lines of code should be removed.(ôœ˜ï
+?squid:S1148'"#Use a logger to log this exception.(€ÉÔ…ýÿÿÿÿ
+nsquid:S3008"RRename this field "FLPorts" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÉÖ³Ùøÿÿÿÿ
+gsquid:CommentedOutCodeLineY"<This block of commented-out lines of code should be removed.(è‘ ¹üÿÿÿÿ
+‡"squid:ClassVariableVisibilityCheck"YMake swerveModules a static final constant or non-public and provide accessors if needed.(ÃÝ¤„
+bsquid:CommentedOutCodeLine†"<This block of commented-out lines of code should be removed.(‚ðÇ+
+Fsquid:S30104"*Remove this assignment of "swerveModules".(ûàèýÿÿÿÿ
+Jsquid:S1444"3Make this "public static swerveModules" field final(ÃÝ¤„
+Ksquid:S2864b"4Iterate over the "entrySet" instead of the "keySet".(˜©¦Ì
+bsquid:CommentedOutCodeLineW"<This block of commented-out lines of code should be removed.(‡­—“
+isquid:S00117T"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¸ì×ƒ
+isquid:S00117S"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(˜ÓÑ 
+Xsquid:S1075""ARefactor your code to get this URI from a customizable parameter.(ØÈã¤
+nsquid:S3008"RRename this field "BRPorts" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÂšÿÏþÿÿÿÿ
+Dsquid:S23864"(Make member "swerveModules" "protected".(ûàèýÿÿÿÿ
+nsquid:S3008"RRename this field "BLPorts" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(°øúœýÿÿÿÿ
+bsquid:CommentedOutCodeLineF"<This block of commented-out lines of code should be removed.(üÛƒÚ
+Ksquid:S2864j"4Iterate over the "entrySet" instead of the "keySet".(˜©¦Ì
+;squid:S16404"Convert this Map to an EnumMap.(ûàèýÿÿÿÿ
+Ksquid:S2864M"4Iterate over the "entrySet" instead of the "keySet".(˜©¦Ì

@@ -14,14 +14,17 @@ import edu.wpi.first.wpilibj.Compressor;
 //import edu.wpi.first.wpilibj.DigitalInput;
 
 //import edu.wpi.first.wpilibj.Compressor;
+//import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.SwerveDrivetrain.WheelType;
 import frc.robot.utilities.*;
-import frc.robot.RRLogger;
+//import frc.robot.RRLogger;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.CameraServer;
+
 //import org.opencv.core.Mat;
 
 /**
@@ -31,8 +34,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-    private double ACCEL_SPEED= 0.1/*0.031*/;
-    private double DECEL_SPEED= 0.3; //0.035, 0.05
+    private double ACCEL_SPEED= 0.1;
+    private double DECEL_SPEED= 0.28; //0.3
 
     private SendableChooser<Integer> startingSide = new SendableChooser<>();
     private SendableChooser<Integer> autoChooser = new SendableChooser<>();
@@ -59,6 +62,7 @@ public class Robot extends TimedRobot {
     private double camZ = 0.0;
     private int latencyCounter = 0;
     private boolean autoIntake = false;
+    private boolean grabAlign = false;
     private boolean holdCargo = false;
     private double cargoTimer = 0.0;
     private boolean seenSensor = false;
@@ -66,10 +70,11 @@ public class Robot extends TimedRobot {
     private double lastTargetSideDistance = 0.0;
     private double lastTargetFrontDistance = 0.0;
     private double lastTargetAngle = 0.0;
-    private double hatchFrontOffset = 18.0;//22.0 degrees from center, 16 inches from front
-    private double hatchSideOffset = 8.8;
+    private double hatchFrontOffset = 17.0;//22.0 degrees from center, 16 inches from front
+    private double hatchSideOffset = 8.8; //8.8
     private double cargoCamOffset = 0.0;
 
+    private double camHeadingAngle = 0.0;
     private boolean habDistanceGood = false;
     private double cargoAlignTime = 0.0;
     private double prevRumbleTimer = 0.0;
@@ -85,7 +90,7 @@ public class Robot extends TimedRobot {
     private double habTime = 0.0;
     private double sideAlignP = 1.53e-2;
     private double frontAlignP = 1.53e-2;
-
+    private boolean camAlignDone = false;
     private double sideAlignI = 0.0;
     private double frontAlignI = 0.0;
     private double wallAlignError = 1.1;
@@ -151,8 +156,13 @@ public class Robot extends TimedRobot {
     private boolean autonomous = true;
 
     private boolean fieldOriented = true; // start on field orientation
+    private boolean reverseRobotOriented = false;
     private boolean previousOrientedButton = false;
+    private boolean previousReverseRobotOrientedButton = false;
+
     private boolean currentOrientedButton = false;
+    private boolean currentReverseRobotOrientedButton = false;
+
     private boolean buttonTimeIncrease = false;
     private boolean wheelsGood = false;
 
@@ -401,7 +411,63 @@ public class Robot extends TimedRobot {
 //        System.out.println(rotationDone + "|" + forwardDone + "|" + strafeDone + "|" + cargoShipDone);
     }
 
-    private boolean cameraAlign(double angle, double threshold) {
+    private boolean cameraAlign(double angle, double front, double side) {
+        cargoCam.enable();
+        hatchCam.enable();
+
+        useKeepAngle = false;
+
+        teleopRCW.setSetpoint(angle);
+
+        teleopRCW.setInput(imu.getAngle());
+
+        RCW = teleopRCW.performPID();
+
+
+        if (0.0 != SmartDashboard.getNumber("Hatch X", 0.0)){
+            camX = SmartDashboard.getNumber("Hatch X", 0.0);
+        }
+        if (0.0 != SmartDashboard.getNumber("Hatch Z", 0.0)) {
+            camZ = SmartDashboard.getNumber("Hatch Z", 0.0);
+        }
+
+        wallAlignSTR.setSetpoint(side); //-0.8 maybe
+        wallAlignFWD.setSetpoint(front);
+        wallAlignSTR.setInput(camX);
+        wallAlignFWD.setInput(camZ);
+
+        wallAlignFWD.setInputRange(-100, 0.0);
+        wallAlignSTR.setInputRange(-100, 100.0);
+
+        wallAlignFWD.setOutputRange(-0.2, 0.2);
+        wallAlignSTR.setOutputRange(-0.15, 0.15);
+
+        wallAlignFWD.setMaximumI(0.0);
+        wallAlignSTR.setMaximumI(0.0);
+
+        double frontAlign = 1.35e-2;
+        double sideAlign = 1.5e-2;
+        double frontAlignI = 2.4e-4;
+        double sideAlignI = 2.4e-4;
+
+
+        wallAlignFWD.setPID(frontAlign, 0.0, 0.0);
+        wallAlignSTR.setPID(sideAlign, 0.0, 0.0);
+
+        FWD = wallAlignFWD.performPID();
+        STR = wallAlignSTR.performPID();
+
+        return (Math.abs(STR) + Math.abs(FWD) < 0.005);
+    }
+
+    //TODO, temp test method
+
+    private void camHeadingAngle(double angle)
+    {
+        camHeadingAngle = (limelightSegment("Hatch")[1] + imu.getAngle());
+    }
+
+    private boolean cameraSegment(double angle, double threshold) {
             cargoCam.enable();
             hatchCam.enable();
 
@@ -460,22 +526,22 @@ public class Robot extends TimedRobot {
 
                 double robotDistanceGone = SmartDashboard.getNumber("Robot Distance", currentDistance) - prevCameraDistance;
 
-                if (threshold < Math.abs(SmartDashboard.getNumber("Hatch Z", 0.0)) && (((limelightSegment("Hatch")[1] == 0.0) && (limelightSegment("Hatch")[0] <= 0.0) &&
+                if (((limelightSegment("Hatch")[1] == 0.0) && (limelightSegment("Hatch")[0] <= 0.0) &&
                         robotDistanceGone > 0.9*(Math.abs(camX-hatchSideOffset) + Math.abs(camZ+hatchFrontOffset))) ||
-                        robotDistanceGone < 0.9*(Math.abs(camX-hatchSideOffset) + Math.abs(camZ+hatchFrontOffset)))) { //Todo, only goes 90%, do 3 segments automatically
+                        robotDistanceGone < 0.9*(Math.abs(camX-hatchSideOffset) + Math.abs(camZ+hatchFrontOffset))) { //Todo, only goes 90%, do 3 segments automatically
 
-//                    if (xbox1.LTrig() > 0.1 && robotDistanceGone < Math.abs(camX/*limelightSegmentDistance*Math.sin(headingVector)*/)) {
-//                        if (angleDelta > 180.0) {
-//                            STR = -1.0;
-//                        } else {
-//                            STR = 1.0;
-//                        }
+                    if (xbox1.LTrig() > 0.1 && robotDistanceGone < Math.abs(camX-hatchSideOffset)) {
+                        if (angleDelta > 180.0) {
+                            STR = -1.0;
+                        } else {
+                            STR = 1.0;
+                        }
 
-//                        STR *= 0.1;
+                        STR *= 0.1;
 
-//                    } else if (xbox1.LTrig() > 0.1){ //if (xbox1.LTrig() > 0.1 && robotDistanceGone < Math.abs(limelightSegmentDistance*Math.cos(headingVector))) {
-//                        FWD = 0.2;
-//                    }
+                    } else if (threshold < Math.abs(SmartDashboard.getNumber("Hatch Z", 0.0)) && xbox1.LTrig() > 0.1){ //if (xbox1.LTrig() > 0.1 && robotDistanceGone < Math.abs(limelightSegmentDistance*Math.cos(headingVector))) {
+                        FWD = 0.2;
+                    }
 
 
 //                    if (xbox1.LTrig() > 0.1 && Math.abs(RCW) < 0.08) {
@@ -496,9 +562,14 @@ public class Robot extends TimedRobot {
                 }
 
 
-                System.out.println(camX + "  |      |   " + camZ + "  |      |   " + robotDistanceGone);
+//                System.out.println(camX + "  |      |   " + camZ + "  |      |   " + robotDistanceGone);
 
             }
+            if (grabAlign) {
+                STR = 0.0;
+                FWD = 0.0;
+            }
+            camAlignDone = (Math.abs(STR) + Math.abs(FWD) < 0.005);
             return (Math.abs(STR) + Math.abs(FWD) < 0.005);
     }
 
@@ -701,7 +772,7 @@ public class Robot extends TimedRobot {
 //Use this for testing:
 //        habDistanceGood = true;
 //        fwdDone = true;
-            if (front < 14.5){
+            if (front < 14.5){ //When a sensor is brokem, it will return 9999.0, so it will climb automatically if both are bad
                 FWD = -0.04;
                 System.out.println("Backing up");
             } else {
@@ -939,7 +1010,7 @@ public class Robot extends TimedRobot {
         double distanceToTarget = MathUtils.pythagorean(SmartDashboard.getNumber(side + " X", 0.0), SmartDashboard.getNumber(side + " Z", 0.0));
 
         if (SmartDashboard.getNumber(side + " X", 0.0) == 0.0 || SmartDashboard.getNumber(side + " Z", 0.0) == 0.0) {
-            distanceToTarget = -10;
+            distanceToTarget = -10; //Returns negative distance so
         }
 //        double angleOffset = hatchFrontOffset;
 //        if (side.equals("Hatch")) {
@@ -989,8 +1060,8 @@ public class Robot extends TimedRobot {
         teleopRCW.setOutputRange(-1.0, 1.0);
         teleopRCW.setContinuous(true);
 
-        RRLogger.start();
-        SmartDashboard.putString("RRLogger File", RRLogger.getFileName());
+//        RRLogger.start();
+//        SmartDashboard.putString("RRLogger File", RRLogger.getFileName());
 //         LABEL robot init
         // Load the wheel offset file from the roborio
 
@@ -1013,7 +1084,7 @@ public class Robot extends TimedRobot {
 
         compressor = new Compressor(0);
 
-        xbox1.setDeadband(0.01);
+        xbox1.setDeadband(0.5);
 
         Time.start();
 
@@ -1132,9 +1203,9 @@ public class Robot extends TimedRobot {
 //            System.err.println("Error in configuration!");
         }
 
-        RRLogger.addData("Autonomous Init", 0);
-        RRLogger.newLine();
-        RRLogger.writeFromQueue();
+//        RRLogger.addData("Autonomous Init", 0);
+//        RRLogger.newLine();
+//        RRLogger.writeFromQueue();
 
         SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setID(1);
         SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setID(2);
@@ -1155,6 +1226,9 @@ public class Robot extends TimedRobot {
 
     public void disabledPeriodic() {
         alignCase = 0;
+//        SmartDashboard.putNumber("Translation Scale Factor", 0.0);
+//        SmartDashboard.putNumber("Rotation Scale Factor", 0.0);
+
         autonomousChoice = autoChooser.getSelected();
         startingChoice = startingSide.getSelected();
 
@@ -1252,7 +1326,7 @@ public class Robot extends TimedRobot {
                     driveTrain.drive(new Vector(FWD, STR), 0);
                     if (Time.get() > timeBase + SmartDashboard.getNumber("Autonomous Delay", 0)) {
                         autoMove = 1;
-                        RRLogger.addData("Autonomous Periodic Start", 0.0);
+//                        RRLogger.addData("Autonomous Periodic Start", 0.0);
                     }
                     previousDistance = currentDistance;
 
@@ -1373,18 +1447,7 @@ public class Robot extends TimedRobot {
 
 
                     SmartDashboard.putNumber("Previous Distance", previousDistance);
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,3,0,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,0.0
-//1.0,1.0,150.0,180.0,999.0,0,999,0,0,0,0,0,0.0,0,0,0,0,2.0,9.5,3.5,30.0,1.0,0.0
-//0.0,0.0,999,180.0,0.0,0,999,0,0,0,0,0,0,0,0,2,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,0.0,180.0,0.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0,0.0,0.0,0.0
-//1.0,1.0,50.0,25.0,999.0,0,999.0,0,0,0,0,0.0,0,0,0,0,0.0,2.0,12.5,5.8,30.0,1.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0,0.0
-//0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,0.0
+
                     if ((Math.abs(SmartDashboard.getNumber("Robot Distance", 0) - previousDistance) >= commands[arrayIndex][4])) {
                         driveDone = true;
                     }
@@ -1399,8 +1462,8 @@ public class Robot extends TimedRobot {
 
                     if (Time.get() > timeBase + commands[arrayIndex][12] && commands[arrayIndex][12] > 0.0) {
                         override = true;
-                        RRLogger.addData("Timeskip", 1.0);
-                        RRLogger.newLine();
+//                        RRLogger.addData("Timeskip", 1.0);
+//                        RRLogger.newLine();
                     } else if (commands[arrayIndex][12] == 0) {
                         timeDone = true;
                     }
@@ -1426,12 +1489,12 @@ public class Robot extends TimedRobot {
 //				} else {
 
                     if (Lidar.valid() && commands[arrayIndex][17] != 0.0) {
-                        RRLogger.addData("FRR", Lidar.getFRRightSensor());
-                        RRLogger.addData("FRF", Lidar.getFRFrontSensor());
-                        RRLogger.addData("FLF", Lidar.getFLFrontSensor());
-                        RRLogger.addData("FLL", Lidar.getFLLeftSensor());
-                        RRLogger.newLine();
-                        RRLogger.writeFromQueue();
+//                        RRLogger.addData("FRR", Lidar.getFRRightSensor());
+//                        RRLogger.addData("FRF", Lidar.getFRFrontSensor());
+//                        RRLogger.addData("FLF", Lidar.getFLFrontSensor());
+//                        RRLogger.addData("FLL", Lidar.getFLLeftSensor());
+//                        RRLogger.newLine();
+//                        RRLogger.writeFromQueue();
 
                         if (commands[arrayIndex][17] == 1.0 && alignCase == 0) {
 //                            if (alignCase == 2 && imu.getAngle() - 20.0 > commands[arrayIndex][3] || imu.getAngle() + 20.0 < commands[arrayIndex][3]) {
@@ -1471,7 +1534,7 @@ public class Robot extends TimedRobot {
                         }
                         //0.7,0.0,87.0,25.0,30.0,0,999,0,0,0,0,0,0.0,0,0,0,0,0,0,0,0.0,0.0,0.0
                     } else if (!Lidar.valid()) {
-                        RRLogger.addData("LidarBroke", 0.0);
+//                        RRLogger.addData("LidarBroke", 0.0);
                         FWD = 0.0;
                         STR = 0.0;
                         RCW = 0.0;
@@ -1546,20 +1609,16 @@ public class Robot extends TimedRobot {
 
 //				System.out.println(driveDone + "||" + hatchDone + "||" + cargoDone);
 
-                    RRLogger.addData("Array Index", arrayIndex);
-                    RRLogger.addData("IMU", imu.getAngle());
-                    RRLogger.addData("FWD", FWD);
-                    RRLogger.addData("STR", STR);
-                    RRLogger.addData("RCW", RCW);
-                    RRLogger.addData("Drive", driveDone? 1: 0);
-//                    RRLogger.addData("Elevator", elevatorDone? 1: 0);
-//                    RRLogger.addData("Hatch", hatchDone? 1: 0);
-//                    RRLogger.addData("Hatch", cargoDone? 1: 0);
+//                    RRLogger.addData("Array Index", arrayIndex);
+//                    RRLogger.addData("IMU", imu.getAngle());
+//                    RRLogger.addData("FWD", FWD);
+//                    RRLogger.addData("STR", STR);
+//                    RRLogger.addData("RCW", RCW);
 
-                    RRLogger.addData("Auto Distance Gone", Math.abs(currentDistance - previousDistance));
-                    RRLogger.addData("Auto Distance Command", commands[arrayIndex][4]);
-                    RRLogger.newLine();
-                    RRLogger.writeFromQueue();
+//                    RRLogger.addData("Auto Distance Gone", Math.abs(currentDistance - previousDistance));
+//                    RRLogger.addData("Auto Distance Command", commands[arrayIndex][4]);
+//                    RRLogger.newLine();
+//                    RRLogger.writeFromQueue();
 
 //                    System.out.println(driveDone + "        " + elevatorDone + "        " + hatchDone + "       " + cargoDone + "       " + cargoShipDone);
 
@@ -1593,9 +1652,9 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         holdCargo = false;
         sensorToLookAt = 0; //0 = both, 1 = right side, 2 = left side
-        RRLogger.addData("Teleop Init", 0.0);
-        RRLogger.newLine();
-        RRLogger.writeFromQueue();
+//        RRLogger.addData("Teleop Init", 0.0);
+//        RRLogger.newLine();
+//        RRLogger.writeFromQueue();
         rotationMax = 0.5;
 //        rotationAlignP = 0.005;
         currentDistance = 0.0;
@@ -1742,13 +1801,45 @@ public class Robot extends TimedRobot {
         currentOrientedButton = xbox1.RB();
         if (currentOrientedButton && !previousOrientedButton) {
             fieldOriented = !fieldOriented;
+            reverseRobotOriented = false;
         }
         previousOrientedButton = currentOrientedButton;
+
+        //Reverse Robot Oriented Attempt #1
+        currentReverseRobotOrientedButton = xbox1.LB();
+        if (currentReverseRobotOrientedButton && !previousReverseRobotOrientedButton) {
+            fieldOriented = false;
+            reverseRobotOriented = !reverseRobotOriented;
+        }
+        previousReverseRobotOrientedButton = currentReverseRobotOrientedButton;
 
         SmartDashboard.putBoolean("Field Oriented", fieldOriented);
 
 
-        if (fieldOriented) { //The wrong command is not being set above here, so the math here is offset when translating while rotating
+        RCW *= SmartDashboard.getNumber("Rotation Scale Factor", 1.0);
+
+        FWD *= SmartDashboard.getNumber("Translation Scale Factor", 1.0);
+        STR *= SmartDashboard.getNumber("Translation Scale Factor", 1.0);
+
+        if (fieldOriented) {
+            double angleOfMovement; //180 on smartDashboard at rest
+
+            if (FWD == 0.0 && STR > 0.0) { //Because dividing by 0.0 is mean, hard code the values
+                angleOfMovement = 90.0;
+            } else if (FWD == 0.0 && STR < 0.0) {
+                angleOfMovement = 270.0;
+            } else {
+                angleOfMovement = Math.toDegrees(MathUtils.resolveAngle(Math.atan2(STR, FWD)));
+            }
+
+            double polarLength = MathUtils.pythagorean(STR, FWD);
+            double compensatedAngle = MathUtils.resolveDeg(angleOfMovement - RCW * SmartDashboard.getNumber("Angle Compensation", 100.0));
+            //Adjust the angle of translation by a scalar of the RCW command, so it mimics the joystick maneuver that counteracts the drift
+            STR = polarLength * Math.sin(Math.toRadians(compensatedAngle));
+            FWD = polarLength * Math.cos(Math.toRadians(compensatedAngle));
+
+            SmartDashboard.putNumber("Angle of Movement", angleOfMovement);
+
             Vector commands;
             commands = MathUtils.convertOrientation(headingRad, FWD, STR);
             FWD = commands.getY();
@@ -1757,7 +1848,13 @@ public class Robot extends TimedRobot {
             FWD *= 0.5;
             STR *= 0.5;
             RCW *= 0.5;
+
+            if (reverseRobotOriented) {
+                FWD *= -1;
+                STR *= -1;
+            }
         }
+
 
 //        System.out.println(xbox1.DPad());
 //        System.out.println(MathUtils.calculateContinuousError(45.0, imu.getAngle(), 360.0, 0.0));
@@ -1773,56 +1870,98 @@ public class Robot extends TimedRobot {
 
         if (xbox1.buttonPad() == 45) {
             sensorToLookAt = 1;
-            if (!cameraAlign(30.0, 0.0)) {
+            if (!cameraAlign(30.0, -hatchFrontOffset, 8.4)) {
 //                    !wallAlign(30.0, 35.0, 13.5, 6.5)) { //FIXME, was 6.5
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(30.0);
             }
 
         } else if (xbox1.buttonPad() == 135) {
             sensorToLookAt = 2;
-            if (!cameraAlign(150.0, 0.0)) {
+            if (!cameraAlign(150.0, -hatchFrontOffset, 8.4)) {
 //                    !wallAlign(150.0, 130.0, 13.5, 6.5)) {
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(150.0);
             }
+
+
 
         } else if (xbox1.buttonPad() == 180 && xbox1.LTrig() > 0.25) {
+            grabAlign = true;
             sensorToLookAt = 1;
-            if (!!cameraAlign(180.0, 0.0)) {
+            if (!cameraAlign(180.0, -hatchFrontOffset, hatchSideOffset)) {
 //                    wallAlign(180.0,  230.0, 12.0, 3.5)) {
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(180.0);
             }
 
+
         } else if (xbox1.buttonPad() == 180 && xbox1.RTrig() > 0.25) {
+            grabAlign = true;
             sensorToLookAt = 2;
-            if (!cameraAlign(180.0, 0.0)) {
+            if (!cameraAlign(180.0, -hatchFrontOffset, hatchSideOffset)) {
 //                    !wallAlign(180.0, 130.0, 12.0, 3.5)) {
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(180.0);
             }
+
 
         } else if (xbox1.buttonPad() == 225) {
             sensorToLookAt = 1;
-            if (!cameraAlign(210.0, 0.0)) {
+            if (!cameraAlign(210.0, -hatchFrontOffset, 8.4)) {
 //                    !wallAlign(210.0, 240.0, 13.5, 6.5)) {
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(210.0);
             }
 
         } else if (xbox1.buttonPad() == 315) {
             sensorToLookAt = 2;
-            if (!cameraAlign(330.0, 0.0)) {
+            if (!cameraAlign(330.0, -hatchFrontOffset, 8.4)) {
 //                    !wallAlign(330.0, 315.0, 14.0, 6.5)) {
-                STR = xbox1.LStickX() * placeholderName;
-                FWD = xbox1.LStickY() * placeholderName;
-                RCW = xbox1.RStickX() * placeholderName;
+                STR += xbox1.LStickX() * placeholderName;
+                FWD += xbox1.LStickY() * placeholderName;
+                RCW += xbox1.RStickX() * placeholderName;
+
+                STR = 0.0;
+                FWD = 0.0;
+                RCW = 0.0;
+
+                camHeadingAngle(330.0);
             }
         }
 
@@ -1832,6 +1971,7 @@ public class Robot extends TimedRobot {
 //            FWD = commands.getY();
 //            STR = commands.getX();
         } else {
+            grabAlign = false;
             headingVector = 0.0;
             useKeepAngle = true;
             prevCameraDistance = SmartDashboard.getNumber("Robot Distance", currentDistance);
@@ -1842,7 +1982,7 @@ public class Robot extends TimedRobot {
             latencyCounter = 0;
             camX = 0.0;
             camZ = 0.0;
-
+            camAlignDone = false;
             sensorToLookAt = 0;
             wallAlignDone = false;
             wallAlignClose = false;
@@ -1903,31 +2043,32 @@ public class Robot extends TimedRobot {
         acceleration();
 
         if (xbox2.buttonPad() == 90.0) {
-            RRLogger.addData("Placing FRR", Lidar.getFRRightSensor());
-            RRLogger.addData("Placing FRF", Lidar.getFRFrontSensor());
-            RRLogger.addData("Placing FLF", Lidar.getFLFrontSensor());
-            RRLogger.addData("Placing FLL", Lidar.getFLLeftSensor());
-            RRLogger.newLine();
-            RRLogger.writeFromQueue();
+//            RRLogger.addData("Placing FRR", Lidar.getFRRightSensor());
+//            RRLogger.addData("Placing FRF", Lidar.getFRFrontSensor());
+//            RRLogger.addData("Placing FLF", Lidar.getFLFrontSensor());
+//            RRLogger.addData("Placing FLL", Lidar.getFLLeftSensor());
+//            RRLogger.newLine();
+//            RRLogger.writeFromQueue();
         }
 
         if (xbox2.buttonPad() == 180.0) {
-            RRLogger.addData("Grabbing FRR", Lidar.getFRRightSensor());
-            RRLogger.addData("Grabbing FRF", Lidar.getFRFrontSensor());
-            RRLogger.addData("Grabbing FLF", Lidar.getFLFrontSensor());
-            RRLogger.addData("Grabbing FLL", Lidar.getFLLeftSensor());
-            RRLogger.newLine();
-            RRLogger.writeFromQueue();
+//            RRLogger.addData("Grabbing FRR", Lidar.getFRRightSensor());
+//            RRLogger.addData("Grabbing FRF", Lidar.getFRFrontSensor());
+//            RRLogger.addData("Grabbing FLF", Lidar.getFLFrontSensor());
+//            RRLogger.addData("Grabbing FLL", Lidar.getFLLeftSensor());
+//            RRLogger.newLine();
+//            RRLogger.writeFromQueue();
         }
 
         if (xbox2.buttonPad() == 0.0) {
-            RRLogger.addData("Cargo Distance 1", Lidar.getBLLeftSensor());
-            RRLogger.addData("Cargo Distance 2", Lidar.getBRRightSensor());
-            RRLogger.newLine();
-            RRLogger.writeFromQueue();
+//            RRLogger.addData("Cargo Distance 1", Lidar.getBLLeftSensor());
+//            RRLogger.addData("Cargo Distance 2", Lidar.getBRRightSensor());
+//            RRLogger.newLine();
+//            RRLogger.writeFromQueue();
         }
 
-        Cargo.set((!Elevator.atPosition() && Elevator.getCommand() > Elevator.getPosition()) /*xbox2.RTrig()*/, xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
+        Cargo.set((!Elevator.atPosition() && Elevator.getCommand() > Elevator.getPosition()), xbox2.X(), xbox2.Y(), Lidar.hasCargo(), Lidar.getBLLeftSensor(), Lidar.getBRRightSensor());
+        SmartDashboard.putNumber("Hold State", Cargo.getHoldState());
 
         if (!Hatch.isRunning() && Elevator.getPosition() < 102.0 && Elevator.getPosition() > 1.0) {
             Elevator.setPosition(xbox2.LStickY(), xbox2.LTrig(), xbox2.LStickX(), xbox2.LStickButton(), xbox2.X(), xbox2.LB());
@@ -1993,10 +2134,10 @@ public class Robot extends TimedRobot {
         }
         */
 
-        if (wallAlignDone || cargoShipDone ||
+        if (camAlignDone/*wallAlignDone || cargoShipDone ||
                 (atGoodDistance((Lidar.getFLFrontSensor() < Lidar.getFRFrontSensor()) ? Lidar.getFLFrontSensor(): Lidar.getFRFrontSensor(), lastTargetFrontDistance, wallAlignError) &&
                 atGoodDistance((Lidar.getFRRightSensor() < Lidar.getFLLeftSensor()) ? Lidar.getFRRightSensor(): Lidar.getFLLeftSensor(), lastTargetSideDistance, wallAlignError) &&
-                 Math.abs(MathUtils.calculateContinuousError(lastTargetAngle, imu.getAngle(), 360.0, 0.0)) < 2.8)) {
+                 Math.abs(MathUtils.calculateContinuousError(lastTargetAngle, imu.getAngle(), 360.0, 0.0)) < 2.8)*/) {
             if (Time.get() - prevRumbleTimer > 0.2) {
                 xbox2.rumbleLeft(1.0);
             } else {
@@ -2091,12 +2232,11 @@ public class Robot extends TimedRobot {
 //
 //            RCW = autoRCW.performPID() *0.3;
 //        }
+
         driveTrain.drive(new Vector(-STR, FWD), RCW);
 
 
 
-//        RRLogger.addData("Counter Encoder FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getCounterEncoder());
-//        RRLogger.addData("Clockwise Encoder FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getClockwiseEncoder());
         SmartDashboard.putNumber("FR Angle", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngle());
         SmartDashboard.putNumber("FL Angle", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngle());
         SmartDashboard.putNumber("BL Angle ", SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngle());
@@ -2106,29 +2246,6 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("FL Angle Command", SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleCommand());
         SmartDashboard.putNumber("BL Angle Command", SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleCommand());
         SmartDashboard.putNumber("BR Angle Command", SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleCommand());
-
-
-
-//        RRLogger.addData("Angle of FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngle());
-//        RRLogger.addData("Angle Command of  FR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).getAngleCommand());
-//
-////        RRLogger.addData("Counter Encoder FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getCounterEncoder());
-////        RRLogger.addData("Clockwise Encoder FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getClockwiseEncoder());
-//        RRLogger.addData("Angle of FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngle());
-//        RRLogger.addData("Angle Command of FL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).getAngleCommand());
-//
-////        RRLogger.addData("Counter Encoder BL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getCounterEncoder());
-////        RRLogger.addData("Clockwise Encoder BL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getClockwiseEncoder());
-//        RRLogger.addData("Angle of BL:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngle());
-//        RRLogger.addData("Angle Command of  BL:  ", 	 SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).getAngleCommand());
-//
-////        RRLogger.addData("Counter Encoder BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getCounterEncoder());
-////        RRLogger.addData("Clockwise Encoder BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getClockwiseEncoder());
-//        RRLogger.addData("Angle of BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngle());
-//        RRLogger.addData("Angle Command of BR:  ", 	SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).getAngleCommand());
-//
-//        RRLogger.newLine();
-//        RRLogger.writeFromQueue();
     }
 
     //0.8,1.0,45.0,25.0,999.0,0,999,0,0,0,0,0,4.0,0,0,0,0,1.0,13.2,5.2
@@ -2152,6 +2269,14 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Cargo Y", cargoCam.getDistance()[1]);
         SmartDashboard.putNumber("Cargo Z", cargoCam.getDistance()[2]);
 
+        SmartDashboard.putNumber("Polar Distance", limelightSegment("Hatch")[0]);
+        SmartDashboard.putNumber("Polar Angle", limelightSegment("Hatch")[1]);
+
+
+        SmartDashboard.putNumber("Distance from Target", cargoCam.getDistance()[2]);
+        SmartDashboard.putNumber("Cam Vector Absolute Angle", camHeadingAngle);
+
+
 
         SmartDashboard.putNumber("Hatch X", hatchCam.getDistance()[0]);
         SmartDashboard.putNumber("Hatch Y", hatchCam.getDistance()[1]);
@@ -2164,7 +2289,6 @@ public class Robot extends TimedRobot {
         if (xbox1.LTrig() + xbox1.RTrig() > 0.1 || xbox1.buttonPad() != -1) {
             cargoCam.enable();
             hatchCam.enable();
-//            limelightSegment("Hatch");
         } else {
             cargoCam.disable();
             hatchCam.disable();
@@ -2209,23 +2333,27 @@ public class Robot extends TimedRobot {
         } else {
             xbox2.stopRightRumble();
             xbox2.stopLeftRumble();
-            RRLogger.close();
+//            RRLogger.close();
             SwerveDrivetrain.resetDeltas();
         }
+        cargoCam.disable();
+        hatchCam.disable();
     }
 
     /**
      * This function is called periodically during test mode
      */
-    public void testPeriodic() {
-        // LABEL test
-//        double speed = (xbox1.RStickX());
-//
-//        System.out.println(speed);
-//
-//        SwerveDrivetrain.swerveModules.get(WheelType.FRONT_RIGHT).setRotationCommand(speed);
-//		SwerveDrivetrain.swerveModules.get(WheelType.FRONT_LEFT).setRotationCommand(speed);
-//		SwerveDrivetrain.swerveModules.get(WheelType.BACK_LEFT).setRotationCommand(speed);
-//		SwerveDrivetrain.swerveModules.get(WheelType.BACK_RIGHT).setRotationCommand(speed);
+        public void testPeriodic() {
+            // LABEL test`
+
+            if (xbox1.LTrig() + xbox1.RTrig() > 0.1 || xbox1.buttonPad() != -1) {
+                cargoCam.enable();
+                hatchCam.enable();
+                System.out.println("On");
+            } else {
+                cargoCam.disable();
+                hatchCam.disable();
+                System.out.println("Off");
+            }
     }
 }

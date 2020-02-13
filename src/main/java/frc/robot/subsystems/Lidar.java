@@ -23,6 +23,8 @@ public  class Lidar {
     private static double sensor6 = 0.0;
     private static double sensor7 = 0.0;
 
+    private static int lidarBreakCounter = 0;
+
     // Reads in mm. Converts to in
     //FRocket
     //13.5 side
@@ -40,9 +42,12 @@ public  class Lidar {
 
         if (transactionFailure) {
 //            System.out.println("Transaction failure. Reopening I2C Bus now");
+            lidarBreakCounter++;
             I2CBus.close();
             I2CBus = new I2C(I2C.Port.kOnboard, 0x08);
         }
+
+//        SmartDashboard.putNumber("Times Lidar Broke", lidarBreakCounter);
 //        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
 //        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,0,1,0,0,0.0,0.0,0.0,0.0
 //        0.0,0.0,999,25.0,0.0,0,999,0,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0

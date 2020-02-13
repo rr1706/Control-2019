@@ -1,0 +1,24 @@
+
+jsquid:S00116#"RRename this field "m_error" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ø£Øî
+hsquid:S00117."QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¤ãá
+jsquid:S00116"RRename this field "m_input" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ğè¿ş
+nsquid:S00116%"QRename this field "m_IMax" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(„£—‰øÿÿÿÿ
+jsquid:S00117œ"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶îÜº
+qsquid:S00116"YRename this field "m_maximumInput" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ëâÀ
+osquid:S00116"WRename this field "m_continuous" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ä×İŸ
+msquid:S00116""URename this field "m_setpoint" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ˆ¥òô
+isquid:S3776;"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(´ô£ç
+qsquid:S00116"YRename this field "m_minimumInput" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ˆ‚éì
+psquid:S00116$"SRename this field "m_result" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ö„ì›üÿÿÿÿ
+osquid:S00116 "WRename this field "m_totalError" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¨ƒŒÿ
+ksquid:S00116"NRename this field "m_D" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(²äšĞıÿÿÿÿ
+hsquid:S00117."QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¤ãá
+ksquid:S00116"NRename this field "m_P" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¥·Ÿåùÿÿÿÿ
+hsquid:S00117."QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¤ãá
+ksquid:S00116"NRename this field "m_I" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ä©³‚øÿÿÿÿ
+ssquid:S00116!"VRename this field "m_tolerance" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÿÆ×Ùşÿÿÿÿ
+nsquid:S00116"VRename this field "m_prevError" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(…×Å¾
+Ksquid:S1066E"/Merge this if statement with the enclosing one.(¢›ï—üÿÿÿÿ
+wsquid:S00116"ZRename this field "m_maximumOutput" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(–ù†şÿÿÿÿ
+rsquid:S00116"ZRename this field "m_minimumOutput" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(óõÕ‡
+lsquid:S00116"TRename this field "m_enabled" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ŸŠÏö

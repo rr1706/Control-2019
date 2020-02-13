@@ -37,7 +37,7 @@ public class MathUtils {
 		}
 		return array;
 	}
-	public static double[][] insertionSort(double[][] array, int indexToCheck) { //FIXME, use to solve angleError issue
+	public static double[][] insertionSort(double[][] array, int indexToCheck) { // use to solve angleError issue
 		for (int i=1; i<array.length; ++i)  {
 			double[] key = array[i];
 			int j = i-1;
@@ -102,9 +102,8 @@ public class MathUtils {
 	public static double convertRange(double oldMin, double oldMax, double newMin, double newMax, double oldValue) {
 		double oldRange = (oldMax - oldMin);
 		double newRange = (newMax - newMin);
-		double newValue = (((oldValue - oldMin) * newRange) / oldRange) + newMin;
+		return (((oldValue - oldMin) * newRange) / oldRange) + newMin;
 
-		return newValue;
 	}
 
 	/**
@@ -183,9 +182,8 @@ public class MathUtils {
 	 * @return Length of the long side of a right triangle
 	 */
 	public static double pythagorean(double a, double b) {
-		double c = Math.sqrt((Math.pow(a, 2) + Math.pow(b, 2)));
+		return Math.sqrt((Math.pow(a, 2) + Math.pow(b, 2)));
 
-		return c;
 	}
 
 	/**

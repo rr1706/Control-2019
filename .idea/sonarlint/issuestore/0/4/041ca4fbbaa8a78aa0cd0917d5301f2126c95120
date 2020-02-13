@@ -1,0 +1,12 @@
+
+hsquid:CommentedOutCodeLine‡"<This block of commented-out lines of code should be removed.(«ÑÝªúÿÿÿÿ
+xsquid:S3923†"[Remove this conditional structure or edit its code blocks so that they're not all the same.(½ àÎøÿÿÿÿ
+bsquid:CommentedOutCodeLine	"<This block of commented-out lines of code should be removed.(íÊ«º
+Msquid:S1068"1Remove this unused "startingHatch" private field.(ˆ¦¯Œøÿÿÿÿ
+U"squid:SwitchLastCaseIsDefaultCheck""Add a default case to this switch.(•Ð¢±ýÿÿÿÿ
+bsquid:CommentedOutCodeLineU"<This block of commented-out lines of code should be removed.(ùãþÊ
+csquid:CommentedOutCodeLine‰"<This block of commented-out lines of code should be removed.(±ÉäÅ
+bsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(èÿ“•
+nsquid:S3776"RRefactor this method to reduce its Cognitive Complexity from 32 to the 15 allowed.(–¦Æ©ûÿÿÿÿ
+[squid:S1134Z"DTake the required action to fix the issue indicated by this comment.(ò™Ë
+Qsquid:S1118":Add a private constructor to hide the implicit public one.(”‡…†

@@ -1,0 +1,11 @@
+
+tsquid:UselessImportCheck"PRemove this unused import 'edu.wpi.first.wpilibj.smartdashboard.SmartDashboard'.(¨íæÚ
+`squid:S1134$"DTake the required action to fix the issue indicated by this comment.(•ğùşÿÿÿÿ
+P"squid:SwitchLastCaseIsDefaultCheck&""Add a default case to this switch.(Õ«×
+bsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(ñ‹¼
+gsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(¡Øşøÿÿÿÿ
+Qsquid:S1118
+":Add a private constructor to hide the implicit public one.(×¯†ı
+gsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(§ûöºıÿÿÿÿ
+bsquid:CommentedOutCodeLine#"<This block of commented-out lines of code should be removed.(Ô«¥
+ksquid:S3252"NUse static access with "edu.wpi.first.wpilibj.CounterBase" for "EncodingType".(–ÚÑ8«£’•ø-

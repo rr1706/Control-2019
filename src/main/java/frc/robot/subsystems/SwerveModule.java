@@ -8,10 +8,6 @@ import frc.robot.utilities.MathUtils;
 import frc.robot.utilities.PIDController;
 import frc.robot.utilities.Vector;
 
-import javax.naming.ldap.Control;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
-
 /**
  * A swerve module.
  */
@@ -141,12 +137,10 @@ public class SwerveModule {
         translationMotor.setInverted(false);
 
         translationPID = translationMotor.getPIDController();
-//        translationPID = new CANPIDController(translationMotor);
         translationPID.setP(translationP);
         translationPID.setI(translationI);
         translationPID.setD(translationD);
         translationPID.setIZone(0.0);
-//        translationPID.setFF(translationF);
 
         translationPID.setOutputRange(kMinOutput, kMaxOutput);
 
@@ -154,7 +148,6 @@ public class SwerveModule {
 
         translationMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 5);
         translationMotor.burnFlash();
-
 
 
         rotationMotor = new CANSparkMax(canPortR, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -170,12 +163,9 @@ public class SwerveModule {
         rotationPID.setI(rotationI);
         rotationPID.setD(rotationD);
         rotationPID.setIZone(0.0);
-//        rotationPID.setFF(rotationF);
 
         rotationPID.setOutputRange(kMinOutput, kMaxOutput);
 
-//        translationEncoder.setPosition(0.0);
-//        rotationEncoder.setPosition(0.0);
         rotationMotor.setSmartCurrentLimit(20, 10);
 
         rotationMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 5);

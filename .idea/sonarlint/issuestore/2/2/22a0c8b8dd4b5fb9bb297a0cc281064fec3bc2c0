@@ -1,0 +1,8 @@
+
+gsquid:CommentedOutCodeLine,"<This block of commented-out lines of code should be removed.(Ú¸€×ÿÿÿÿÿ
+nsquid:CommentedOutCodeLine2"<This block of commented-out lines of code should be removed.(¶ˆ±þýÿÿÿÿ8ï’í Æ-
+lsquid:S00100¨"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(—Ôåñþÿÿÿÿ
+Vsquid:S1118":Add a private constructor to hide the implicit public one.(ÇÅÖøÿÿÿÿ
+O
+squid:S106J"9Replace this use of System.out or System.err by a logger.(Î‘žî
+msquid:S3008"QRename this field "I2CBus" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ôˆ™—üÿÿÿÿ
